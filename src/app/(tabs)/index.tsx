@@ -1,23 +1,34 @@
-import { Stack } from 'expo-router';
+import { Link } from 'expo-router';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { StyleSheet, View } from 'react-native';
+import { spacing, type } from '@/src/theme';
 
-import { ScreenContent } from '@/src/components/ScreenContent';
-
-export default function Home() {
+// Full bleed map så att den tar upp hela skärmen.
+export default function Map() {
   return (
-    <>
-      <Stack.Screen options={{ title: 'Tab One' }} />
-      <View style={styles.container}>
-        <ScreenContent path="app/(tabs)/index.tsx" title="Tab One" />
-      </View>
-    </>
+    <View style={styles.container}>
+      <Text style={styles.placeholder}>Map goes here</Text>
+      <Link href={{ pathname: '/place/[id]', params: { id: '1' } }} style={styles.link}>
+        Open an example place
+      </Link>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    alignItems: 'center',
+    backgroundColor: '#e5e7eb',
     flex: 1,
-    padding: 24,
+    justifyContent: 'center',
+  },
+  link: {
+    ...type.body,
+    color: '#2563eb',
+    marginTop: spacing.sm,
+  },
+  placeholder: {
+    ...type.title,
+    color: '#6b7280',
   },
 });
