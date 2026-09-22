@@ -5,6 +5,7 @@ export default function TabLayout() {
   return (
     <NativeTabs minimizeBehavior="onScrollDown">
       <NativeTabs.Trigger name="index">
+        <NativeTabs.Trigger.Badge>9+</NativeTabs.Trigger.Badge>
         <NativeTabs.Trigger.Icon sf={{ default: 'map', selected: 'map.fill' }} />
         <NativeTabs.Trigger.Label>Map</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>

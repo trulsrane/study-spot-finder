@@ -60,3 +60,4 @@ Bra att veta: skärmar med stor titel i headern måste ha en `FlatList` eller `S
 
 - [Expo Router](https://docs.expo.dev/router/introduction/) – filbaserad routing
 - [Native Tabs](https://docs.expo.dev/router/advanced/native-tabs/) – tab-baren vi använder
+- [Modaler](https://docs.expo.dev/router/advanced/modals/) - typ "pop-ups", den dragbara pop-up platsinfo-sidan i kartvyn.
