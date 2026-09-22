@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import MapView from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
+import { usePlaces } from '@/src/hooks/usePlaces';
 import { colors, radius, spacing, type } from '@/src/theme';
 
 // Full bleed map så att den tar upp hela skärmen.
@@ -32,8 +32,8 @@ export default function Map() {
           longitudeDelta: 0.08,
         }}
       />
-      <Link
-        href={{ pathname: '/place/[id]', params: { id: '1' } }}
+      <Link 
+        href={{ pathname: '/place/[id]', params: { id: 'kulturbageriet' } }}
         style={{
           ...styles.link,
           bottom: insets.bottom + spacing.xl * 2,
