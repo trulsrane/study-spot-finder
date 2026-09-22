@@ -167,7 +167,7 @@ Undantag får såklart göras men kan vara bra å dubbelkolla så man inte förs
 
 Anledningen varför denna är viktig är för att när du installerar ett nytt paket så kan package-lock.json få flera hundra nya rader. Om fler personer lägger till paket samtidigt innan man `merge` med `main` så blir det garanterat konflikter. Man löser det enklast genom att skriva till alla andra innan man lägger till ett paket. Lägger till paketet committa paketet för sig, pusha din branch och gör en snabb PR direkt, så kan resten hämta det. Sen hämtar alla hem ändringen med `git pull`. Det uppdaterar `package.json` och `package-lock.json`. Kör sedan `npm install`, det läser lockfilen och installerar paketet.
 
-Blir det trots allt konflikter i `package.json` och `package-lock.json` så löser man det enklast genom att radera `package-lock.json` helt (då den innehåller flera tusen rade) och manuellt fixa `package.json`:
+Blir det trots allt konflikter i `package.json` och `package-lock.json` så löser man det enklast genom att acceptera den nya `package-lock.json` och manuellt fixa `package.json` så att dina paket finns med för att sen generera `package-lock.json` på nytt:
 ```
 # ── Konflikt i package-lock.json ─────────────────────────────
 # Lockfilen är maskingenererad och 15 000 rader lång.
