@@ -1,14 +1,44 @@
 import { Link } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import * as Location from 'expo-location';
+import { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import MapView from 'react-native-maps';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { spacing, type } from '@/src/theme';
+import { colors, radius, spacing, type } from '@/src/theme';
 
 // Full bleed map så att den tar upp hela skärmen.
 export default function Map() {
+  const insets = useSafeAreaInsets();
+  const [locationGranted, setLocationGranted] = useState(false);
+
+  useEffect(() => {
+	(async () => {
+	  const { status } = await Location.requestForegroundPermissionsAsync();
+	  setLocationGranted(status === 'granted');
+	})();
+  }, []);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.placeholder}>Map goes here</Text>
-      <Link href={{ pathname: '/place/[id]', params: { id: '1' } }} style={styles.link}>
+      <MapView
+        style={styles.map}
+		showsUserLocation={locationGranted}
+		showsMyLocationButton={locationGranted}
+        initialRegion={{
+          latitude: 63.8258,
+          longitude: 20.2630,
+          latitudeDelta: 0.08,
+          longitudeDelta: 0.08,
+        }}
+      />
+      <Link
+        href={{ pathname: '/place/[id]', params: { id: '1' } }}
+        style={{
+          ...styles.link,
+          bottom: insets.bottom + spacing.xl * 2,
+        }}
+      >
         Open an example place
       </Link>
     </View>
@@ -17,18 +47,21 @@ export default function Map() {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    backgroundColor: '#e5e7eb',
     flex: 1,
-    justifyContent: 'center',
+  },
+  map: {
+    width: '100%',
+    height: '100%',
   },
   link: {
     ...type.body,
-    color: '#2563eb',
-    marginTop: spacing.sm,
-  },
-  placeholder: {
-    ...type.title,
-    color: '#6b7280',
+    color: colors.tint,
+    position: 'absolute',
+    alignSelf: 'center',
+    backgroundColor: colors.background,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    overflow: 'hidden',
   },
 });
