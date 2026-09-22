@@ -2,22 +2,51 @@ import { Link } from 'expo-router';
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import MapView from 'react-native-maps';
+import MapView, { Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radius, spacing, type } from '@/src/theme';
+// Fallback region if location permission is denied or not available.
+const fallbackRegion ={
+latitude: 63.8258,
+  longitude: 20.2630,
+  latitudeDelta: 0.08,
+  longitudeDelta: 0.08,
+};
 
 // Full bleed map så att den tar upp hela skärmen.
 export default function Map() {
   const insets = useSafeAreaInsets();
-  const [locationGranted, setLocationGranted] = useState(false);
+  // State to track if location permission is granted and the initial region for the map.
+  const [locationGranted, setLocationGranted] = useState(false); 
+  const [initialRegion, setInitialRegion] = useState < Region | null > (null);
 
+// Request location permission and get the current position on component mount.
   useEffect(() => {
 	(async () => {
 	  const { status } = await Location.requestForegroundPermissionsAsync();
-	  setLocationGranted(status === 'granted');
+	  const granted = status === 'granted';
+	  setLocationGranted(granted);
+		// If permission is granted, get the current position and set the initial region for the map. Otherwise, use the fallback region.
+	  if (granted) {
+		const position = await Location.getCurrentPositionAsync({});
+		setInitialRegion({
+		  latitude: position.coords.latitude,
+		  longitude: position.coords.longitude,
+		  latitudeDelta: 0.08,
+		  longitudeDelta: 0.08,
+		});
+		// If permission is denied, use the fallback region.
+	  } else {
+		setInitialRegion(fallbackRegion);
+	  }
+
 	})();
   }, []);
+	// If the initial region is not set yet, render an empty view to avoid rendering the map with undefined region.
+  if (!initialRegion) {
+	return  <View style={styles.container} />;
+  }
 
   return (
     <View style={styles.container}>
@@ -25,12 +54,8 @@ export default function Map() {
         style={styles.map}
 		showsUserLocation={locationGranted}
 		showsMyLocationButton={locationGranted}
-        initialRegion={{
-          latitude: 63.8258,
-          longitude: 20.2630,
-          latitudeDelta: 0.08,
-          longitudeDelta: 0.08,
-        }}
+		initialRegion={initialRegion}
+        
       />
       <Link
         href={{ pathname: '/place/[id]', params: { id: '1' } }}
