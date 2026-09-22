@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import MapView, { Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
+import { usePlaces } from '@/src/hooks/usePlaces';
 import { colors, radius, spacing, type } from '@/src/theme';
 // Fallback region if location permission is denied or not available.
 const fallbackRegion ={
@@ -57,8 +57,8 @@ export default function Map() {
 		initialRegion={initialRegion}
         
       />
-      <Link
-        href={{ pathname: '/place/[id]', params: { id: '1' } }}
+      <Link 
+        href={{ pathname: '/place/[id]', params: { id: 'kulturbageriet' } }}
         style={{
           ...styles.link,
           bottom: insets.bottom + spacing.xl * 2,

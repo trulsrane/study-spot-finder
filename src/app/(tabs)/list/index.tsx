@@ -1,19 +1,18 @@
 import { Link } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text } from 'react-native';
 
-import { spacing, type } from '@/src/theme';
-
-// Hårdkodade exempelplatser. Byts ut mot supabase-data i nästa steg. Varje plats har ett id som används för att navigera till en detaljvy.
-const PLACES = [
-  { id: '1', name: 'Kulturbageriet' },
-  { id: '2', name: 'Trädgården i MIT' },
-  { id: '3', name: 'Naturhuset' },
-];
+import { usePlaces } from '@/src/hooks/usePlaces';
+import { colors, spacing, type } from '@/src/theme';
 
 export default function List() {
+  const { places, loading, error } = usePlaces();
+
+  if (loading) return <Text style={styles.message}>Laddar...</Text>;
+  if (error) return <Text style={styles.message}>{error}</Text>;
+
   return (
     <FlatList
-      data={PLACES}
+      data={places}
       keyExtractor={(place) => place.id}
       // Utan detta hamnar innehållet bakom den genomskinliga headern med stor titel.
       contentInsetAdjustmentBehavior="automatic"
@@ -32,12 +31,25 @@ export default function List() {
 
 const styles = StyleSheet.create({
   list: {
-    backgroundColor: 'white',
+    backgroundColor: colors.background,
     flex: 1,
   },
-  name: type.body,
+  message: {
+    ...type.body,
+    color: colors.textMuted,
+    padding: spacing.lg,
+  },
+  meta: {
+    ...type.caption,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
+  },
+  name: {
+    ...type.heading,
+    color: colors.text,
+  },
   row: {
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: colors.border,
     borderBottomWidth: 1,
     padding: spacing.md,
   },
