@@ -47,6 +47,16 @@
 				"foregroundImage": "./assets/adaptive-icon.png",
 				"backgroundColor": "#ffffff"
 			}
+		},
+		"expo": {
+			"plugins": [
+			[
+				"expo-image-picker",
+				{
+				"photosPermission": "Appen behöver tillgång till dina bilder för att du ska kunna välja en profilbild."
+				}
+			]
+			]
 		}
 	}
 }
