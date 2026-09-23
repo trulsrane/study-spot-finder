@@ -66,8 +66,15 @@ export default function Map() {
 				coordinate={{ latitude: place.latitude, longitude: place.longitude }}	
 				title={place.name}
 				description={place.address}
-				onPress={() => router.push({pathname: '/place/[id]', params: { id: place.id }})}
+				onPress={() => {
+					if (router.canGoBack()){
+						router.back();
+					}
+					router.push({pathname: '/place/[id]', params: { id: place.id }});
+				}}
 			/>
+		
+		
     ))}
     </MapView>
       <Link
