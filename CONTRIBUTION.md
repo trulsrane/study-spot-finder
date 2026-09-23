@@ -1,5 +1,7 @@
 # Contributing
 
+Detta är ett test
+
 Riktlinjer för git. Följ om inget anna sägs, ändra om något behöver ändras.
 
 ## TL;DR
