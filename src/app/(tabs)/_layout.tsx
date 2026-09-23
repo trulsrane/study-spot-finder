@@ -13,6 +13,10 @@ export default function TabLayout() {
         <NativeTabs.Trigger.Icon sf="list.bullet" />
         <NativeTabs.Trigger.Label>List</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
+	  <NativeTabs.Trigger name="profile">
+		<NativeTabs.Trigger.Icon sf={{ default: 'person', selected: 'person.fill' }} />
+		<NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
