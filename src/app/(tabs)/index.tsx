@@ -1,11 +1,12 @@
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import MapView, { Region } from 'react-native-maps';
+import MapView, { Marker, Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { usePlaces } from '@/src/hooks/usePlaces';
+import { useNearbyPlaces } from '@/src/hooks/useNearbyPlaces';
 import { colors, radius, spacing, type } from '@/src/theme';
+
 // Fallback region if location permission is denied or not available.
 const fallbackRegion ={
 latitude: 63.8258,
@@ -17,6 +18,8 @@ latitude: 63.8258,
 // Full bleed map så att den tar upp hela skärmen.
 export default function Map() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+ const { places, loading, error } = useNearbyPlaces();
   // State to track if location permission is granted and the initial region for the map.
   const [locationGranted, setLocationGranted] = useState(false); 
   const [initialRegion, setInitialRegion] = useState < Region | null > (null);
@@ -56,9 +59,19 @@ export default function Map() {
 		showsMyLocationButton={locationGranted}
 		initialRegion={initialRegion}
         
-      />
-      <Link 
-        href={{ pathname: '/place/[id]', params: { id: 'kulturbageriet' } }}
+      >
+    {places.map((place) => (
+			<Marker
+				key={place.id}
+				coordinate={{ latitude: place.latitude, longitude: place.longitude }}	
+				title={place.name}
+				description={place.address}
+				onPress={() => router.push({pathname: '/place/[id]', params: { id: place.id }})}
+			/>
+    ))}
+    </MapView>
+      <Link
+        href={{ pathname: '/place/[id]', params: { id: '1' } }}
         style={{
           ...styles.link,
           bottom: insets.bottom + spacing.xl * 2,
