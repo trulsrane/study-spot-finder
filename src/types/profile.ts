@@ -1,5 +1,6 @@
 export type Profile = {
-  bio: string;
+  id: number;
+  bio?: string;
   name: string;
   profilePictureUrl?: string;
 }
