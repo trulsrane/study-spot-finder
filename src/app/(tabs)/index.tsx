@@ -2,7 +2,8 @@ import { Link, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import MapView, { Marker, Region } from 'react-native-maps';
+import ClusteredMapView from 'react-native-map-clustering';
+import { Marker, Region } from 'react-native-maps'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNearbyPlaces } from '@/src/hooks/useNearbyPlaces';
 import { colors, radius, spacing, type } from '@/src/theme';
@@ -53,11 +54,12 @@ export default function Map() {
 
   return (
     <View style={styles.container}>
-      <MapView
-        style={styles.map}
+      <ClusteredMapView	
+		style={styles.map}
 		showsUserLocation={locationGranted}
 		showsMyLocationButton={locationGranted}
-		initialRegion={initialRegion}
+		initialRegion={initialRegion} 
+		radius={60}
         
       >
     {places.map((place) => (
@@ -76,7 +78,7 @@ export default function Map() {
 		
 		
     ))}
-    </MapView>
+    </ClusteredMapView>
       <Link
         href={{ pathname: '/place/[id]', params: { id: '1' } }}
         style={{
