@@ -38,7 +38,7 @@ export default function ProfilePage() {
 				{favoritePlaces.map((item) => (
 				<Link
 					key={item.id}
-					href={{ pathname: '/list/[id]', params: { id: item.id } }}
+					href={{ pathname: '/', params: { id: item.id } }}
 					asChild
 				>
 					<Card {...translatePlaceToInfoCards(item)} isFavorite = {isFavorite(item.id)} onToggleFavorite={() => toggleFavorite(item.id)}/>

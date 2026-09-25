@@ -1,6 +1,9 @@
 import { useState, useCallback } from 'react';
+import { mockPlaces } from '@/src/data/mockPlaces';
 
-export function useFavorites(initialFavorites: string[] = []) {
+const seededFavorites = mockPlaces.map((place) => place.id);
+
+export function useFavorites(initialFavorites: string[] = seededFavorites) {
 	const [favorites, setFavorites] = useState<string[]>(initialFavorites);
 
 	const toggleFavorite = useCallback((platsid: string) => {
