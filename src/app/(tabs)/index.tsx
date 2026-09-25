@@ -6,7 +6,7 @@ import { Marker, Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNearbyPlaces } from '@/src/hooks/useNearbyPlaces';
 import { Place } from '@/src/types/place';
-import { Link,useRouter } from 'expo-router';
+import { Link,useLocalSearchParams,useRouter } from 'expo-router';
 import { spacing } from '@/src/theme';
 import { colors, radius, type } from '@/src/theme';
 
@@ -26,6 +26,7 @@ export default function Map() {
   const {places} = useNearbyPlaces();
   const [locationGranted, setLocationGranted] = useState(false);
   const [initialRegion, setInitialRegion] = useState<Region | null>(null);
+  const { focus } = useLocalSearchParams<{ focus?: string }>(); // Hook som renderar om map om focus har ett värde
 
   // Request location permission and set the initial region based on the user's location or fallback region.
   useEffect(() => {
@@ -47,6 +48,15 @@ export default function Map() {
       }
     })();
   }, []);
+
+  // Körs vid anrop på platsinfo från en annan sida än maps. T.ex. favoritplatser
+  // Hade eventuellt kunna lägga till så att kartan centreras över markören som motsvarar platsen
+  useEffect(() => {
+    if (!focus) return; // körs endast om focus har ett värde
+    router.setParams({ focus: undefined }); // rensar focus så att hooken inte körs varje gång man öppnar maps
+    router.push({ pathname: '/place/[id]', params: { id: focus } }); // öppnar modalen
+  }, [focus]); // Gör så att den körs varje gång focus ändras
+
 
 	// If the initial region is not set yet, render an empty view to avoid rendering the map prematurely.
   if (!initialRegion) {
