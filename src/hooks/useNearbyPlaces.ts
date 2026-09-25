@@ -11,6 +11,7 @@ type PlacesResult = {
   error: string | null;
 };
 
+
 const FALLBACK_COORDS = { latitude: 63.8258, longitude: 20.2630 };
 // Hook to fetch nearby study spots based on the user's current location
 export function useNearbyPlaces(): PlacesResult {
@@ -38,5 +39,12 @@ export function useNearbyPlaces(): PlacesResult {
     })();
   }, []);
 
-  return { places, loading, error };
+	return { places, loading, error };
+
+}
+
+export function useNearbyPlace(id: string) {
+  const { places, loading, error } = useNearbyPlaces();
+  const place = places.find((p) => p.id === id);
+  return { place, loading, error };
 }

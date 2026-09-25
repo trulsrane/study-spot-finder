@@ -21,6 +21,16 @@ export default function RootLayout() {
           headerShown: false,
         }}
       />
-    </Stack>
-  );
+	  <Stack.Screen
+		name="place/cluster"
+		options={{
+			presentation: 'formSheet',
+    		sheetAllowedDetents: [0.3, 0.6, 1],
+    		sheetLargestUndimmedDetentIndex: 1,
+   		 	sheetGrabberVisible: true,
+    		headerShown: false
+    	}}
+	  />
+	</Stack>
+	);
 }
