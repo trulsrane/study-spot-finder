@@ -13,16 +13,11 @@ export default function ProfilePage() {
 	const profile = getProfile();
 	const router = useRouter();
 	const { places, loading, error } = usePlaces();
-	const { toggleFavorite, isFavorite, setFavorites } = useFavorites();
+	const { favorites, toggleFavorite, isFavorite } = useFavorites();
+	const favoritePlaces = places.filter((p) => favorites.includes(p.id))
 	
 	if (loading) return <Text style={styles.message}>Laddar...</Text>;
 	if (error) return <Text style={styles.message}>{error}</Text>;
-
-	useEffect(() => {
-		if(!loading){
-			setFavorites(places.map((p) => p.id));
-		}
-	}, [loading, places]);
 
   	return (
 		<ScrollView style={styles.container}>
@@ -40,7 +35,7 @@ export default function ProfilePage() {
 			</View>
 			<Text style={styles.caption}>Favorite study places:</Text>
 			<View style={styles.list}>
-				{places.map((item) => (
+				{favoritePlaces.map((item) => (
 				<Link
 					key={item.id}
 					href={{ pathname: '/list/[id]', params: { id: item.id } }}
