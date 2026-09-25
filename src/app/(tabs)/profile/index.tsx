@@ -38,7 +38,7 @@ export default function ProfilePage() {
 				{favoritePlaces.map((item) => (
 				<Link
 					key={item.id}
-					href={{ pathname: '/', params: { id: item.id } }}
+					href={{ pathname: '/', params: { focus: item.id } }} // focus skickas med som en sträng i URLen som läses av i maps och triggar en hook
 					asChild
 				>
 					<Card {...translatePlaceToInfoCards(item)} isFavorite = {isFavorite(item.id)} onToggleFavorite={() => toggleFavorite(item.id)}/>
