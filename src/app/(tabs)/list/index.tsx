@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { FlatList, View, StyleSheet, Text } from 'react-native';
-
+import { Link } from 'expo-router';
 import { usePlaces } from '@/src/hooks/usePlaces';
 import { colors, spacing, type } from '@/src/theme';
 import { Card } from '@/src/components/CardContainer';
@@ -23,10 +23,9 @@ export default function List() {
         keyExtractor={(place) => place.id}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
-          <Card
-            {...translatePlaceToInfoCards(item)}
-            onPress={() => useRouter().push(`/place/${item.id}`)}
-          />
+          <Link href={{ pathname: '/list/[id]', params: { id: item.id } }} asChild>
+            <Card {...translatePlaceToInfoCards(item)} />
+          </Link>
         )}
       />
     </View>
