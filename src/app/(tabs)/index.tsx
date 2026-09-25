@@ -6,7 +6,10 @@ import { Marker, Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNearbyPlaces } from '@/src/hooks/useNearbyPlaces';
 import { Place } from '@/src/types/place';
-import { useRouter } from 'expo-router';
+import { Link,useRouter } from 'expo-router';
+import { spacing } from '@/src/theme';
+import { colors, radius, type } from '@/src/theme';
+
 
 // Fallback region if location permission is denied or not available.
 const fallbackRegion = {
@@ -18,6 +21,7 @@ const fallbackRegion = {
 
 // Full bleed map så att den tar upp hela skärmen.
 export default function Map() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const {places} = useNearbyPlaces();
   const [locationGranted, setLocationGranted] = useState(false);
@@ -99,6 +103,15 @@ export default function Map() {
           />
         ))}
       </ClusteredMapView>
+	  <Link
+ 		href={{ pathname: '/place/[id]', params: { id: 'kulturbageriet' } }}
+  		style={{
+    		...styles.link,
+    	bottom: insets.bottom + spacing.xl * 2,
+  }}
+>
+  Open an example place
+</Link>
     </View>
   );
 }
@@ -111,4 +124,15 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  link: {
+  ...type.body,
+  color: colors.tint,
+  position: 'absolute',
+  alignSelf: 'center',
+  backgroundColor: colors.background,
+  paddingHorizontal: spacing.md,
+  paddingVertical: spacing.sm,
+  borderRadius: radius.md,
+  overflow: 'hidden',
+},
 });
