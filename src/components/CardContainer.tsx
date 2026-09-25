@@ -85,7 +85,7 @@ export function Card({
             <Text style={styles.status}>{status}</Text>
           </View>
 
-		//Favoritmarkering	
+		{/* Favoritmarkering	 */}
           <TouchableOpacity onPress={onToggleFavorite} hitSlop={8}>
             <Ionicons
               name={isFavorite ? 'heart' : 'heart-outline'}
@@ -99,7 +99,7 @@ export function Card({
           <Text style={styles.tagText}>{tag}</Text>
         </View>
 
-		//Ikonerna för bekvämligheterna som finns på studieplatsen
+		{/* Ikonerna för bekvämligheterna som finns på studieplatsen */}
         <View style={styles.amenitiesRow}>
           {amenities.map((a) => (
             <View key={a.key} style={styles.amenityCircle}>

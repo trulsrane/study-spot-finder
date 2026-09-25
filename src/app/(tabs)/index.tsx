@@ -88,7 +88,7 @@ export default function Map() {
           });
         }}
       >
-		// Render a marker for each nearby place. When a marker is pressed, it opens the place's detail view.
+		{/* Render a marker for each nearby place. When a marker is pressed, it opens the place's detail view. */}
         {places.map((place) => (
           <Marker
             key={place.id}
