@@ -1,14 +1,10 @@
-import { useRouter } from 'expo-router';
-import { FlatList, View, StyleSheet, Text } from 'react-native';
 import { Link } from 'expo-router';
+import { FlatList, Pressable, StyleSheet, Text } from 'react-native';
+
 import { usePlaces } from '@/src/hooks/usePlaces';
 import { colors, spacing, type } from '@/src/theme';
 import { Card } from '@/src/components/CardContainer';
 import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards';
-// const mockCards = [
-// 	{ id: '1', title: 'Kulturbageriet', status: 'Öppet', tag: 'LUGNT', rating: 4.5, image: null, amenities: [] },
-// 	{ id: '2', title: 'MIT-balkongen', status: 'Stängt', tag: 'MYCKET FOLK', rating: 4, image: null, amenities: [] },
-// ]
 
 export default function List() {
   const { places, loading, error } = usePlaces();
@@ -17,24 +13,23 @@ export default function List() {
   if (error) return <Text style={styles.message}>{error}</Text>;
 
   return (
-	<View style={{flex: 1}}>
-      <FlatList
-        data={places}
-        keyExtractor={(place) => place.id}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <Link href={{ pathname: '/list/[id]', params: { id: item.id } }} asChild>
-            <Card {...translatePlaceToInfoCards(item)} />
-          </Link>
-        )}
-      />
-    </View>
+    <FlatList
+      data={places}
+      keyExtractor={(place) => place.id}
+      // Utan detta hamnar innehållet bakom den genomskinliga headern med stor titel.
+      contentInsetAdjustmentBehavior="automatic"
+	  contentContainerStyle={styles.list}
+      renderItem={({ item }) => (
+        // asChild gör att Pressable blir den klickbara ytan, istället för Links egen Text.
+        <Link href={{ pathname: '/list/[id]', params: { id: item.id } }} asChild>
+          <Card {...translatePlaceToInfoCards(item)} />
+        </Link>
+      )}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-
-
   list: {
     backgroundColor: colors.background,
     flex: 1,
@@ -58,5 +53,4 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     padding: spacing.md,
   },
-  
 });
