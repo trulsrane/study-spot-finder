@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 export type Amenity = {
   icon: keyof typeof Ionicons.glyphMap;
   key: string;
+//   label: string;
 };
 
 type CardProps = {
@@ -24,18 +25,6 @@ type CardProps = {
 
 // storleken på bilden i kortet
 const IMAGE_SIZE = 120;
-
-//--------behövs inte nu------------
-// // Om inga amenties skickas in, visa dessa
-// const placeholderAmenities: Amenity[] = [
-//   { key: 'charger', icon: 'flash' },
-//   { key: 'wifi', icon: 'wifi' },
-//   { key: 'cafe', icon: 'cafe' },
-//   { key: 'daylight', icon: 'sunny'},
-//   { key: 'discount', icon: 'pricetags'},
-//   { key: 'food', icon: 'restaurant'},
-//   { key: 'pets', icon: 'paw'}
-// ];
 
 export function Card({
   title = 'Platsens namn',
@@ -85,7 +74,7 @@ export function Card({
             <Text style={styles.status}>{status}</Text>
           </View>
 
-		{/* Favoritmarkering	 */}
+		{/* Favoritmarkering */}
           <TouchableOpacity onPress={onToggleFavorite} hitSlop={8}>
             <Ionicons
               name={isFavorite ? 'heart' : 'heart-outline'}
@@ -188,7 +177,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: '#000',
-    // letterSpacing: 0.5,
   },
   amenitiesRow: {
     flexDirection: 'row',
