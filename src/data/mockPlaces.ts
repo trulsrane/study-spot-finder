@@ -4,6 +4,7 @@ export const mockPlaces: Place[] = [
   {
     id: 'kulturbageriet',
     name: 'Kulturbageriet',
+    googlePlaceId: 'ChIJsfzBZQxbfEYRtrVwxCsVZrU', // 
     latitude: 63.8258,   // TODO: replace with real coordinates
     longitude: 20.2630,
     address: 'Umeå centrum',
@@ -15,8 +16,8 @@ export const mockPlaces: Place[] = [
   {
     id: 'mit-tradgarden',
     name: 'Trädgården i MIT',
-    latitude: 63.8196,   // TODO: verify
-    longitude: 20.3073,
+    latitude: 63.8205,   // TODO: verify
+    longitude: 20.3082,
     building: 'MIT-huset',
     floor: '1',
     openingHours: 'Mon–Fri 07–21',
@@ -27,8 +28,8 @@ export const mockPlaces: Place[] = [
   {
     id: 'naturhuset',
     name: 'Naturhuset',
-    latitude: 63.8210,   // TODO: verify
-    longitude: 20.3035,
+    latitude: 63.8196,   // TODO: verify
+    longitude: 20.3073,
     busyness: 'unknown',
     amenities: ['quiet'],
   },

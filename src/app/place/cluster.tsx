@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { useNearbyPlaces } from '@/src/hooks/useNearbyPlaces';
+import { useMapPlaces } from '@/src/hooks/useMapPlaces';
 import { colors, radius, spacing, type } from '@/src/theme';
 
 /**
@@ -12,7 +12,11 @@ import { colors, radius, spacing, type } from '@/src/theme';
 export default function ClusterListScreen() {
   const { ids } = useLocalSearchParams<{ ids: string }>();
   const router = useRouter();
-  const { places } = useNearbyPlaces();
+  const { places,loading } = useMapPlaces();
+  if (loading) {
+  return <Text style={styles.cardSubtitle}>Laddar platser...</Text>;
+}
+  
 
   const idList = ids ? ids.split(',') : [];
   const clusterPlaces = places.filter((p) => idList.includes(p.id));
