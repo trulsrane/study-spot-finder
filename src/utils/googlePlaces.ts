@@ -8,6 +8,11 @@ type GooglePlace = {
   location: { latitude: number; longitude: number };
   formattedAddress: string;
 };
+
+let cachedPlaces: Place[] | null = null;
+let chacedAt = 0;
+const CAHACE_DURATION = 5*60*1000;
+
 // Fetches nearby study spots (cafes, libraries, universities) from the Google Places API
 export async function fetchNearbyStudySpots(
   latitude: number,
