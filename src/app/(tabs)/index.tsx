@@ -112,8 +112,6 @@ export default function Map() {
         {places.map((place) => (
           <Marker
             key={place.id}
-            // @ts-expect-error – react-native-map-clustering saknar korrekt typ för cluster-prop
-            cluster={place.id !== focusedId}
             coordinate={{ latitude: place.latitude, longitude: place.longitude }}
             title={place.name}
             description={place.address}
