@@ -8,7 +8,8 @@
     "start": "expo start",
     "lint": "eslint \"**/*.{js,jsx,ts,tsx}\" && prettier -c \"**/*.{js,jsx,ts,tsx,json}\"",
     "format": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix && prettier \"**/*.{js,jsx,ts,tsx,json}\" --write",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "types": "supabase gen types typescript --project-id pgialmtoulnmfrivjqeq > src/types/database.types.ts"
   },
   "dependencies": {
     "@expo/log-box": "^57.0.4",
@@ -48,6 +49,7 @@
     "eslint-config-expo": "~57.0.2",
     "eslint-config-prettier": "^10.1.2",
     "prettier": "^3.2.5",
+    "supabase": "^2.118.0",
     "typescript": "~6.0.3"
   },
   "private": true
