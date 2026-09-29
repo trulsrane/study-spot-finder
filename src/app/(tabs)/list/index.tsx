@@ -6,7 +6,23 @@ import { colors, spacing, type } from '@/src/theme';
 import { Card } from '@/src/components/CardContainer';
 import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards';
 
+// För att testa databasen
+import { useEffect } from 'react';
+import { supabase } from '@/src/utils/supabase';
+
 export default function List() {
+
+  // För att testa connection med databasen
+  useEffect(() => {
+  supabase
+    .from('places')
+    .select('*')
+    .then(({ data, error }) => {
+      console.log('ERROR:', error);
+      console.log('ROWS:', data?.length);
+      console.log('FIRST:', data?.[0]);
+    });
+  }, []);
   const { places, loading, error } = usePlaces();
 
   if (loading) return <Text style={styles.message}>Laddar...</Text>;
