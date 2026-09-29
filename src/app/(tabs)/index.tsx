@@ -52,7 +52,7 @@ export default function Map() {
     if (!place) return;
 
     setFocusedId(place.id);
-    const delta = 0.01;
+    const delta = 0.001;
     mapRef.current?.animateToRegion(
       {
         latitude: place.latitude - delta * 0.15,
@@ -84,7 +84,6 @@ export default function Map() {
         showsUserLocation={locationGranted}
         showsMyLocationButton={locationGranted}
         initialRegion={initialRegion}
-		
         radius={60}
         mapRef={(ref: any) => {
           mapRef.current = ref;

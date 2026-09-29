@@ -5,8 +5,8 @@ export const mockPlaces: Place[] = [
     id: 'kulturbageriet',
     name: 'Kulturbageriet',
     googlePlaceId: 'ChIJsfzBZQxbfEYRtrVwxCsVZrU', // 
-    latitude: 63.8258,   // TODO: replace with real coordinates
-    longitude: 20.2630,
+    latitude: 63.8249,   // TODO: replace with real coordinates
+    longitude: 20.2608,
     address: 'Umeå centrum',
     openingHours: 'Mon–Fri 08–18',
     busyness: 'medium',
