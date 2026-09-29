@@ -13,4 +13,5 @@ export type Place = {
   busynessUpdatedAt?: string;   // ISO date — your "hur relevant är infon" HMW
   amenities: string[];          // 'outlets', 'wifi', 'quiet', 'group'
   imageUrl?: string;
+  googlePlaceId?: string;         // Google Places ID, if applicable
 };
