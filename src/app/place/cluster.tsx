@@ -40,7 +40,7 @@ export default function ClusterListScreen() {
         <TouchableOpacity style={styles.card} onPress={() => openPlace(item.id)}>
           <Text style={styles.cardTitle}>{item.name}</Text>
           <Text style={styles.cardSubtitle}>{item.address ?? '—'}</Text>
-          <Text style={styles.cardBusyness}>{item.busyness}</Text>
+          <Text style={styles.cardBusyness}>{item.current_busyness}</Text>
         </TouchableOpacity>
       )}
     />

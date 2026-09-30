@@ -5,6 +5,7 @@ type Tables = Database['public']['Tables'];
 export type Place = Omit<Tables['places']['Row'], 'geom'>;
 export type PlaceInsert = Tables['places']['Insert'];
 export type Profile = Tables['profiles']['Row'];
+export type ProfileUpdate = Tables['profiles']['Update'];
 export type Review = Tables['reviews']['Row'];
 export type ReviewInsert = Tables['reviews']['Insert'];
 export type Friendship = Tables['friendships']['Row'];

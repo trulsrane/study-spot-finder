@@ -1,19 +1,16 @@
-import {useMemo} from 'react';
-import {useNearbyPlaces} from '@/src/hooks/useNearbyPlaces';
-import {mockPlaces} from '@/src/data/mockPlaces';
+import { useMemo } from 'react';
+import { usePlaces } from '@/src/hooks/usePlaces';
+import { useNearbyPlaces } from '@/src/hooks/useNearbyPlaces';
 
-// Hook to combine mock places with nearby places fetched from Google Places API
+// Kombinerar våra platser från databasen med närliggande platser från Google Places.
 export function useMapPlaces() {
-  const {places: googlePlaces, loading, error} = useNearbyPlaces();
+  const { places: dbPlaces, loading: dbLoading, error: dbError } = usePlaces();
+  const { places: googlePlaces, loading: googleLoading, error: googleError } = useNearbyPlaces();
 
-  // Combine mock places with Google Places, ensuring no duplicates based on Google Place ID
-  const places = useMemo(() => {
-	const hardcodedGoogleIds = new Set (
-		mockPlaces.map((p) => p.googlePlaceId).filter(Boolean)
-	);
-	// Filter out Google Places that have the same Google Place ID as any of the mock places
-	const extra = googlePlaces.filter((p)=> !hardcodedGoogleIds.has(p.googlePlaceId));
-	return [...mockPlaces, ...extra];
-  }, [googlePlaces])
-  return {places, loading, error};
-} 
+  // useMemo så att listan bara byggs om när någon av källorna ändras
+  const places = useMemo(() => [...dbPlaces, ...googlePlaces], [dbPlaces, googlePlaces]);
+  const loading = dbLoading || googleLoading;
+  const error = dbError ?? googleError;
+
+  return { places, loading, error };
+}

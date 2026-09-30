@@ -114,7 +114,7 @@ export default function Map() {
             key={place.id}
             coordinate={{ latitude: place.latitude, longitude: place.longitude }}
             title={place.name}
-            description={place.address}
+            description={place.address ?? undefined}
             onPress={() => openPlace(place.id)}
           />
         ))}

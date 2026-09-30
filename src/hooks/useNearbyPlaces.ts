@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import * as Location from 'expo-location';
 
-import { Place } from '@/src/types/place';
+import { Place } from '@/src/types/db';
 import { fetchNearbyStudySpots } from '@/src/utils/googlePlaces';
 
 

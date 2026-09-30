@@ -1,16 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { View, TextInput, Button, Image, StyleSheet } from 'react-native';
-import { getProfile, updateProfile } from '../../../hooks/useProfile';
+import { View, TextInput, Button, Image, StyleSheet, Text } from 'react-native';
+import { useProfile, updateProfile } from '../../../hooks/useProfile';
+import { TEST_USER_ID } from '@/src/constants';
 
 export default function editProfilePage() {
-	const profile = getProfile();
+	const { profile, loading, error } = useProfile(TEST_USER_ID);
 	const router = useRouter();
 
-	const [name, setName] = useState(profile.name);
-	const[bio, setBio] = useState(profile.bio ?? '');
-	const [profilePictureUrl, setprofilePictureUrl] = useState(profile.profilePictureUrl ?? '');
+	const [name, setName] = useState('');
+	const[bio, setBio] = useState('');
+	const [profilePictureUrl, setprofilePictureUrl] = useState('');
+
+	// Fyll i fälten när profilen har hämtats från databasen
+	useEffect(() => {
+		if (!profile) return;
+		setName(profile.username);
+		setBio(profile.description ?? '');
+		setprofilePictureUrl(profile.avatar_url ?? '');
+	}, [profile]);
 
 	const pickImage = async () => {
 		const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
@@ -30,10 +39,18 @@ export default function editProfilePage() {
 		}
 	}
 
-	const handleSave = () => {
-		updateProfile({ name, bio, profilePictureUrl });
-		router.back();
+	const handleSave = async () => {
+		const saveError = await updateProfile(TEST_USER_ID, {
+			username: name,
+			description: bio,
+			avatar_url: profilePictureUrl,
+		});
+		if (saveError) alert(saveError);
+		else router.back();
 	}
+
+	if (loading) return <Text style={styles.message}>Laddar...</Text>;
+	if (error) return <Text style={styles.message}>{error}</Text>;
 
 	return (
 		// Kommer behöva ändra Image source='' sen när vi fått upp databasen
@@ -65,4 +82,5 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 12,
   },
+  message: { padding: 16 },
 });
