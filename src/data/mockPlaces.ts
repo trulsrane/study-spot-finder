@@ -4,7 +4,6 @@ export const mockPlaces: Place[] = [
   {
     id: 'kulturbageriet',
     name: 'Kulturbageriet',
-    googlePlaceId: 'ChIJsfzBZQxbfEYRtrVwxCsVZrU', // 
     latitude: 63.8249,   // TODO: replace with real coordinates
     longitude: 20.2608,
     address: 'Umeå centrum',
@@ -12,6 +11,7 @@ export const mockPlaces: Place[] = [
     busyness: 'medium',
     busynessUpdatedAt: '2026-09-22T09:30:00Z',
     amenities: ['wifi', 'coffee'],
+    createdAt: '2026-09-22T08:00:00Z',
   },
   {
     id: 'mit-tradgarden',
@@ -24,6 +24,7 @@ export const mockPlaces: Place[] = [
     busyness: 'high',
     busynessUpdatedAt: '2026-09-22T10:15:00Z',
     amenities: ['outlets', 'wifi', 'group'],
+    createdAt: '2026-09-22T08:30:00Z',
   },
   {
     id: 'naturhuset',
@@ -32,5 +33,6 @@ export const mockPlaces: Place[] = [
     longitude: 20.3073,
     busyness: 'unknown',
     amenities: ['quiet'],
+    createdAt: '2026-09-22T09:00:00Z',
   },
 ];

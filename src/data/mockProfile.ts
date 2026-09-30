@@ -5,4 +5,6 @@ export const mockProfile: Profile = {
 	bio: 'Detta är en testprofil :)',
   	name: 'Hugh Jackman',
   	profilePictureUrl: 'assets/images/profile-pic.jpg',
+	shareLocation: true,
+	createdAt: '2026-09-22T08:00:00Z',
 };

@@ -48,5 +48,6 @@ export async function fetchNearbyStudySpots(
     address: googlePlace.formattedAddress,
     busyness: 'unknown',
     amenities: [],
+    createdAt: new Date().toISOString(),
   }));
 }
