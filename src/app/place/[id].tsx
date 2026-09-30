@@ -1,7 +1,7 @@
 import { useLocalSearchParams } from 'expo-router';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNearbyPlace, useNearbyPlaces, } from '@/src/hooks/useNearbyPlaces';
-import { usePlace } from '@/src/hooks/usePlaces';
+import { usePlaces } from '@/src/hooks/usePlaces';
 import { colors, spacing, type } from '@/src/theme';
 import { translatePlaceToInfoPage } from '@/src/utils/translatePlaceToInfoPage';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,10 +10,12 @@ import { Ionicons } from '@expo/vector-icons';
 // Panelen som dras upp från kartan. Egen fil från listans detaljsida, så de kan visa olika saker framöver.
 export default function PlaceScreen() {
 	const { id } = useLocalSearchParams<{ id: string }>();
-	const { place: mockplace } = usePlace(id);
+	const { places } = usePlaces();
+	const DbPlace = places.find((p) => p.id === id);
+
 	const { place: googlePlace, loading } = useNearbyPlace(id);
 
-	const place = mockplace ?? googlePlace;
+	const place = DbPlace ?? googlePlace;
 	if (loading && !place) return <Text style={styles.missing}>Laddar plats...</Text>;
 	if (!place) return <Text style={styles.missing}>Hittade ingen plats med id {id}</Text>;
 
@@ -26,17 +28,10 @@ export default function PlaceScreen() {
 
 			{/* Vill vi ha bilden mindre?*/}
 			<View style={styles.imageWrapper}>
-				{place.imageUrl ? (
-					<Image
-						source={{ uri: place.imageUrl }}
-						style={styles.image}
-						resizeMode="cover"
-					/>
-				) : (
-					<View style={[styles.image, styles.imagePlaceholder]}>
-						<Ionicons name="image-outline" size={22} color="grey" />
-					</View>
-				)}
+				{/* Databasen har ingen bild-kolumn än, så vi visar alltid platshållaren */}
+				<View style={[styles.image, styles.imagePlaceholder]}>
+					<Ionicons name="image-outline" size={22} color="grey" />
+				</View>
 
 				{/* Knappen är inte klickbar än, onPress senare? */}
 				<TouchableOpacity style={styles.checkInButton}>
@@ -71,9 +66,9 @@ export default function PlaceScreen() {
 			</View>
 
 
-			<Text style={styles.row}>Öppettider: {place.openingHours ?? '—'}</Text>
+			<Text style={styles.row}>Öppettider: {place.opening_hours ?? '—'}</Text>
 
-			<Text style={styles.row}>Uppdaterad: {place.busynessUpdatedAt ?? '—'}</Text>
+			<Text style={styles.row}>Uppdaterad: {place.busyness_updated_at ?? '—'}</Text>
 
 
 			{/* Skriver här så länge */}

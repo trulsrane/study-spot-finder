@@ -1,37 +1,41 @@
 import { View, Text, Image, StyleSheet, Button, ScrollView } from 'react-native';
-import { getProfile } from '@/src/hooks/useProfile';
+import { useProfile } from '@/src/hooks/useProfile';
 import { useRouter, Link } from 'expo-router'
 import { usePlaces } from '@/src/hooks/usePlaces';
 import { useFavorites } from '@/src/hooks/useFavorites';
 import { colors, spacing, type } from '@/src/theme';
 import { Card } from '@/src/components/CardContainer';
 import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards';
-import { useEffect } from 'react';
+import { TEST_USER_ID } from '@/src/constants';
 
 
 export default function ProfilePage() {
-	const profile = getProfile();
 	const router = useRouter();
-	const { places, loading, error } = usePlaces();
-	const { favorites, toggleFavorite, isFavorite } = useFavorites();
+	const { profile, loading: profileLoading, error: profileError } = useProfile(TEST_USER_ID);
+	const { places, loading: placesLoading, error: placesError } = usePlaces();
+	const { favorites, loading: favoritesLoading, error: favoritesError, toggleFavorite, isFavorite } = useFavorites(TEST_USER_ID);
 	const favoritePlaces = places.filter((p) => favorites.includes(p.id))
-	
+
+	const loading = profileLoading || placesLoading || favoritesLoading;
+	const error = profileError ?? placesError ?? favoritesError;
+
 	if (loading) return <Text style={styles.message}>Laddar...</Text>;
 	if (error) return <Text style={styles.message}>{error}</Text>;
+	if (!profile) return <Text style={styles.message}>Hittade ingen profil</Text>;
 
   	return (
 		<ScrollView style={styles.container}>
 			<View style={styles.buttonContainer}>
 				<Button title="Edit Profile" onPress={() => router.push('/profile/edit')} />
 			</View>
-			<View style={styles.profileinfo}>{profile.profilePictureUrl && (
+			<View style={styles.profileinfo}>{profile.avatar_url && (
 				<Image
 				source={require('../../../../assets/images/profile-pic.jpg')}
 				style={styles.profilePicture}
 				/>
 			)}
-			<Text style={styles.name}>{profile.name}</Text>
-			<Text style={styles.bio}>Bio: {profile.bio}</Text>
+			<Text style={styles.name}>{profile.username}</Text>
+			<Text style={styles.bio}>Bio: {profile.description}</Text>
 			</View>
 			<Text style={styles.caption}>Favorite study places:</Text>
 			<View style={styles.list}>

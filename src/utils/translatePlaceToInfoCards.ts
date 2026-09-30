@@ -1,7 +1,7 @@
 //Översätter en plats till ett format som kan användas, och visas i, infokorten (CardContainer.tsx)
 
 import { Ionicons } from '@expo/vector-icons';
-import { Place } from '@/src/types/place';
+import { Place } from '@/src/types/db';
 
 //Översätter bekvämlighter till ikoner som visas i korten
 const amenityIconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -25,12 +25,12 @@ const levelOfBusynessMap: Record<string, string> = {
 export function translatePlaceToInfoCards(place: Place) {
 	return {
 		title: place.name,
-		status: place.openingHours ?? 'Öppet',
+		status: place.opening_hours ?? 'Öppet',
 
 		amenities: place.amenities.map((key) => ({
 			key,
 			icon: amenityIconMap[key] || 'help-circle-outline',
 		})),
-		busyness: levelOfBusynessMap[place.busyness ?? 'unknown'] ?? levelOfBusynessMap.unknown,
+		busyness: levelOfBusynessMap[place.current_busyness ?? 'unknown'] ?? levelOfBusynessMap.unknown,
 	};
 }

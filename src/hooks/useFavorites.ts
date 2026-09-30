@@ -1,18 +1,42 @@
-import { useState, useCallback } from 'react';
-import { mockPlaces } from '@/src/data/mockPlaces';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/src/utils/supabase';
 
-const seededFavorites = mockPlaces.map((place) => place.id);
+// favorites är en lista med place_id:n från tabellen saved_places.
+export function useFavorites(userId: string) {
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export function useFavorites(initialFavorites: string[] = seededFavorites) {
-	const [favorites, setFavorites] = useState<string[]>(initialFavorites);
+  useEffect(() => {
+    let cancelled = false;
 
-	const toggleFavorite = useCallback((platsid: string) => {
-		setFavorites((prev) =>
-			prev.includes(platsid) ? prev.filter((id) => id !== platsid) : [...prev, platsid]
-		);
-	}, []);
+    (async () => {
+      const { data, error } = await supabase.from('saved_places').select('place_id').eq('user_id', userId);
+      if (cancelled) return;
+      if (error) setError(error.message);
+      else setFavorites((data ?? []).map((row) => row.place_id));
+      setLoading(false);
+    })();
 
-	const isFavorite = useCallback((platsid: string) => favorites.includes(platsid), [favorites]);
+    return () => { cancelled = true; };
+  }, [userId]);
 
-	return { toggleFavorite, isFavorite, favorites, setFavorites };
+  function isFavorite(placeId: string) {
+    return favorites.includes(placeId);
+  }
+
+  // Sparar i databasen först, och uppdaterar listan bara om det gick bra.
+  async function toggleFavorite(placeId: string) {
+    if (isFavorite(placeId)) {
+      const { error } = await supabase.from('saved_places').delete().eq('user_id', userId).eq('place_id', placeId);
+      if (error) setError(error.message);
+      else setFavorites((prev) => prev.filter((id) => id !== placeId));
+    } else {
+      const { error } = await supabase.from('saved_places').insert({ user_id: userId, place_id: placeId });
+      if (error) setError(error.message);
+      else setFavorites((prev) => [...prev, placeId]);
+    }
+  }
+
+  return { favorites, loading, error, isFavorite, toggleFavorite };
 }

@@ -1,23 +1,25 @@
-import { mockPlaces } from '@/src/data/mockPlaces';
-import { Place } from '@/src/types/place';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/src/utils/supabase';
+import { Place } from '@/src/types/db';
 
-type PlacesResult = {
-  places: Place[];
-  loading: boolean;
-  error: string | null;
-};
+export function usePlaces() {
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-type PlaceResult = {
-  place: Place | undefined;
-  loading: boolean;
-  error: string | null;
-};
+  useEffect(() => {
+    let cancelled = false;
 
-export function usePlaces(): PlacesResult {
-  return { places: mockPlaces, loading: false, error: null };
-}
+    (async () => {
+      const { data, error } = await supabase.from('places').select('*');
+      if (cancelled) return;
+      if (error) setError(error.message);
+      else setPlaces(data ?? []);
+      setLoading(false);
+    })();
 
-export function usePlace(id: string): PlaceResult {
-  const place = mockPlaces.find((p) => p.id === id);
-  return { place, loading: false, error: null };
+    return () => { cancelled = true; };
+  }, []);
+
+  return { places, loading, error };
 }

@@ -1,5 +1,5 @@
 import { Link } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, Text } from 'react-native';
+import { FlatList, StyleSheet, Text } from 'react-native';
 
 import { usePlaces } from '@/src/hooks/usePlaces';
 import { colors, spacing, type } from '@/src/theme';

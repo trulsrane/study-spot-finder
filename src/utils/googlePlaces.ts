@@ -1,4 +1,4 @@
-import { Place } from '@/src/types/place';
+import { Place } from '@/src/types/db';
 
 const API_KEY = process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY;
 
@@ -46,7 +46,13 @@ export async function fetchNearbyStudySpots(
     latitude: googlePlace.location.latitude,
     longitude: googlePlace.location.longitude,
     address: googlePlace.formattedAddress,
-    busyness: 'unknown',
+    opening_hours: null,
+    building: null,
+    floor: null,
+    current_busyness: 'unknown',
+    busyness_updated_at: new Date().toISOString(),
     amenities: [],
+    created_at: new Date().toISOString(),
+    created_by: null,
   }));
 }
