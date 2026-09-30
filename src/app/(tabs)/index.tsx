@@ -5,7 +5,7 @@ import ClusteredMapView from 'react-native-map-clustering';
 import MapView, { Marker, Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMapPlaces } from '@/src/hooks/useMapPlaces';
-import { Place } from '@/src/types/place';
+import { Place } from '@/src/types/db';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { colors, radius, spacing, type } from '@/src/theme';
 

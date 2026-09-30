@@ -1,0 +1,12 @@
+import { Database } from './database.types';
+
+type Tables = Database['public']['Tables'];
+
+export type Place = Omit<Tables['places']['Row'], 'geom'>;
+export type PlaceInsert = Tables['places']['Insert'];
+export type Profile = Tables['profiles']['Row'];
+export type Review = Tables['reviews']['Row'];
+export type ReviewInsert = Tables['reviews']['Insert'];
+export type Friendship = Tables['friendships']['Row'];
+export type SavedPlace = Tables['saved_places']['Row'];
+export type Busyness = Database['public']['Enums']['busyness_level'];
