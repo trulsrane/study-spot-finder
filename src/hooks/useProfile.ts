@@ -15,7 +15,7 @@ export function useProfile(userId: string) {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle(); // returnerar null om det inte finns någon profil med det id:t
       if (cancelled) return;
       if (error) setError(error.message);
       else setProfile(data);
