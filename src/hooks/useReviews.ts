@@ -32,8 +32,9 @@ export function useReviews(placeId: string) {
   }, [placeId]);
 
   // null (inte 0) när det saknas recensioner, så skärmen kan skilja på "inga betyg" och "betyg 0".
+  // räknar ut medelvärdet av alla betyg, avrundat till en decimal.
   const averageRating =
     reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : null;
 
-  return { reviews, averageRating, count: reviews.length, loading, error };
+  return { reviews, averageRating, count: reviews.length, loading, error }; // returnerar recensionerna, medelbetyget, antalet recensioner, laddningsstatus och eventuellt felmeddelande
 }

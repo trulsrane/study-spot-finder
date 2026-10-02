@@ -11,7 +11,9 @@ export function usePlaces() {
     let cancelled = false;
 
     (async () => {
-      const { data, error } = await supabase.from('places').select('*');
+      const { data, error } = await supabase
+        .from('places')
+        .select('*');
       if (cancelled) return;
       if (error) setError(error.message);
       else setPlaces(data ?? []);
@@ -21,5 +23,5 @@ export function usePlaces() {
     return () => { cancelled = true; };
   }, []);
 
-  return { places, loading, error };
+  return { places, loading, error }; // returnerar en lista med alla platser, samt laddningsstatus och eventuellt felmeddelande
 }
