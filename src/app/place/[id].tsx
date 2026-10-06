@@ -6,7 +6,12 @@ import { colors, spacing, type } from '@/src/theme';
 import { translatePlaceToInfoPage } from '@/src/utils/translatePlaceToInfoPage';
 import { Ionicons } from '@expo/vector-icons';
 
-
+const tagColorMap: Record<string, string> = {
+	low: colors.busynessLow,
+	medium: colors.busynessMedium,
+	high: colors.busynessHigh,
+	unknown: colors.busynessUnknown,
+};
 // Panelen som dras upp från kartan. Egen fil från listans detaljsida, så de kan visa olika saker framöver.
 export default function PlaceScreen() {
 	const { id } = useLocalSearchParams<{ id: string }>();
@@ -20,7 +25,8 @@ export default function PlaceScreen() {
 	if (!place) return <Text style={styles.missing}>Hittade ingen plats med id {id}</Text>;
 
 	const amenities = translatePlaceToInfoPage(place).amenities ?? [];
-	const tag = translatePlaceToInfoPage(place).busyness ?? '—';
+	const busyness = translatePlaceToInfoPage(place).busyness ?? '—';
+	const level = translatePlaceToInfoPage(place).level ?? 'unknown';
 
 
 	return (
@@ -40,8 +46,8 @@ export default function PlaceScreen() {
 			</View>
 
 			{/* Busyness, placerad längst upp i det vänstra hörnet, på bilden */}
-			<View style={styles.tag}>
-				<Text style={styles.tagText}>{tag}</Text>
+			<View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
+				<Text style={styles.tagText}>{busyness}</Text>
 			</View>
 
 
@@ -142,7 +148,7 @@ const styles = StyleSheet.create({
 		width: 28,
 		height: 28,
 		borderRadius: 14,
-		backgroundColor: 'lightgrey',
+		backgroundColor: colors.amenityCircle,
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
@@ -151,7 +157,7 @@ const styles = StyleSheet.create({
 		position: 'absolute',
 		top: 28,
 		left: 35,
-		backgroundColor: '#fff',
+		// backgroundColor: '#fff',
 		borderRadius: 14,
 		paddingHorizontal: 12,
 		paddingVertical: 5,
@@ -161,7 +167,7 @@ const styles = StyleSheet.create({
 	tagText: {
 		fontSize: 12,
 		fontWeight: '700',
-		color: '#000',
+		color: colors.text,
 	},
 	imageWrapper: {
 		width: '100%',
@@ -175,6 +181,8 @@ const styles = StyleSheet.create({
 		height: '100%',
 	},
 	imagePlaceholder: {
+		//kan ha denna så länge
+		//ska vara en bild senare
 		backgroundColor: 'lightgrey',
 		alignItems: 'center',
 		justifyContent: 'center',
@@ -187,14 +195,14 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 		gap: 6,
-		backgroundColor: '#fff',
+		backgroundColor: colors.buttonBackground,
 		borderRadius: 18,
 		paddingVertical: 10,
 		width: '35%',
 		marginBottom: spacing.sm,
 	},
 	checkInText: {
-		color: '#000',
+		color: colors.text,
 		fontSize: 14,
 		fontWeight: '700',
 	},

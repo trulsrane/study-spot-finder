@@ -9,9 +9,22 @@ export const type = {
 
 // Exempel på hur man definierar färger som kan användas. Skriv användningsområdet istället för "red" direkt i koden, så blir det lättare att byta färgtema senare.
 export const colors = {
-  text: '#111827',
-  textMuted: '#6b7280',
-  background: 'white',
+  text: '#2F2319',
+  textMuted: '#827B75',
+  background: '#EDEDE9',
   border: '#e5e7eb',
   tint: '#2563eb',
+  icon: '#2F2319',
+  favorite: '#C74068',
+  amenityCircle: '#B8CB9E',
+  busynessLow: '#E3EAD8',
+  busynessMedium: '#EDDAC2',
+  busynessHigh: '#E8CDD5',
+  busynessUnknown: '#D9D9D9',
+  buttonBackground: '#fff',
+  
 };
+
+export const icons = {
+	size: 24
+}

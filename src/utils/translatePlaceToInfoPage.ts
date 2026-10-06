@@ -37,6 +37,7 @@ export function translatePlaceToInfoPage(place: Place) {
 	return {
 		title: place.name,
 		status: place.opening_hours ?? 'Öppet',
+		level: place.current_busyness ?? 'unknown',
 
 		amenities: place.amenities.map((key) => ({
 			key,

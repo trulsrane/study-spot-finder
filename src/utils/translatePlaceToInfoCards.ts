@@ -33,6 +33,7 @@ export function translatePlaceToInfoCards(place: Place & { distance_meters?: num
 	return {
 		title: place.name,
 		status: place.opening_hours ?? 'Öppet',
+		level: place.current_busyness ?? 'unknown',
 		distance: place.distance_meters != null ? formatDistance(place.distance_meters) : undefined,
 
 		amenities: place.amenities.map((key) => ({
