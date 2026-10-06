@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, Text } from 'react-native';
 
 import { usePlaces } from '@/src/hooks/usePlaces';
 import { useFavorites } from '@/src/hooks/useFavorites';
+import { useUserLocation } from '@/src/hooks/useUserLocation';
 import { colors, spacing, type } from '@/src/theme';
 import { Card } from '@/src/components/CardContainer';
 import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards';
@@ -11,6 +12,9 @@ import { TEST_USER_ID } from '@/src/constants';
 // För att testa databasen
 import { useEffect } from 'react';
 import { supabase } from '@/src/utils/supabase';
+
+// Listan visar alla platser, så radien är stor nog för att alla i Umeå ska få ett avstånd
+const DISTANCE_RADIUS_METERS = 50_000;
 
 export default function List() {
 
@@ -25,7 +29,9 @@ export default function List() {
       console.log('FIRST:', data?.[0]);
     });
   }, []);
-  const { places, loading: placesLoading, error: placesError } = usePlaces();
+  // Avstånden dyker upp när positionen är hämtad. Utan position visas listan utan avstånd.
+  const { coords } = useUserLocation();
+  const { places, loading: placesLoading, error: placesError } = usePlaces(coords, DISTANCE_RADIUS_METERS);
   const { favorites, loading: favoritesLoading, error: favoritesError, isFavorite, toggleFavorite } = useFavorites(TEST_USER_ID);
 
   const loading = placesLoading || favoritesLoading;

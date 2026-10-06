@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import * as Location from 'expo-location';
 
 import { Place } from '@/src/types/db';
 import { fetchNearbyStudySpots } from '@/src/utils/googlePlaces';
+import { useUserLocation } from '@/src/hooks/useUserLocation';
+import { FALLBACK_COORDS } from '@/src/constants';
 
 
 type PlacesResult = {
@@ -12,24 +13,21 @@ type PlacesResult = {
 };
 
 
-const FALLBACK_COORDS = { latitude: 63.8258, longitude: 20.2630 };
 // Hook to fetch nearby study spots based on the user's current location
 export function useNearbyPlaces(): PlacesResult {
+  const { coords, loading: locationLoading } = useUserLocation();
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
 	// Fetch nearby study spots based on the user's current location
   useEffect(() => {
+    if (locationLoading) return; // wait until we know where the user is
+    const { latitude, longitude } = coords ?? FALLBACK_COORDS;
+
     (async () => {
       try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        const coords =
-          status === 'granted'
-            ? await Location.getCurrentPositionAsync({}).then((pos) => pos.coords)
-            : FALLBACK_COORDS;
-		
-        const result = await fetchNearbyStudySpots(coords.latitude, coords.longitude);
+        const result = await fetchNearbyStudySpots(latitude, longitude);
         setPlaces(result);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Något gick fel');
@@ -37,7 +35,7 @@ export function useNearbyPlaces(): PlacesResult {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [locationLoading, coords]);
 
 	return { places, loading, error };
 
