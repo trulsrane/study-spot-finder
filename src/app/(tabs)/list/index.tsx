@@ -2,9 +2,11 @@ import { Link } from 'expo-router';
 import { FlatList, StyleSheet, Text } from 'react-native';
 
 import { usePlaces } from '@/src/hooks/usePlaces';
+import { useFavorites } from '@/src/hooks/useFavorites';
 import { colors, spacing, type } from '@/src/theme';
 import { Card } from '@/src/components/CardContainer';
 import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards';
+import { TEST_USER_ID } from '@/src/constants';
 
 // För att testa databasen
 import { useEffect } from 'react';
@@ -23,7 +25,11 @@ export default function List() {
       console.log('FIRST:', data?.[0]);
     });
   }, []);
-  const { places, loading, error } = usePlaces();
+  const { places, loading: placesLoading, error: placesError } = usePlaces();
+  const { favorites, loading: favoritesLoading, error: favoritesError, isFavorite, toggleFavorite } = useFavorites(TEST_USER_ID);
+
+  const loading = placesLoading || favoritesLoading;
+  const error = placesError ?? favoritesError;
 
   if (loading) return <Text style={styles.message}>Laddar...</Text>;
   if (error) return <Text style={styles.message}>{error}</Text>;
@@ -32,13 +38,19 @@ export default function List() {
     <FlatList
       data={places}
       keyExtractor={(place) => place.id}
+      // FlatList ritar bara om när data ändras, så favorites måste skickas med för att hjärtat ska uppdateras.
+      extraData={favorites}
       // Utan detta hamnar innehållet bakom den genomskinliga headern med stor titel.
       contentInsetAdjustmentBehavior="automatic"
 	  contentContainerStyle={styles.list}
       renderItem={({ item }) => (
         // asChild gör att Pressable blir den klickbara ytan, istället för Links egen Text.
         <Link href={{ pathname: '/list/[id]', params: { id: item.id } }} asChild>
-          <Card {...translatePlaceToInfoCards(item)} />
+          <Card
+            {...translatePlaceToInfoCards(item)}
+            isFavorite={isFavorite(item.id)}
+            onToggleFavorite={() => toggleFavorite(item.id)}
+          />
         </Link>
       )}
     />
