@@ -3,6 +3,7 @@ import { useProfile } from '@/src/hooks/useProfile';
 import { useRouter, Link } from 'expo-router'
 import { usePlaces } from '@/src/hooks/usePlaces';
 import { useFavorites } from '@/src/hooks/useFavorites';
+import { useMyReviews } from '@/src/hooks/useMyReviews';
 import { colors, spacing, type } from '@/src/theme';
 import { Card } from '@/src/components/CardContainer';
 import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards';
@@ -15,6 +16,7 @@ export default function ProfilePage() {
 	const { places, loading: placesLoading, error: placesError } = usePlaces();
 	const { favorites, loading: favoritesLoading, error: favoritesError, toggleFavorite, isFavorite } = useFavorites();
 	const favoritePlaces = places.filter((p) => favorites.includes(p.id))
+	const { reviews, loading: reviewsLoading, error: reviewsError } = useMyReviews();
 
 	const loading = profileLoading || placesLoading || favoritesLoading;
 	const error = profileError ?? placesError ?? favoritesError;
@@ -50,6 +52,12 @@ export default function ProfilePage() {
 				</Link>
 				))}
 			</View>
+
+			{/* Tillfälligt: rå data för att testa useFavorites och useMyReviews */}
+			<Text>useFavorites (place_id:n):</Text>
+			<Text>{JSON.stringify(favorites, null, 2)}</Text>
+			<Text>useMyReviews:</Text>
+			<Text>{reviewsLoading ? 'Laddar...' : reviewsError ?? JSON.stringify(reviews, null, 2)}</Text>
 		</ScrollView>
   	);
 }
