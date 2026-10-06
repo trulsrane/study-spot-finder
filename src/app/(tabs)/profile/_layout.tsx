@@ -1,3 +1,4 @@
+import { useSession } from '@/src/hooks/useSession';
 import { Stack } from 'expo-router';
 
 export const unstable_settings = {
@@ -5,11 +6,17 @@ export const unstable_settings = {
   initialRouteName: '(tabs)',
 };
 
+const session = useSession();
+
 export default function ProfileLayout() {
   return (
-	<Stack screenOptions={{ headerShown: false }}>
-		<Stack.Screen name="(auth)" options={{title: 'Profile'}}/>
-		<Stack.Screen name="(noAuth)" options={{title: 'Sign in/ Sign up'}} />
-	</Stack>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Protected guard={!!session}>
+        <Stack.Screen name="(auth)" />
+      </Stack.Protected>
+      <Stack.Protected guard={!session}>
+        <Stack.Screen name="(noAuth)" />
+      </Stack.Protected>
+    </Stack>
   );
 }
