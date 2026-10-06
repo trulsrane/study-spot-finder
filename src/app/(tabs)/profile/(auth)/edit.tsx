@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { View, TextInput, Button, Image, StyleSheet, Text } from 'react-native';
-import { useProfile, updateProfile } from '../../../hooks/useProfile';
+import { useProfile, updateProfile } from '../../../../hooks/useProfile';
 import { TEST_USER_ID } from '@/src/constants';
 
 export default function editProfilePage() {
@@ -55,7 +55,7 @@ export default function editProfilePage() {
 	return (
 		// Kommer behöva ändra Image source='' sen när vi fått upp databasen
 		<View style={styles.container}>
-			<Image source={require('../../../../assets/images/profile-pic.jpg')}
+			<Image source={require('@/assets/images/profile-pic.jpg')}
 				style={styles.preview}
 			/>
 			<Button title="Choose profile picture" onPress={pickImage} />

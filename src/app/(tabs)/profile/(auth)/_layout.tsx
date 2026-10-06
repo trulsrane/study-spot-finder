@@ -8,8 +8,8 @@ export const unstable_settings = {
 export default function ProfileLayout() {
   return (
 	<Stack screenOptions={{ headerShown: false }}>
-		<Stack.Screen name="(auth)" options={{title: 'Profile'}}/>
-		<Stack.Screen name="(noAuth)" options={{title: 'Sign in/ Sign up'}} />
+		<Stack.Screen name="index" options={{title: 'Profile'}}/>
+		<Stack.Screen name="edit" options={{title: 'Edit Profile'}} />
 	</Stack>
   );
 }
