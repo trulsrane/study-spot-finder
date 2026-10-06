@@ -2,9 +2,11 @@ import { useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNearbyPlace, useNearbyPlaces, } from '@/src/hooks/useNearbyPlaces';
 import { usePlaces } from '@/src/hooks/usePlaces';
-import { colors, spacing, type } from '@/src/theme';
+import { colors, spacing, type,radius } from '@/src/theme';
 import { translatePlaceToInfoPage } from '@/src/utils/translatePlaceToInfoPage';
 import { Ionicons } from '@expo/vector-icons';
+import {openDirections} from '@/src/utils/openDirections';
+
 
 const tagColorMap: Record<string, string> = {
 	low: colors.busynessLow,
@@ -56,6 +58,17 @@ export default function PlaceScreen() {
 			{/* Tog bort rubrikerna, jag tänker att adressen säger sig själv */}
 			<Text style={styles.rowSmall}>{place.address ?? ''} {place.building ?? ''} {place.floor ?? ''}</Text>
 			<Text style={styles.rowSmall}>{place.latitude}°, {place.longitude}°</Text>
+			{/* Vägbeskrivning visas bara för platser från databasen */}
+			{DbPlace && (
+				<TouchableOpacity
+					style={styles.directionsButton}
+					onPress={() => openDirections(DbPlace.latitude, DbPlace.longitude)}
+				>
+					<Ionicons name="navigate-outline" size={16} color="#fff" />
+					<Text style={styles.directionsText}>Vägbeskrivning</Text>
+				</TouchableOpacity>
+			)}
+
 
 			{/* Ikonerna för bekvämligheterna som finns på studieplatsen */}
 			{/* Ändrade från de små info-korten så de även skrivs ut bredvid ikonerna */}
@@ -206,5 +219,23 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 		fontWeight: '700',
 	},
+	directionsButton: {
+	flexDirection: 'row',
+	alignItems: 'center',
+	alignSelf: 'flex-start',
+	gap: 6,
+	backgroundColor: colors.tint,
+	borderRadius: radius.pill,
+	paddingHorizontal: spacing.md,
+	paddingVertical: spacing.sm,
+	marginTop: spacing.sm,
+},
+directionsText: {
+	color: '#fff',
+	fontSize: 14,
+	fontWeight: '700',
+},
+
+
 
 });
