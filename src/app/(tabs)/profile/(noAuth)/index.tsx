@@ -1,53 +1,26 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity} from 'react-native';
-import signInWithEmail from '@/src/hooks/useAuth';
-import signUpWithEmail from '@/src/hooks/useAuth';
-import { supabase } from '@/src/utils/supabase';
-import { router } from 'expo-router';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
+import useAuth from '@/src/hooks/useAuth'
 
-const Index = () => {
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-
-  const handleSignUp = async () => {
-    console.log('Email:', email);
-    console.log('Password:', password);
-    await signUpWithEmail();
-  };
-
-  const handleLogin = async () => {
-    await signInWithEmail();
-    const { data: { user } } = await supabase.auth.getUser();
-    router.push(user ? '/(tabs)/profile/(auth)' : '/(tabs)/profile/(noAuth)');
-  }
-
+export default function LoginScreen() {
+  const { email, setEmail, password, setPassword, loading, signInWithEmail, signUpWithEmail } = useAuth()
   return (
-      <View>
-        <Text>Login Now</Text>
-        <Text>Email:</Text>
-        <TextInput
-          placeholder="Enter your email"
-          keyboardType="email-address"
-          onChangeText={setEmail}
-          value={email}
-        />
-        <Text>Password:</Text>
-        <TextInput
-          onChangeText={setPassword}
-          value={password}
-          placeholder="Enter your password"
-          secureTextEntry
-        />
+    <View style={styles.container}>
+      <TextInput placeholder="E-post" value={email} onChangeText={setEmail}
+        autoCapitalize="none" keyboardType="email-address" style={styles.input} />
+      <TextInput placeholder="Lösenord" value={password} onChangeText={setPassword}
+        secureTextEntry autoCapitalize="none" style={styles.input} />
+      <TouchableOpacity disabled={loading} onPress={signInWithEmail} style={styles.button}>
+        <Text>Log in</Text>
+      </TouchableOpacity>
+      <TouchableOpacity disabled={loading} onPress={signUpWithEmail} style={styles.button}>
+        <Text>Sign up</Text>
+      </TouchableOpacity>
+    </View>
+  )
+}
 
-        <TouchableOpacity onPress={handleLogin}>
-          <Text>Login</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={handleSignUp}>
-          <Text>Sign Up</Text>
-        </TouchableOpacity>
-      </View>
-  );
-};
-
-export default Index;
+const styles = StyleSheet.create({
+  container: { padding: 16, gap: 12 },
+  input: { borderWidth: 1, borderRadius: 8, padding: 12 },
+  button: { padding: 12, alignItems: 'center', borderWidth: 1, borderRadius: 8 },
+})
