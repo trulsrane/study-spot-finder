@@ -6,14 +6,13 @@ import { useFavorites } from '@/src/hooks/useFavorites';
 import { colors, spacing, type } from '@/src/theme';
 import { Card } from '@/src/components/CardContainer';
 import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards';
-import { TEST_USER_ID } from '@/src/constants';
 
 
 export default function ProfilePage() {
 	const router = useRouter();
-	const { profile, loading: profileLoading, error: profileError } = useProfile(TEST_USER_ID);
+	const { profile, loading: profileLoading, error: profileError } = useProfile();
 	const { places, loading: placesLoading, error: placesError } = usePlaces();
-	const { favorites, loading: favoritesLoading, error: favoritesError, toggleFavorite, isFavorite } = useFavorites(TEST_USER_ID);
+	const { favorites, loading: favoritesLoading, error: favoritesError, toggleFavorite, isFavorite } = useFavorites();
 	const favoritePlaces = places.filter((p) => favorites.includes(p.id))
 
 	const loading = profileLoading || placesLoading || favoritesLoading;
