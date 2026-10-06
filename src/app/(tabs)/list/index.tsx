@@ -7,7 +7,6 @@ import { useUserLocation } from '@/src/hooks/useUserLocation';
 import { colors, spacing, type } from '@/src/theme';
 import { Card } from '@/src/components/CardContainer';
 import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards';
-import { TEST_USER_ID } from '@/src/constants';
 
 // För att testa databasen
 import { useEffect } from 'react';
@@ -32,7 +31,7 @@ export default function List() {
   // Avstånden dyker upp när positionen är hämtad. Utan position visas listan utan avstånd.
   const { coords } = useUserLocation();
   const { places, loading: placesLoading, error: placesError } = usePlaces(coords, DISTANCE_RADIUS_METERS);
-  const { favorites, loading: favoritesLoading, error: favoritesError, isFavorite, toggleFavorite } = useFavorites(TEST_USER_ID);
+  const { favorites, loading: favoritesLoading, error: favoritesError, isFavorite, toggleFavorite } = useFavorites();
 
   const loading = placesLoading || favoritesLoading;
   const error = placesError ?? favoritesError;
