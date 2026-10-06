@@ -16,7 +16,7 @@ export default function ProfilePage() {
 	const { places, loading: placesLoading, error: placesError } = usePlaces();
 	const { favorites, loading: favoritesLoading, error: favoritesError, toggleFavorite, isFavorite } = useFavorites();
 	const favoritePlaces = places.filter((p) => favorites.includes(p.id))
-	const { reviews, loading: reviewsLoading, error: reviewsError } = useMyReviews(TEST_USER_ID);
+	const { reviews, loading: reviewsLoading, error: reviewsError } = useMyReviews();
 
 	const loading = profileLoading || placesLoading || favoritesLoading;
 	const error = profileError ?? placesError ?? favoritesError;

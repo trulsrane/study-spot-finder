@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/src/utils/supabase';
 import { Review, Place } from '@/src/types/db';
+import { useSession } from '@/src/hooks/useSession';
 
 // En recension plus platsen den gäller. `places` är ingen kolumn i reviews-tabellen,
 // den kommer från join:en i select-strängen nedan.
@@ -8,13 +9,22 @@ export type ReviewWithPlace = Review & {
   places: Pick<Place, 'name'> | null;
 };
 
-// Alla recensioner som en användare har skrivit, nyast först.
-export function useMyReviews(userId: string) {
+// Alla recensioner som den inloggade användaren har skrivit, nyast först.
+// Utan inloggning är listan tom.
+export function useMyReviews() {
+  const userId = useSession()?.user.id;
   const [reviews, setReviews] = useState<ReviewWithPlace[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Inte inloggad: inga recensioner att hämta
+    if (!userId) {
+      setReviews([]);
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
 
     (async () => {
