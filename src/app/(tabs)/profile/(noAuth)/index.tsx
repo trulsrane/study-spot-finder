@@ -1,8 +1,9 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
+import { Link } from 'expo-router'
 import useAuth from '@/src/hooks/useAuth'
 
 export default function LoginScreen() {
-  const { email, setEmail, password, setPassword, loading, signInWithEmail, signUpWithEmail } = useAuth()
+  const { email, setEmail, password, setPassword, loading, signInWithEmail } = useAuth()
   return (
     <View style={styles.container}>
       <TextInput placeholder="E-post" value={email} onChangeText={setEmail}
@@ -12,9 +13,12 @@ export default function LoginScreen() {
       <TouchableOpacity disabled={loading} onPress={signInWithEmail} style={styles.button}>
         <Text>Log in</Text>
       </TouchableOpacity>
-      <TouchableOpacity disabled={loading} onPress={signUpWithEmail} style={styles.button}>
-        <Text>Sign up</Text>
-      </TouchableOpacity>
+      {/* Registreringen har en egen sida med användarnamn, se signup.tsx */}
+      <Link href="/profile/signup" asChild>
+        <TouchableOpacity style={styles.button}>
+          <Text>Sign up</Text>
+        </TouchableOpacity>
+      </Link>
     </View>
   )
 }
