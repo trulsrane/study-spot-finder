@@ -6,6 +6,7 @@ import { useFavorites } from '@/src/hooks/useFavorites';
 import { colors, spacing, type } from '@/src/theme';
 import { Card } from '@/src/components/CardContainer';
 import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards';
+import { supabase } from '@/src/utils/supabase';
 
 
 export default function ProfilePage() {
@@ -26,6 +27,7 @@ export default function ProfilePage() {
 		<ScrollView style={styles.container}>
 			<View style={styles.buttonContainer}>
 				<Button title="Edit Profile" onPress={() => router.push('/profile/edit')} />
+				<Button title="Logga ut" onPress={() => supabase.auth.signOut()} />
 			</View>
 			<View style={styles.profileinfo}>{profile.avatar_url && (
 				<Image
