@@ -22,10 +22,18 @@ const levelOfBusynessMap: Record<string, string> = {
 	unknown: 'OKÄNT LÄGE',
 };
 
-export function translatePlaceToInfoCards(place: Place) {
+// 350 m under en kilometer, annars 1,2 km
+function formatDistance(meters: number) {
+	if (meters < 1000) return `${Math.round(meters / 10) * 10} m`;
+	return `${(meters / 1000).toFixed(1).replace('.', ',')} km`;
+}
+
+// distance_meters finns bara när usePlaces fått en position, annars visas inget avstånd
+export function translatePlaceToInfoCards(place: Place & { distance_meters?: number | null }) {
 	return {
 		title: place.name,
 		status: place.opening_hours ?? 'Öppet',
+		distance: place.distance_meters != null ? formatDistance(place.distance_meters) : undefined,
 
 		amenities: place.amenities.map((key) => ({
 			key,

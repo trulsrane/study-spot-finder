@@ -1,17 +1,18 @@
-import * as Location from 'expo-location';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import ClusteredMapView from 'react-native-map-clustering';
 import MapView, { Marker, Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMapPlaces } from '@/src/hooks/useMapPlaces';
+import { useUserLocation } from '@/src/hooks/useUserLocation';
+import { FALLBACK_COORDS } from '@/src/constants';
 import { Place } from '@/src/types/db';
-import { Link, useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { colors, radius, spacing, type } from '@/src/theme';
+import { MapSearchBar } from '@/src/components/MapSearchBar';
 
 const fallbackRegion = {
-  latitude: 63.8258,
-  longitude: 20.2630,
+  ...FALLBACK_COORDS,
   latitudeDelta: 0.08,
   longitudeDelta: 0.08,
 };
@@ -20,30 +21,17 @@ export default function Map() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { places } = useMapPlaces();
-  const [locationGranted, setLocationGranted] = useState(false);
+  const { coords, loading: locationLoading } = useUserLocation();
   const [focusedId, setFocusedId] = useState<string | null>(null);
-  const [initialRegion, setInitialRegion] = useState<Region | null>(null);
   const { focus } = useLocalSearchParams<{ focus?: string }>();
   const mapRef = useRef<MapView>(null);
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      const granted = status === 'granted';
-      setLocationGranted(granted);
-      if (granted) {
-        const position = await Location.getCurrentPositionAsync({});
-        setInitialRegion({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          latitudeDelta: 0.08,
-          longitudeDelta: 0.08,
-        });
-      } else {
-        setInitialRegion(fallbackRegion);
-      }
-    })();
-  }, []);
+  const locationGranted = coords !== null;
+  // useMemo så att initialRegion inte blir ett nytt objekt varje render (den används i fokus-effekten nedan)
+  const initialRegion = useMemo<Region | null>(() => {
+    if (locationLoading) return null;
+    return coords ? { ...coords, latitudeDelta: 0.08, longitudeDelta: 0.08 } : fallbackRegion;
+  }, [locationLoading, coords]);
 
   // Körs när en annan sida (t.ex. profilen) vill visa en plats på kartan.
   useEffect(() => {
@@ -80,6 +68,7 @@ export default function Map() {
   return (
     <View style={styles.container}>
       <ClusteredMapView
+		clusteringEnabled={false}
         style={styles.map}
         showsUserLocation={locationGranted}
         showsMyLocationButton={locationGranted}
@@ -119,15 +108,10 @@ export default function Map() {
           />
         ))}
       </ClusteredMapView>
-      <Link
-        href={{ pathname: '/place/[id]', params: { id: 'kulturbageriet' } }}
-        style={{
-          ...styles.link,
-          bottom: insets.bottom + spacing.xl * 2,
-        }}
-      >
-        Open an example place
-      </Link>
+	  <View style={[styles.searchBar, { top: insets.top + spacing.sm }]}>
+		<MapSearchBar onSelect={(place) => router.setParams({ focus: place.id })} />
+	  </View>
+	
     </View>
   );
 }
@@ -140,15 +124,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  link: {
-    ...type.body,
-    color: colors.tint,
-    position: 'absolute',
-    alignSelf: 'center',
-    backgroundColor: colors.background,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md,
-    overflow: 'hidden',
+  searchBar: {
+	position: 'absolute',
+	left: spacing.md,
+	right: spacing.md,
   },
 });

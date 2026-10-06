@@ -11,7 +11,11 @@ export function useProfile(userId: string) {
     let cancelled = false;
 
     (async () => {
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle(); // returnerar null om det inte finns någon profil med det id:t
       if (cancelled) return;
       if (error) setError(error.message);
       else setProfile(data);
@@ -21,11 +25,14 @@ export function useProfile(userId: string) {
     return () => { cancelled = true; };
   }, [userId]);
 
-  return { profile, loading, error };
+  return { profile, loading, error }; // returnerar profilen, laddningsstatus och eventuellt felmeddelande
 }
 
 // Returnerar ett felmeddelande, eller null om det gick bra.
 export async function updateProfile(userId: string, updates: ProfileUpdate) {
-  const { error } = await supabase.from('profiles').update(updates).eq('id', userId);
-  return error ? error.message : null;
+  const { error } = await supabase
+    .from('profiles')
+    .update(updates)
+    .eq('id', userId);
+  return error ? error.message : null; // returnerar felmeddelande om det finns ett, annars null. null betyder att det gick bra.
 }

@@ -14,6 +14,7 @@ export type Amenity = {
 type CardProps = {
   title?: string;
   status?: string;
+  distance?: string;
   tag?: string;
   rating?: number;
   image?: ImageSourcePropType | string;
@@ -29,6 +30,7 @@ const IMAGE_SIZE = 120;
 export function Card({
   title = 'Platsens namn',
   status = 'Öppet',
+  distance,
   tag = 'LUGNT',
   rating,
   image,
@@ -71,7 +73,9 @@ export function Card({
             <Text style={styles.title} numberOfLines={1}>
               {title}
             </Text>
-            <Text style={styles.status}>{status}</Text>
+            <Text style={styles.status}>
+              {distance ? `${status} · ${distance}` : status}
+            </Text>
           </View>
 
 		{/* Favoritmarkering */}
