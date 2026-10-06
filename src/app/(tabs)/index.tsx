@@ -6,8 +6,9 @@ import MapView, { Marker, Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMapPlaces } from '@/src/hooks/useMapPlaces';
 import { Place } from '@/src/types/db';
-import { Link, useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { colors, radius, spacing, type } from '@/src/theme';
+import { MapSearchBar } from '@/src/components/MapSearchBar';
 
 const fallbackRegion = {
   latitude: 63.8258,
@@ -80,6 +81,7 @@ export default function Map() {
   return (
     <View style={styles.container}>
       <ClusteredMapView
+		clusteringEnabled={false}
         style={styles.map}
         showsUserLocation={locationGranted}
         showsMyLocationButton={locationGranted}
@@ -119,15 +121,10 @@ export default function Map() {
           />
         ))}
       </ClusteredMapView>
-      <Link
-        href={{ pathname: '/place/[id]', params: { id: 'kulturbageriet' } }}
-        style={{
-          ...styles.link,
-          bottom: insets.bottom + spacing.xl * 2,
-        }}
-      >
-        Open an example place
-      </Link>
+	  <View style={[styles.searchBar, { top: insets.top + spacing.sm }]}>
+		<MapSearchBar onSelect={(place) => router.setParams({ focus: place.id })} />
+	  </View>
+	
     </View>
   );
 }
@@ -140,15 +137,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  link: {
-    ...type.body,
-    color: colors.tint,
-    position: 'absolute',
-    alignSelf: 'center',
-    backgroundColor: colors.background,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md,
-    overflow: 'hidden',
+  searchBar: {
+	position: 'absolute',
+	left: spacing.md,
+	right: spacing.md,
   },
 });
