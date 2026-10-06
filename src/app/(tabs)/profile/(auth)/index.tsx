@@ -7,14 +7,14 @@ import { useMyReviews } from '@/src/hooks/useMyReviews';
 import { colors, spacing, type } from '@/src/theme';
 import { Card } from '@/src/components/CardContainer';
 import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards';
-import { TEST_USER_ID } from '@/src/constants';
+import { supabase } from '@/src/utils/supabase';
 
 
 export default function ProfilePage() {
 	const router = useRouter();
-	const { profile, loading: profileLoading, error: profileError } = useProfile(TEST_USER_ID);
+	const { profile, loading: profileLoading, error: profileError } = useProfile();
 	const { places, loading: placesLoading, error: placesError } = usePlaces();
-	const { favorites, loading: favoritesLoading, error: favoritesError, toggleFavorite, isFavorite } = useFavorites(TEST_USER_ID);
+	const { favorites, loading: favoritesLoading, error: favoritesError, toggleFavorite, isFavorite } = useFavorites();
 	const favoritePlaces = places.filter((p) => favorites.includes(p.id))
 	const { reviews, loading: reviewsLoading, error: reviewsError } = useMyReviews(TEST_USER_ID);
 
@@ -29,10 +29,11 @@ export default function ProfilePage() {
 		<ScrollView style={styles.container}>
 			<View style={styles.buttonContainer}>
 				<Button title="Edit Profile" onPress={() => router.push('/profile/edit')} />
+				<Button title="Logga ut" onPress={() => supabase.auth.signOut()} />
 			</View>
 			<View style={styles.profileinfo}>{profile.avatar_url && (
 				<Image
-				source={require('../../../../assets/images/profile-pic.jpg')}
+				source={require('@/assets/images/profile-pic.jpg')}
 				style={styles.profilePicture}
 				/>
 			)}
