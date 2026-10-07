@@ -2,11 +2,11 @@ import { useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNearbyPlace, useNearbyPlaces, } from '@/src/hooks/useNearbyPlaces';
 import { usePlaces } from '@/src/hooks/usePlaces';
-import { colors, spacing, type,radius } from '@/src/theme';
+import { colors, spacing, type, radius } from '@/src/theme';
 import { translatePlaceToInfoPage } from '@/src/utils/translatePlaceToInfoPage';
 import { Ionicons } from '@expo/vector-icons';
-import {openDirections} from '@/src/utils/openDirections';
-
+import { openDirections } from '@/src/utils/openDirections';
+import { useReviews } from '@/src/hooks/useReviews';
 
 const tagColorMap: Record<string, string> = {
 	low: colors.busynessLow,
@@ -21,10 +21,13 @@ export default function PlaceScreen() {
 	const DbPlace = places.find((p) => p.id === id);
 
 	const { place: googlePlace, loading } = useNearbyPlace(id);
+	const { reviews, averageRating, count, loading: reviewsLoading, error: reviewsError, submitReview, submitting } = useReviews(id);
 
 	const place = DbPlace ?? googlePlace;
 	if (loading && !place) return <Text style={styles.missing}>Laddar plats...</Text>;
 	if (!place) return <Text style={styles.missing}>Hittade ingen plats med id {id}</Text>;
+
+
 
 	const amenities = translatePlaceToInfoPage(place).amenities ?? [];
 	const busyness = translatePlaceToInfoPage(place).busyness ?? '—';
@@ -98,10 +101,43 @@ export default function PlaceScreen() {
 
 			{/* Fyll denna med info om populära tider */}
 			<Text style={styles.rowTitle}>Popular times:</Text>
+			
+			<View style={styles.reviewContainer}>
+				<Text style={styles.rowTitle}>Reviews ({count}):</Text>
+				<Text style={styles.rowSmall}>Average rating: {averageRating?.toFixed(1) ?? '—'}</Text>
 
+				{/* <View style={styles.ratingBadge}>
+					<Text style={styles.ratingText}>{averageRating?.toFixed(1) ?? '—'}</Text>
+					<Ionicons name="star" size={11} color="#000" />
+				</View> */}
 
-			<Text style={styles.rowTitle}>Reviews:</Text>
-			{/* Ska koppla till recensioner */}
+				{reviewsLoading ? (
+					<Text style={styles.row}>Loading reviews...</Text>
+				) : reviewsError ? (
+					<Text style={styles.row}>Error loading reviews: {reviewsError}</Text>
+				) : reviews.length === 0 ? (
+					<Text style={styles.row}>No reviews yet.</Text>
+				) : (
+					reviews.map((review) => (
+						<View key={review.id} style={styles.reviewItem}>
+							<View style={styles.reviewProfilePicture}>
+								<View style={[styles.profile, styles.profilePlaceholder]}>
+									<Ionicons name="person-outline" size={22} color="grey" />
+								</View>
+
+								{/* Allt till höger om bilden — namn, rating OCH kommentar — i samma kolumn */}
+								<View style={styles.reviewContent}>
+									<Text style={styles.reviewAuthor}>
+										{review.profiles?.display_name ?? review.profiles?.username ?? 'Unknown user'}
+									</Text>
+									<Text style={styles.reviewRating}>Rating: {review.rating}</Text>
+									{review.comment ? <Text style={styles.reviewComment}>{review.comment}</Text> : null}
+								</View>
+							</View>
+						</View>
+					))
+				)}
+			</View>
 		</ScrollView>
 	);
 }
@@ -183,7 +219,7 @@ const styles = StyleSheet.create({
 	},
 	imageWrapper: {
 		width: '100%',
-		height: '70%',
+		aspectRatio: 4 / 3,
 		borderRadius: radius.md,
 		overflow: 'hidden',
 		position: 'relative',
@@ -219,22 +255,78 @@ const styles = StyleSheet.create({
 		fontWeight: type.buttonText.fontWeight,
 	},
 	directionsButton: {
-	flexDirection: 'row',
-	alignItems: 'center',
-	alignSelf: 'flex-start',
-	gap: 6,
-	backgroundColor: colors.greenButtonBackground,
-	borderRadius: radius.pill,
-	paddingHorizontal: spacing.md,
-	paddingVertical: spacing.sm,
-	marginTop: spacing.sm,
-},
-directionsText: {
-	color: colors.text,
-	fontSize: type.buttonText.fontSize,
-	fontWeight: type.buttonText.fontWeight,
-},
+		flexDirection: 'row',
+		alignItems: 'center',
+		alignSelf: 'flex-start',
+		gap: 6,
+		backgroundColor: colors.greenButtonBackground,
+		borderRadius: radius.pill,
+		paddingHorizontal: spacing.md,
+		paddingVertical: spacing.sm,
+		marginTop: spacing.sm,
+	},
+	directionsText: {
+		color: colors.text,
+		fontSize: type.buttonText.fontSize,
+		fontWeight: type.buttonText.fontWeight,
+	},
 
-
+	reviewItem: {
+		marginTop: spacing.sm,
+		padding: spacing.sm,
+		backgroundColor: colors.cardBackground,
+		borderRadius: radius.md,
+	},
+	reviewAuthor: {
+		fontSize: type.body.fontSize,
+		fontWeight: 600,
+	},
+	reviewRating: {
+		fontSize: type.body.fontSize,
+		fontWeight: 600,
+	},
+	reviewComment: {
+		fontSize: type.caption.fontSize,
+		color: colors.textMuted,
+	},
+	reviewContainer: {
+		
+	},
+	// ratingBadge: {
+	// 	position: 'absolute',
+	// 	// bottom: 6,
+	// 	// left: 6,
+	// 	flexDirection: 'row',
+	// 	alignItems: 'center',
+	// 	backgroundColor: colors.buttonBackground,
+	// 	borderRadius: 12,
+	// 	paddingHorizontal: 7,
+	// 	paddingVertical: 3,
+	// 	gap: 3,
+	// },
+	// ratingText: {
+	// 	fontSize: 11,
+	// 	fontWeight: '600',
+	// 	color: colors.text,
+	// },
+	profile: {
+		width: 50,
+		height: 50,
+		borderRadius: radius.pill,
+	},
+	profilePlaceholder: {
+		backgroundColor: 'lightgrey',
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	reviewProfilePicture: {
+		flexDirection: 'row',
+		gap: spacing.sm, // eller vad du redan har där
+	},
+	reviewContent: {
+		flex: 1,
+		flexShrink: 1,
+		paddingRight: spacing.sm,
+	},
 
 });
