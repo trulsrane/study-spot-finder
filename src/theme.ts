@@ -28,6 +28,7 @@ export const colors = {
   busynessUnknown: '#D9D9D9',
   buttonBackground: '#fff',
   greenButtonBackground: '#B8CB9E',
+  cardBackground: '#fff',
   
 };
 
