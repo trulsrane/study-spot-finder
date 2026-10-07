@@ -1,9 +1,12 @@
-import { useMemo } from 'react';
+//import { useMemo } from 'react';
 import { usePlaces } from '@/src/hooks/usePlaces';
-import { useNearbyPlaces } from '@/src/hooks/useNearbyPlaces';
+//import { useNearbyPlaces } from '@/src/hooks/useNearbyPlaces';
 
-// Kombinerar våra platser från databasen med närliggande platser från Google Places.
 export function useMapPlaces() {
+	return usePlaces();
+}
+
+/*export function useMapPlaces() {
   const { places: dbPlaces, loading: dbLoading, error: dbError } = usePlaces();
   const { places: googlePlaces, loading: googleLoading, error: googleError } = useNearbyPlaces();
 
@@ -14,3 +17,4 @@ export function useMapPlaces() {
 
   return { places, loading, error };
 }
+*/

@@ -33,6 +33,10 @@ export default function RootLayout() {
             headerShown: false
           }}
         />
+		<Stack.Screen
+		  name="place/newPlace"
+		  options={{ presentation: 'modal', title:'Insert new place' }}
+		/>
       </Stack>
     </SessionProvider>
   );

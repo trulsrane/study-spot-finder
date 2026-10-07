@@ -3,6 +3,7 @@ import { supabase } from '@/src/utils/supabase';
 import { Place } from '@/src/types/db';
 import { Database } from '@/src/types/database.types';
 import { Coords } from '@/src/hooks/useUserLocation';
+import {useCallback} from 'react';
 
 type NearbyRow = Database['public']['Functions']['places_nearby']['Returns'][number];
 
@@ -14,6 +15,10 @@ export function usePlaces(coords?: Coords | null, radiusMeters?: number) {
   const [places, setPlaces] = useState<PlaceWithDistance[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // reloadKey används för att kunna trigga en ny hämtning av platserna när användaren trycker på "reload" i listan.
+  const [reloadKey, setReloadKey] = useState(0);
+  const refetch = useCallback(() => setReloadKey((k) => k + 1), []);
 
   // Plockar ut talen så att effekten inte körs om varje gång skärmen skickar in ett nytt coords-objekt
   const lat = coords?.latitude;
@@ -52,7 +57,7 @@ export function usePlaces(coords?: Coords | null, radiusMeters?: number) {
     })();
 
     return () => { cancelled = true; };
-  }, [lat, lng, radiusMeters]);
+  }, [lat, lng, radiusMeters,reloadKey]);
 
-  return { places, loading, error }; // returnerar en lista med alla platser (med avstånd om en position skickats in), samt laddningsstatus och eventuellt felmeddelande
+  return { places, loading, error, refetch }; // returnerar en lista med alla platser (med avstånd om en position skickats in), samt laddningsstatus och eventuellt felmeddelande
 }
