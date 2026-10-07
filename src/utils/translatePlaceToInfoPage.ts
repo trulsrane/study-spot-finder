@@ -16,27 +16,28 @@ const amenityIconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
 };
 
 const amenityLabelMap: Record<string, string> = {
-	outlets: 'Eluttag',
+	outlets: 'Outlets',
 	wifi: 'WiFi',
-	coffee: 'Kaffe',
-	group: 'Grupprum',
-	quiet: 'Tyst plats',
-	daylight: 'Dagsljus',
-	discount: 'Studentabatt',
-	food: 'Mat',
+	coffee: 'Coffee',
+	group: 'Group rooms',
+	quiet: 'Quiet place',
+	daylight: 'Daylight',
+	discount: 'Student discount',
+	food: 'Food',
 };
 
 const levelOfBusynessMap: Record<string, string> = {
-	low: 'LUGNT',
-	medium: 'MÅTTLIGT',
-	high: 'HÖGT TEMPO',
-	unknown: 'OKÄNT LÄGE',
+	low: 'LOW',
+	medium: 'MEDIUM',
+	high: 'HIGH',
+	unknown: 'UNKNOWN',
 };
 
 export function translatePlaceToInfoPage(place: Place) {
 	return {
 		title: place.name,
-		status: place.opening_hours ?? 'Öppet',
+		status: place.opening_hours ?? 'Open',
+		level: place.current_busyness ?? 'unknown',
 
 		amenities: place.amenities.map((key) => ({
 			key,

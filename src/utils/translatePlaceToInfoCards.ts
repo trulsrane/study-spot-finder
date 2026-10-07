@@ -16,10 +16,10 @@ const amenityIconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
 };
 
 const levelOfBusynessMap: Record<string, string> = {
-	low: 'LUGNT',
-	medium: 'MÅTTLIGT',
-	high: 'HÖGT TEMPO',
-	unknown: 'OKÄNT LÄGE',
+	low: 'LOW',
+	medium: 'MEDIUM',
+	high: 'HIGH',
+	unknown: 'UNKNOWN',
 };
 
 // 350 m under en kilometer, annars 1,2 km
@@ -32,7 +32,8 @@ function formatDistance(meters: number) {
 export function translatePlaceToInfoCards(place: Place & { distance_meters?: number | null }) {
 	return {
 		title: place.name,
-		status: place.opening_hours ?? 'Öppet',
+		status: place.opening_hours ?? 'Open',
+		level: place.current_busyness ?? 'unknown',
 		distance: place.distance_meters != null ? formatDistance(place.distance_meters) : undefined,
 
 		amenities: place.amenities.map((key) => ({

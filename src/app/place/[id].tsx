@@ -8,7 +8,12 @@ import { Ionicons } from '@expo/vector-icons';
 import {openDirections} from '@/src/utils/openDirections';
 
 
-
+const tagColorMap: Record<string, string> = {
+	low: colors.busynessLow,
+	medium: colors.busynessMedium,
+	high: colors.busynessHigh,
+	unknown: colors.busynessUnknown,
+};
 // Panelen som dras upp från kartan. Egen fil från listans detaljsida, så de kan visa olika saker framöver.
 export default function PlaceScreen() {
 	const { id } = useLocalSearchParams<{ id: string }>();
@@ -22,7 +27,8 @@ export default function PlaceScreen() {
 	if (!place) return <Text style={styles.missing}>Hittade ingen plats med id {id}</Text>;
 
 	const amenities = translatePlaceToInfoPage(place).amenities ?? [];
-	const tag = translatePlaceToInfoPage(place).busyness ?? '—';
+	const busyness = translatePlaceToInfoPage(place).busyness ?? '—';
+	const level = translatePlaceToInfoPage(place).level ?? 'unknown';
 
 
 	return (
@@ -37,13 +43,13 @@ export default function PlaceScreen() {
 
 				{/* Knappen är inte klickbar än, onPress senare? */}
 				<TouchableOpacity style={styles.checkInButton}>
-					<Text style={styles.checkInText}>Checka in</Text>
+					<Text style={styles.checkInText}>Check in</Text>
 				</TouchableOpacity>
 			</View>
 
 			{/* Busyness, placerad längst upp i det vänstra hörnet, på bilden */}
-			<View style={styles.tag}>
-				<Text style={styles.tagText}>{tag}</Text>
+			<View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
+				<Text style={styles.tagText}>{busyness}</Text>
 			</View>
 
 
@@ -58,7 +64,7 @@ export default function PlaceScreen() {
 					style={styles.directionsButton}
 					onPress={() => openDirections(DbPlace.latitude, DbPlace.longitude)}
 				>
-					<Ionicons name="navigate-outline" size={16} color="#fff" />
+					<Ionicons name="navigate-outline" size={16} color={colors.icon} />
 					<Text style={styles.directionsText}>Vägbeskrivning</Text>
 				</TouchableOpacity>
 			)}
@@ -70,7 +76,7 @@ export default function PlaceScreen() {
 				{amenities.map((a) => (
 					<View key={a.key} style={styles.amenityPill}>
 						<View style={styles.amenityCircle}>
-							<Ionicons name={a.icon} size={13} color="#000" />
+							<Ionicons name={a.icon} size={13} color={colors.icon} />
 						</View>
 						<Text style={styles.amenityLabel}>{a.label}</Text>
 
@@ -79,22 +85,22 @@ export default function PlaceScreen() {
 			</View>
 
 
-			<Text style={styles.row}>Öppettider: {place.opening_hours ?? '—'}</Text>
+			<Text style={styles.row}>Opening hours: {place.opening_hours ?? '—'}</Text>
 
-			<Text style={styles.row}>Uppdaterad: {place.busyness_updated_at ?? '—'}</Text>
+			<Text style={styles.row}>Updated: {place.busyness_updated_at ?? '—'}</Text>
 
 
 			{/* Skriver här så länge */}
 			{/* Behöver ändra i Place-typen för at lägga till info om platsen */}
 			{/* Osäker på hur man löser det med populära tiden och recensioner... */}
-			<Text style={styles.rowTitle}>Info om platsen:</Text>
-			<Text style={styles.row}>Fin plats med gott kaffe och fika✨</Text>
+			<Text style={styles.rowTitle}>Info about the place:</Text>
+			<Text style={styles.row}>✨✨✨✨✨✨✨✨✨✨✨✨✨</Text>
 
 			{/* Fyll denna med info om populära tider */}
-			<Text style={styles.rowTitle}>Populära tider:</Text>
+			<Text style={styles.rowTitle}>Popular times:</Text>
 
 
-			<Text style={styles.rowTitle}>Recensioner:</Text>
+			<Text style={styles.rowTitle}>Reviews:</Text>
 			{/* Ska koppla till recensioner */}
 		</ScrollView>
 	);
@@ -143,19 +149,19 @@ const styles = StyleSheet.create({
 	amenityPill: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		borderRadius: 12,
+		borderRadius: radius.pill,
 	},
 	amenityLabel: {
-		fontSize: 10,
-		fontWeight: '600',
+		fontSize: type.amenityLabel.fontSize,
+		fontWeight: type.amenityLabel.fontWeight,
 		color: colors.textMuted,
 		paddingLeft: 2,
 	},
 	amenityCircle: {
 		width: 28,
 		height: 28,
-		borderRadius: 14,
-		backgroundColor: 'lightgrey',
+		borderRadius: radius.pill,
+		backgroundColor: colors.amenityCircle,
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
@@ -164,22 +170,21 @@ const styles = StyleSheet.create({
 		position: 'absolute',
 		top: 28,
 		left: 35,
-		backgroundColor: '#fff',
-		borderRadius: 14,
+		borderRadius: radius.pill,
 		paddingHorizontal: 12,
 		paddingVertical: 5,
 		marginTop: 8,
 
 	},
 	tagText: {
-		fontSize: 12,
-		fontWeight: '700',
-		color: '#000',
+		fontSize: type.tag.fontSize,
+		fontWeight: type.tag.fontWeight,
+		color: colors.text,
 	},
 	imageWrapper: {
 		width: '100%',
 		height: '70%',
-		borderRadius: 12,
+		borderRadius: radius.md,
 		overflow: 'hidden',
 		position: 'relative',
 	},
@@ -188,6 +193,8 @@ const styles = StyleSheet.create({
 		height: '100%',
 	},
 	imagePlaceholder: {
+		//kan ha denna så länge
+		//ska vara en bild senare
 		backgroundColor: 'lightgrey',
 		alignItems: 'center',
 		justifyContent: 'center',
@@ -200,32 +207,32 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 		gap: 6,
-		backgroundColor: '#fff',
-		borderRadius: 18,
+		backgroundColor: colors.buttonBackground,
+		borderRadius: radius.lg,
 		paddingVertical: 10,
 		width: '35%',
 		marginBottom: spacing.sm,
 	},
 	checkInText: {
-		color: '#000',
-		fontSize: 14,
-		fontWeight: '700',
+		color: colors.text,
+		fontSize: type.buttonText.fontSize,
+		fontWeight: type.buttonText.fontWeight,
 	},
 	directionsButton: {
 	flexDirection: 'row',
 	alignItems: 'center',
 	alignSelf: 'flex-start',
 	gap: 6,
-	backgroundColor: colors.tint,
+	backgroundColor: colors.greenButtonBackground,
 	borderRadius: radius.pill,
 	paddingHorizontal: spacing.md,
 	paddingVertical: spacing.sm,
 	marginTop: spacing.sm,
 },
 directionsText: {
-	color: '#fff',
-	fontSize: 14,
-	fontWeight: '700',
+	color: colors.text,
+	fontSize: type.buttonText.fontSize,
+	fontWeight: type.buttonText.fontWeight,
 },
 
 
