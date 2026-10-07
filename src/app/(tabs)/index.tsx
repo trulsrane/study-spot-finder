@@ -1,15 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import ClusteredMapView from 'react-native-map-clustering';
-import MapView, { Marker, Region } from 'react-native-maps';
+import MapView, { LatLng, Marker, Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMapPlaces } from '@/src/hooks/useMapPlaces';
 import { useUserLocation } from '@/src/hooks/useUserLocation';
+import { useSession } from '@/src/hooks/useSession';
 import { FALLBACK_COORDS } from '@/src/constants';
-import { Place } from '@/src/types/db';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { colors, radius, spacing, type } from '@/src/theme';
 import { MapSearchBar } from '@/src/components/MapSearchBar';
+
+
 
 const fallbackRegion = {
   ...FALLBACK_COORDS,
@@ -20,9 +22,12 @@ const fallbackRegion = {
 export default function Map() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { places } = useMapPlaces();
+  const session = useSession();
+  const { places, refetch } = useMapPlaces();
   const { coords, loading: locationLoading } = useUserLocation();
   const [focusedId, setFocusedId] = useState<string | null>(null);
+  // Positionen för en plats som håller på att läggas till (den gröna markören)
+  const [draft, setDraft] = useState<LatLng | null>(null);
   const { focus } = useLocalSearchParams<{ focus?: string }>();
   const mapRef = useRef<MapView>(null);
 
@@ -32,6 +37,19 @@ export default function Map() {
     if (locationLoading) return null;
     return coords ? { ...coords, latitudeDelta: 0.08, longitudeDelta: 0.08 } : fallbackRegion;
   }, [locationLoading, coords]);
+
+  // Hämtar om platserna när man kommer tillbaka till kartan, t.ex. efter att ha lagt till en plats.
+  // Hoppar över första gången eftersom usePlaces redan hämtar när kartan öppnas.
+  const isFirstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (isFirstFocus.current) {
+        isFirstFocus.current = false;
+        return;
+      }
+      refetch();
+    }, [refetch])
+  );
 
   // Körs när en annan sida (t.ex. profilen) vill visa en plats på kartan.
   useEffect(() => {
@@ -65,10 +83,29 @@ export default function Map() {
     router.push({ pathname: '/place/[id]', params: { id } });
   };
 
+  // Långtryck på kartan sätter ut en grön markör där den nya platsen ska ligga
+  const startDraft = (coordinate: LatLng) => {
+    if (!session) {
+      Alert.alert('Logga in', 'Du måste vara inloggad för att lägga till en plats.');
+      return;
+    }
+    setDraft(coordinate);
+  };
+
+  // Öppnar formuläret med markörens position
+  const confirmDraft = () => {
+    if (!draft) return;
+    router.push({
+      pathname: '../place/newPlace',
+      params: { lat: String(draft.latitude), lng: String(draft.longitude) },
+    });
+    setDraft(null);
+  };
+
   return (
     <View style={styles.container}>
       <ClusteredMapView
-		clusteringEnabled={false}
+        clusteringEnabled={false}
         style={styles.map}
         showsUserLocation={locationGranted}
         showsMyLocationButton={locationGranted}
@@ -78,6 +115,7 @@ export default function Map() {
           mapRef.current = ref;
         }}
         onPress={() => setFocusedId(null)}
+        onLongPress={(e) => startDraft(e.nativeEvent.coordinate)}
         onClusterPress={(cluster, markers) => {
           const matchedIds = (markers ?? [])
             .map((marker: any) => {
@@ -86,8 +124,8 @@ export default function Map() {
                 (p) => p.latitude === coord?.latitude && p.longitude === coord?.longitude
               );
             })
-            .filter((p: Place | undefined): p is Place => Boolean(p))
-            .map((p: Place) => p.id);
+            .filter((p): p is NonNullable<typeof p> => p !== undefined)
+            .map((p) => p.id);
 
           if (router.canGoBack()) {
             router.back();
@@ -107,11 +145,35 @@ export default function Map() {
             onPress={() => openPlace(place.id)}
           />
         ))}
+
+        {draft && (
+          <Marker
+            key="draft"
+            coordinate={draft}
+            pinColor="green"
+            draggable
+            onDragEnd={(e) => setDraft(e.nativeEvent.coordinate)}
+          />
+        )}
       </ClusteredMapView>
-	  <View style={[styles.searchBar, { top: insets.top + spacing.sm }]}>
-		<MapSearchBar onSelect={(place) => router.setParams({ focus: place.id })} />
-	  </View>
-	
+
+      <View style={[styles.searchBar, { top: insets.top + spacing.sm }]}>
+        <MapSearchBar onSelect={(place) => router.setParams({ focus: place.id })} />
+      </View>
+
+      {draft && (
+        <View style={[styles.draftBar, { bottom: insets.bottom + spacing.sm }]}>
+          <Text style={styles.draftHint}>Dra markören för att justera platsen</Text>
+          <View style={styles.draftButtons}>
+            <Pressable style={[styles.draftButton, styles.cancelButton]} onPress={() => setDraft(null)}>
+              <Text style={styles.buttonText}>Avbryt</Text>
+            </Pressable>
+            <Pressable style={[styles.draftButton, styles.addButton]} onPress={confirmDraft}>
+              <Text style={styles.buttonText}>Add place</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -125,8 +187,42 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   searchBar: {
-	position: 'absolute',
-	left: spacing.md,
-	right: spacing.md,
+    position: 'absolute',
+    left: spacing.md,
+    right: spacing.md,
+  },
+  draftBar: {
+    position: 'absolute',
+    left: spacing.md,
+    right: spacing.md,
+    backgroundColor: colors.buttonBackground,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  draftHint: {
+    ...type.caption,
+    color: colors.textMuted,
+    textAlign: 'center',
+  },
+  draftButtons: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  draftButton: {
+    flex: 1,
+    paddingVertical: spacing.sm + 4,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: colors.background,
+  },
+  addButton: {
+    backgroundColor: colors.greenButtonBackground,
+  },
+  buttonText: {
+    ...type.buttonText,
+    color: colors.text,
   },
 });
