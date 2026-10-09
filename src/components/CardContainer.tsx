@@ -37,8 +37,8 @@ type CardProps = {
 const IMAGE_SIZE = 120;
 
 export function Card({
-	title = 'Platsens namn',
-	status = 'Öppet',
+	title = 'Place name',
+	status = 'Open',
 	distance,
 	level,
 	busyness = 'LUGNT',

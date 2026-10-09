@@ -14,7 +14,7 @@ export default function ClusterListScreen() {
   const router = useRouter();
   const { places,loading } = useMapPlaces();
   if (loading) {
-  return <Text style={styles.cardSubtitle}>Laddar platser...</Text>;
+  return <Text style={styles.cardSubtitle}>Loading places...</Text>;
 }
   
 

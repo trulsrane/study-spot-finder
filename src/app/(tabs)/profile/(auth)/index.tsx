@@ -21,15 +21,15 @@ export default function ProfilePage() {
 	const loading = profileLoading || placesLoading || favoritesLoading;
 	const error = profileError ?? placesError ?? favoritesError;
 
-	if (loading) return <Text style={styles.message}>Laddar...</Text>;
+	if (loading) return <Text style={styles.message}>Loading...</Text>;
 	if (error) return <Text style={styles.message}>{error}</Text>;
-	if (!profile) return <Text style={styles.message}>Hittade ingen profil</Text>;
+	if (!profile) return <Text style={styles.message}>No profile found</Text>;
 
   	return (
 		<ScrollView style={styles.container}>
 			<View style={styles.buttonContainer}>
 				<Button title="Edit Profile" onPress={() => router.push('/profile/edit')} />
-				<Button title="Logga ut" onPress={() => supabase.auth.signOut()} />
+				<Button title="Log out" onPress={() => supabase.auth.signOut()} />
 			</View>
 			<View style={styles.profileinfo}>{profile.avatar_url && (
 				<Image
