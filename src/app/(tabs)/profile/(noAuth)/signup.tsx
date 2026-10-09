@@ -7,13 +7,13 @@ export default function SignUpScreen() {
   return (
     <View style={styles.container}>
       <Text>E-mail</Text>
-      <TextInput placeholder="E-post" value={email} onChangeText={setEmail}
+      <TextInput placeholder="Email" value={email} onChangeText={setEmail}
         autoCapitalize="none" keyboardType="email-address" style={styles.input} />
       <Text>Username</Text>
-      <TextInput placeholder="Användarnamn" value={username} onChangeText={setUsername}
+      <TextInput placeholder="Username" value={username} onChangeText={setUsername}
         autoCapitalize="none" style={styles.input} />
       <Text>Password</Text>
-      <TextInput placeholder="Lösenord" value={password} onChangeText={setPassword}
+      <TextInput placeholder="Password" value={password} onChangeText={setPassword}
         secureTextEntry autoCapitalize="none" style={styles.input} />
       <TouchableOpacity disabled={loading} onPress={signUpWithEmail} style={styles.button}>
         <Text>Sign up</Text>

@@ -30,7 +30,7 @@ export function useNearbyPlaces(): PlacesResult {
         const result = await fetchNearbyStudySpots(latitude, longitude);
         setPlaces(result);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Något gick fel');
+        setError(err instanceof Error ? err.message : 'Something went wrong');
       } finally {
         setLoading(false);
       }

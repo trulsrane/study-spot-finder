@@ -26,6 +26,10 @@ export const colors = {
   busynessMedium: '#EDDAC2',
   busynessHigh: '#E8CDD5',
   busynessUnknown: '#D9D9D9',
+  // Starkare varianter för små prickar på kartan, där pastellfärgerna ovan blir för bleka
+  busynessDotLow: '#6FA04A',
+  busynessDotMedium: '#E0A040',
+  busynessDotHigh: '#C74068',
   buttonBackground: '#fff',
   greenButtonBackground: '#B8CB9E',
   cardBackground: '#fff',

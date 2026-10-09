@@ -20,7 +20,7 @@ export default function NewPlaceScreen() {
   const [floor, setFloor] = useState('');
   const [openingHours, setOpeningHours] = useState('');
 
-  // Föreslår en adress utifrån koordinaterna med telefonens inbyggda geocoder (gratis, ingen API-nyckel)
+  // Föreslår en adress utifrån koordinaterna med telefonens inbyggda geocoder 
   useEffect(() => {
     let cancelled = false;
     Location.reverseGeocodeAsync({ latitude, longitude })
@@ -58,20 +58,20 @@ export default function NewPlaceScreen() {
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      <Field label="Namn *" value={name} onChangeText={setName} placeholder="t.ex. Läsesalen plan 2" />
-      <Field label="Adress" value={address} onChangeText={setAddress} placeholder="Hämtar adress..." />
-      <Field label="Byggnad" value={building} onChangeText={setBuilding} />
-      <Field label="Våning" value={floor} onChangeText={setFloor} />
-      <Field label="Öppettider" value={openingHours} onChangeText={setOpeningHours} placeholder="t.ex. 08–20" />
+      <Field label="Name *" value={name} onChangeText={setName} placeholder="e.g. Reading room, floor 2" />
+      <Field label="Address" value={address} onChangeText={setAddress} placeholder="Fetching address..." />
+      <Field label="Building" value={building} onChangeText={setBuilding} />
+      <Field label="Floor" value={floor} onChangeText={setFloor} />
+      <Field label="Opening hours" value={openingHours} onChangeText={setOpeningHours} placeholder="e.g. 08–20" />
 
-      {error && <Text style={styles.error}>Kunde inte spara: {error}</Text>}
+      {error && <Text style={styles.error}>Could not save: {error}</Text>}
 
       <Pressable
         style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}
         onPress={handleSave}
         disabled={!canSave}
       >
-        <Text style={styles.saveButtonText}>{saving ? 'Sparar...' : 'Spara plats'}</Text>
+        <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Save place'}</Text>
       </Pressable>
     </ScrollView>
   );

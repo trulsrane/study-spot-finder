@@ -16,7 +16,7 @@ export default function useAuth() {
   }
 
   async function signUpWithEmail() {
-    if (!username.trim()) return Alert.alert('Välj ett användarnamn')
+    if (!username.trim()) return Alert.alert('Choose a username')
     setLoading(true)
     // username sparas i användarens metadata, och en trigger i databasen skapar profilen utifrån den
     const { data: { session }, error } = await supabase.auth.signUp({
@@ -25,7 +25,7 @@ export default function useAuth() {
       options: { data: { username: username.trim() } },
     })
     if (error) Alert.alert(error.message)
-    else if (!session) Alert.alert('Kolla din inkorg för att verifiera e-posten!')
+    else if (!session) Alert.alert('Check your inbox to verify your email!')
     setLoading(false)
   }
 

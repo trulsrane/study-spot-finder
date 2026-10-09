@@ -24,7 +24,7 @@ export default function PlaceScreen() {
 	const { reviews, averageRating, count, loading: reviewsLoading, error: reviewsError, submitReview, submitting } = useReviews(id);
 
 	const place = DbPlace ?? googlePlace;
-	if (loading && !place) return <Text style={styles.missing}>Laddar plats...</Text>;
+	if (loading && !place) return <Text style={styles.missing}>Loading place...</Text>;
 	if (!place) return <Text style={styles.missing}>Hittade ingen plats med id {id}</Text>;
 
 
@@ -68,7 +68,7 @@ export default function PlaceScreen() {
 					onPress={() => openDirections(DbPlace.latitude, DbPlace.longitude)}
 				>
 					<Ionicons name="navigate-outline" size={16} color={colors.icon} />
-					<Text style={styles.directionsText}>Vägbeskrivning</Text>
+					<Text style={styles.directionsText}>Directions</Text>
 				</TouchableOpacity>
 			)}
 

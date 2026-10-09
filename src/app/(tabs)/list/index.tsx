@@ -36,7 +36,7 @@ export default function List() {
   const loading = placesLoading || favoritesLoading;
   const error = placesError ?? favoritesError;
 
-  if (loading) return <Text style={styles.message}>Laddar...</Text>;
+  if (loading) return <Text style={styles.message}>Loading...</Text>;
   if (error) return <Text style={styles.message}>{error}</Text>;
 
   return (

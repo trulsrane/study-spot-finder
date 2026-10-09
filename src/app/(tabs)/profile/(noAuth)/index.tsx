@@ -6,9 +6,9 @@ export default function LoginScreen() {
   const { email, setEmail, password, setPassword, loading, signInWithEmail } = useAuth()
   return (
     <View style={styles.container}>
-      <TextInput placeholder="E-post" value={email} onChangeText={setEmail}
+      <TextInput placeholder="Email" value={email} onChangeText={setEmail}
         autoCapitalize="none" keyboardType="email-address" style={styles.input} />
-      <TextInput placeholder="Lösenord" value={password} onChangeText={setPassword}
+      <TextInput placeholder="Password" value={password} onChangeText={setPassword}
         secureTextEntry autoCapitalize="none" style={styles.input} />
       <TouchableOpacity disabled={loading} onPress={signInWithEmail} style={styles.button}>
         <Text>Log in</Text>
