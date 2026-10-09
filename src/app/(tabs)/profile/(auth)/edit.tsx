@@ -48,7 +48,7 @@ export default function editProfilePage() {
 		else router.back();
 	}
 
-	if (loading) return <Text style={styles.message}>Laddar...</Text>;
+	if (loading) return <Text style={styles.message}>Loading...</Text>;
 	if (error) return <Text style={styles.message}>{error}</Text>;
 
 	return (

@@ -37,7 +37,7 @@ export function useProfile() {
 
   // Returnerar ett felmeddelande, eller null om det gick bra.
   async function updateProfile(updates: ProfileUpdate) {
-    if (!userId) return 'Du måste vara inloggad';
+    if (!userId) return 'You need to be logged in';
     const { error } = await supabase
       .from('profiles')
       .update(updates)

@@ -126,7 +126,7 @@ export function MapSearchBar({ onSelect }: Props) {
 
       {showNoResults && (
         <View style={styles.results}>
-          <Text style={styles.noResults}>Inga träffar</Text>
+          <Text style={styles.noResults}>No results</Text>
         </View>
       )}
     </View>

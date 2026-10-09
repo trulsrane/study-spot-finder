@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import ClusteredMapView from 'react-native-map-clustering';
+import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import MapView, { LatLng, Marker, Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { Host, Image } from '@expo/ui/swift-ui';
+import { accessibilityLabel, frame, glassEffect, onTapGesture } from '@expo/ui/swift-ui/modifiers';
 import { useMapPlaces } from '@/src/hooks/useMapPlaces';
 import { useUserLocation } from '@/src/hooks/useUserLocation';
 import { useSession } from '@/src/hooks/useSession';
@@ -10,8 +12,13 @@ import { FALLBACK_COORDS } from '@/src/constants';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { colors, radius, spacing, type } from '@/src/theme';
 import { MapSearchBar } from '@/src/components/MapSearchBar';
+import { PlaceMarker } from '@/src/components/PlaceMarker';
+import { MapCompass } from '@/src/components/MapCompass';
 
-
+// Storlek på de runda knapparna nere på kartan (kompassen och plus-knappen)
+const MAP_BUTTON_SIZE = 56;
+// Ungefärlig höjd på kartans logga och "Legal"-länk längst ner
+const MAP_ATTRIBUTION_HEIGHT = 28;
 
 const fallbackRegion = {
   ...FALLBACK_COORDS,
@@ -28,8 +35,22 @@ export default function Map() {
   const [focusedId, setFocusedId] = useState<string | null>(null);
   // Positionen för en plats som håller på att läggas till (den gröna markören)
   const [draft, setDraft] = useState<LatLng | null>(null);
+  // Hur många grader kartan är vriden från norr, används för att snurra kompassen
+  const [heading, setHeading] = useState(0);
   const { focus } = useLocalSearchParams<{ focus?: string }>();
   const mapRef = useRef<MapView>(null);
+  // Sätts när den native kartan är klar. Innan dess kraschar anrop som getCamera().
+  const mapReady = useRef(false);
+
+  // Hämtar kartans kamera (mitt, vridning osv.), eller null om kartan inte är redo
+  const getCameraSafely = async () => {
+    if (!mapReady.current || !mapRef.current) return null;
+    try {
+      return await mapRef.current.getCamera();
+    } catch {
+      return null;
+    }
+  };
 
   const locationGranted = coords !== null;
   // useMemo så att initialRegion inte blir ett nytt objekt varje render (den används i fokus-effekten nedan)
@@ -77,6 +98,8 @@ export default function Map() {
   }
 
   const openPlace = (id: string) => {
+    // Markören för platsen visas större tills man trycker någon annanstans på kartan
+    setFocusedId(id);
     if (router.canGoBack()) {
       router.back();
     }
@@ -86,11 +109,33 @@ export default function Map() {
   // Långtryck på kartan sätter ut en grön markör där den nya platsen ska ligga
   const startDraft = (coordinate: LatLng) => {
     if (!session) {
-      Alert.alert('Logga in', 'Du måste vara inloggad för att lägga till en plats.');
+      Alert.alert('Log in', 'You need to be logged in to add a place.');
       return;
     }
     setDraft(coordinate);
   };
+
+  // Plus-knappen sätter ut markören mitt på den del av kartan som syns just nu
+  const startDraftAtCenter = async () => {
+    const camera = await getCameraSafely();
+    if (camera) startDraft(camera.center);
+  };
+
+  // Läser av kartans vridning medan man rör kartan
+  const updateHeading = async () => {
+    const camera = await getCameraSafely();
+    if (camera) setHeading(camera.heading);
+  };
+
+
+  // Kompassen sätts till norr direkt så att den inte hänger efter medan kartan snurrar tillbaka.
+  const resetNorth = () => {
+    setHeading(0);
+    mapRef.current?.animateCamera({ heading: 0, pitch: 0 }, { duration: 300 });
+  };
+
+  // Knapparna lyfts över kartans logga och "Legal"-länken längst ner, som inte får täckas
+  const mapButtonBottom = insets.bottom + MAP_ATTRIBUTION_HEIGHT + spacing.sm;
 
   // Öppnar formuläret med markörens position
   const confirmDraft = () => {
@@ -104,44 +149,28 @@ export default function Map() {
 
   return (
     <View style={styles.container}>
-      <ClusteredMapView
-        clusteringEnabled={false}
+      <MapView
+        ref={mapRef}
         style={styles.map}
         showsUserLocation={locationGranted}
         showsMyLocationButton={locationGranted}
+        // Den inbyggda kompassen går inte att flytta, så vi visar en egen till vänster
+        showsCompass={false}
+        onRegionChange={updateHeading}
+        // Läser av en sista gång när kartan stannat, så att kompassen alltid visar rätt till slut
+        onRegionChangeComplete={updateHeading}
         initialRegion={initialRegion}
-        radius={60}
-        mapRef={(ref: any) => {
-          mapRef.current = ref;
+        onMapReady={() => {
+          mapReady.current = true;
         }}
         onPress={() => setFocusedId(null)}
         onLongPress={(e) => startDraft(e.nativeEvent.coordinate)}
-        onClusterPress={(cluster, markers) => {
-          const matchedIds = (markers ?? [])
-            .map((marker: any) => {
-              const coord = marker.properties?.coordinate;
-              return places.find(
-                (p) => p.latitude === coord?.latitude && p.longitude === coord?.longitude
-              );
-            })
-            .filter((p): p is NonNullable<typeof p> => p !== undefined)
-            .map((p) => p.id);
-
-          if (router.canGoBack()) {
-            router.back();
-          }
-          router.push({
-            pathname: '/place/cluster',
-            params: { ids: matchedIds.join(',') },
-          });
-        }}
       >
         {places.map((place) => (
-          <Marker
+          <PlaceMarker
             key={place.id}
-            coordinate={{ latitude: place.latitude, longitude: place.longitude }}
-            title={place.name}
-            description={place.address ?? undefined}
+            place={place}
+            selected={place.id === focusedId}
             onPress={() => openPlace(place.id)}
           />
         ))}
@@ -155,18 +184,54 @@ export default function Map() {
             onDragEnd={(e) => setDraft(e.nativeEvent.coordinate)}
           />
         )}
-      </ClusteredMapView>
+      </MapView>
+
+      {/* Kompass nere till vänster, i höjd med plus-knappen. Döljs när panelen för ny plats visas. */}
+      {!draft && (
+        <MapCompass
+          heading={heading}
+          size={MAP_BUTTON_SIZE}
+          onPress={resetNorth}
+          style={[styles.compass, { bottom: mapButtonBottom }]}
+        />
+      )}
 
       <View style={[styles.searchBar, { top: insets.top + spacing.sm }]}>
         <MapSearchBar onSelect={(place) => router.setParams({ focus: place.id })} />
       </View>
 
+      {!draft &&
+        (Platform.OS === 'ios' ? (
+          // Liquid Glass-knapp, samma stil som sökfältet och tab-baren
+          <Host matchContents style={[styles.addPlaceButtonHost, { bottom: mapButtonBottom }]}>
+            <Image
+              systemName="plus"
+              size={22}
+              color={colors.text}
+              modifiers={[
+                frame({ width: MAP_BUTTON_SIZE, height: MAP_BUTTON_SIZE }),
+                glassEffect({ glass: { variant: 'regular', interactive: true }, shape: 'circle' }),
+                accessibilityLabel('Add place'),
+                onTapGesture(startDraftAtCenter),
+              ]}
+            />
+          </Host>
+        ) : (
+          <Pressable
+            style={[styles.addPlaceButton, { bottom: mapButtonBottom }]}
+            onPress={startDraftAtCenter}
+            accessibilityLabel="Add place"
+          >
+            <Ionicons name="add" size={28} color={colors.text} />
+          </Pressable>
+        ))}
+
       {draft && (
-        <View style={[styles.draftBar, { bottom: insets.bottom + spacing.sm }]}>
-          <Text style={styles.draftHint}>Dra markören för att justera platsen</Text>
+        <View style={[styles.draftBar, { bottom: mapButtonBottom }]}>
+          <Text style={styles.draftHint}>Drag the marker to adjust the location</Text>
           <View style={styles.draftButtons}>
             <Pressable style={[styles.draftButton, styles.cancelButton]} onPress={() => setDraft(null)}>
-              <Text style={styles.buttonText}>Avbryt</Text>
+              <Text style={styles.buttonText}>Cancel</Text>
             </Pressable>
             <Pressable style={[styles.draftButton, styles.addButton]} onPress={confirmDraft}>
               <Text style={styles.buttonText}>Add place</Text>
@@ -190,6 +255,29 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: spacing.md,
     right: spacing.md,
+  },
+  compass: {
+    position: 'absolute',
+    left: spacing.md,
+  },
+  addPlaceButtonHost: {
+    position: 'absolute',
+    right: spacing.md,
+  },
+  addPlaceButton: {
+    position: 'absolute',
+    right: spacing.md,
+    width: MAP_BUTTON_SIZE,
+    height: MAP_BUTTON_SIZE,
+    borderRadius: radius.pill,
+    backgroundColor: colors.greenButtonBackground,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
   },
   draftBar: {
     position: 'absolute',
