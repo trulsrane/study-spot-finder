@@ -7,6 +7,8 @@ import { translatePlaceToInfoPage } from '@/src/utils/translatePlaceToInfoPage';
 import { Ionicons } from '@expo/vector-icons';
 import { openDirections } from '@/src/utils/openDirections';
 import { useReviews } from '@/src/hooks/useReviews';
+import { useSession } from '@/src/hooks/useSession';
+import { useCheckIns } from '@/src/hooks/useCheckIns';
 
 const tagColorMap: Record<string, string> = {
 	low: colors.busynessLow,
@@ -17,22 +19,25 @@ const tagColorMap: Record<string, string> = {
 // Panelen som dras upp från kartan. Egen fil från listans detaljsida, så de kan visa olika saker framöver.
 export default function PlaceScreen() {
 	const { id } = useLocalSearchParams<{ id: string }>();
-	const { places } = usePlaces();
+	const { places, loading: placesLoading, error: placesError } = usePlaces();
 	const DbPlace = places.find((p) => p.id === id);
 
-	const { place: googlePlace, loading } = useNearbyPlace(id);
+	const { place: googlePlace, loading: googlePlacesLoading, error: googlePlacesError } = useNearbyPlace(id);
 	const { reviews, averageRating, count, loading: reviewsLoading, error: reviewsError, submitReview, submitting } = useReviews(id);
+	const { checkIn, checkOut, myCheckIn, saving, loading: checkInsLoading, error: checkInsError } = useCheckIns(DbPlace?.id);
 
 	const place = DbPlace ?? googlePlace;
+	const loading = placesLoading || reviewsLoading || checkInsLoading || googlePlacesLoading;
+	const error = placesError ?? reviewsError ?? checkInsError ?? googlePlacesError;
 	if (loading && !place) return <Text style={styles.missing}>Loading place...</Text>;
-	if (!place) return <Text style={styles.missing}>Hittade ingen plats med id {id}</Text>;
+	if (error && !place) return <Text style={styles.missing}>Error loading place: {error}</Text>;
+	if (!place) return <Text style={styles.missing}>Hittade ingen plats med id {id}</Text>
 
 
 
 	const amenities = translatePlaceToInfoPage(place).amenities ?? [];
 	const busyness = translatePlaceToInfoPage(place).busyness ?? '—';
 	const level = translatePlaceToInfoPage(place).level ?? 'unknown';
-
 
 	return (
 		<ScrollView key={id} style={styles.screen} contentContainerStyle={styles.content}>
@@ -44,10 +49,19 @@ export default function PlaceScreen() {
 					<Ionicons name="image-outline" size={22} color="grey" />
 				</View>
 
-				{/* Knappen är inte klickbar än, onPress senare? */}
-				<TouchableOpacity style={styles.checkInButton}>
-					<Text style={styles.checkInText}>Check in</Text>
-				</TouchableOpacity>
+				{/* Samma knapp för båda: checkar ut om man redan är incheckad här, annars checkar den in.
+				    Visas bara för platser i databasen, Google-platser går inte att checka in på. */}
+				{DbPlace && (
+					<TouchableOpacity
+						style={styles.checkInButton}
+						onPress={myCheckIn ? checkOut : checkIn}
+						disabled={saving}
+						activeOpacity={0.8}
+					>
+						<Ionicons name={myCheckIn ? 'log-out-outline' : 'log-in-outline'} size={16} color={colors.icon} />
+						<Text style={styles.checkInText}>{myCheckIn ? 'Check out' : 'Check in'}</Text>
+					</TouchableOpacity>
+				)}
 			</View>
 
 			{/* Busyness, placerad längst upp i det vänstra hörnet, på bilden */}
