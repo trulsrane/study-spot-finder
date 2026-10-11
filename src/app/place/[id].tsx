@@ -107,11 +107,9 @@ export default function PlaceScreen() {
 			<Text style={styles.row}>Updated: {place.busyness_updated_at ?? '—'}</Text>
 
 
-			{/* Skriver här så länge */}
-			{/* Behöver ändra i Place-typen för at lägga till info om platsen */}
-			{/* Osäker på hur man löser det med populära tiden och recensioner... */}
+			{/* Texten som angavs när platsen lades till */}
 			<Text style={styles.rowTitle}>Info about the place:</Text>
-			<Text style={styles.row}>✨✨✨✨✨✨✨✨✨✨✨✨✨</Text>
+			<Text style={styles.row}>{place.description ?? 'No info about this place yet.'}</Text>
 
 			{/* Fyll denna med info om populära tider */}
 			<Text style={styles.rowTitle}>Popular times:</Text>

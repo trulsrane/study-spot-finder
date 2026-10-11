@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
+import { Ionicons } from '@expo/vector-icons';
 import { useAddPlace } from '@/src/hooks/useAddPlace';
 import { useSession } from '@/src/hooks/useSession';
 import { colors, radius, spacing, type } from '@/src/theme';
+import { amenityOptions } from '@/src/utils/translatePlaceToInfoPage';
 
 export default function NewPlaceScreen() {
   const { lat, lng } = useLocalSearchParams<{ lat: string; lng: string }>();
@@ -19,6 +21,13 @@ export default function NewPlaceScreen() {
   const [building, setBuilding] = useState('');
   const [floor, setFloor] = useState('');
   const [openingHours, setOpeningHours] = useState('');
+  const [amenities, setAmenities] = useState<string[]>([]);
+  const [description, setDescription] = useState('');
+
+  const toggleAmenity = (key: string) =>
+    setAmenities((current) =>
+      current.includes(key) ? current.filter((k) => k !== key) : [...current, key],
+    );
 
   // Föreslår en adress utifrån koordinaterna med telefonens inbyggda geocoder 
   useEffect(() => {
@@ -47,6 +56,8 @@ export default function NewPlaceScreen() {
       building: building.trim() || null,
       floor: floor.trim() || null,
       opening_hours: openingHours.trim() || null,
+      amenities,
+      description: description.trim() || null,
       created_by: userId,
     });
     if (place) router.back();
@@ -63,6 +74,41 @@ export default function NewPlaceScreen() {
       <Field label="Building" value={building} onChangeText={setBuilding} />
       <Field label="Floor" value={floor} onChangeText={setFloor} />
       <Field label="Opening hours" value={openingHours} onChangeText={setOpeningHours} placeholder="e.g. 08–20" />
+
+      {/* Samma ikoner som visas på platsens infosida, tryck för att välja/avmarkera */}
+      <View style={styles.field}>
+        <Text style={styles.label}>Amenities</Text>
+        <View style={styles.amenitiesRow}>
+          {amenityOptions.map((a) => {
+            const selected = amenities.includes(a.key);
+            return (
+              <Pressable
+                key={a.key}
+                style={[styles.amenityPill, selected && styles.amenityPillSelected]}
+                onPress={() => toggleAmenity(a.key)}
+              >
+                <View style={styles.amenityCircle}>
+                  <Ionicons name={a.icon} size={13} color={colors.icon} />
+                </View>
+                <Text style={styles.amenityLabel}>{a.label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+
+      <View style={styles.field}>
+        <Text style={styles.label}>Info about the place</Text>
+        <TextInput
+          style={[styles.input, styles.multilineInput]}
+          placeholderTextColor={colors.textMuted}
+          value={description}
+          onChangeText={setDescription}
+          placeholder="e.g. Quiet reading room with large windows"
+          multiline
+          textAlignVertical="top"
+        />
+      </View>
 
       {error && <Text style={styles.error}>Could not save: {error}</Text>}
 
@@ -118,6 +164,44 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 4,
+  },
+  multilineInput: {
+    minHeight: 100,
+  },
+  amenitiesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  amenityPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.xs,
+    paddingLeft: spacing.xs,
+    paddingRight: spacing.sm,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.buttonBackground,
+    opacity: 0.6,
+  },
+  amenityPillSelected: {
+    borderColor: colors.amenityCircle,
+    backgroundColor: colors.busynessLow,
+    opacity: 1,
+  },
+  amenityCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: radius.pill,
+    backgroundColor: colors.amenityCircle,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  amenityLabel: {
+    ...type.amenityLabel,
+    color: colors.text,
   },
   error: {
     ...type.body,

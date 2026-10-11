@@ -49,6 +49,7 @@ export async function fetchNearbyStudySpots(
     opening_hours: null,
     building: null,
     floor: null,
+    description: null,
     current_busyness: 'unknown',
     busyness_updated_at: new Date().toISOString(),
     amenities: [],
