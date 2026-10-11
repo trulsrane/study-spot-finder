@@ -143,6 +143,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           current_busyness: Database["public"]["Enums"]["busyness_level"]
+          description: string | null
           floor: string | null
           geom: unknown
           id: string
@@ -159,6 +160,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           current_busyness?: Database["public"]["Enums"]["busyness_level"]
+          description?: string | null
           floor?: string | null
           geom?: unknown
           id?: string
@@ -175,6 +177,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           current_busyness?: Database["public"]["Enums"]["busyness_level"]
+          description?: string | null
           floor?: string | null
           geom?: unknown
           id?: string

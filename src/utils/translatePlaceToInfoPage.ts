@@ -26,6 +26,13 @@ const amenityLabelMap: Record<string, string> = {
 	food: 'Food',
 };
 
+// Alla bekvämligheter man kan välja när man lägger till en plats, samma ikoner och namn som på infosidan
+export const amenityOptions = Object.keys(amenityLabelMap).map((key) => ({
+	key,
+	icon: amenityIconMap[key],
+	label: amenityLabelMap[key],
+}));
+
 const levelOfBusynessMap: Record<string, string> = {
 	low: 'LOW',
 	medium: 'MEDIUM',
