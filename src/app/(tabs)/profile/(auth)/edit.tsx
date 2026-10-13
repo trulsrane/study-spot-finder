@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { View, TextInput, Button, Image, StyleSheet, Text } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useProfile } from '../../../../hooks/useProfile';
 
 export default function editProfilePage() {
@@ -52,11 +53,11 @@ export default function editProfilePage() {
 	if (error) return <Text style={styles.message}>{error}</Text>;
 
 	return (
-		// Kommer behöva ändra Image source='' sen när vi fått upp databasen
 		<View style={styles.container}>
-			<Image source={require('@/assets/images/profile-pic.jpg')}
-				style={styles.preview}
-			/>
+			{/* Platshållare tills uppladdning av profilbilder finns */}
+			<View style={[styles.preview, styles.previewPlaceholder]}>
+				<Ionicons name="person-outline" size={80} color="grey" />
+			</View>
 			<Button title="Choose profile picture" onPress={pickImage} />
 			<TextInput style={styles.input} value={name} onChangeText={setName} placeholder='Name'/>
 			<TextInput style={styles.input} value={bio} onChangeText={setBio} placeholder='Bio'/>
@@ -73,6 +74,11 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     marginBottom: 16,
     alignSelf: 'center',
+  },
+  previewPlaceholder: {
+    backgroundColor: 'lightgrey',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   input: {
     borderWidth: 1,

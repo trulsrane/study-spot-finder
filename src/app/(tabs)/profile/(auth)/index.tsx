@@ -1,4 +1,5 @@
-import { View, Text, Image, StyleSheet, Button, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Button, ScrollView, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useProfile } from '@/src/hooks/useProfile';
 import { useRouter, Link } from 'expo-router'
 import { usePlaces } from '@/src/hooks/usePlaces';
@@ -31,12 +32,11 @@ export default function ProfilePage() {
 				<Button title="Edit Profile" onPress={() => router.push('/profile/edit')} />
 				<Button title="Log out" onPress={() => supabase.auth.signOut()} />
 			</View>
-			<View style={styles.profileinfo}>{profile.avatar_url && (
-				<Image
-					source={require('@/assets/images/profile-pic.jpg')}
-					style={styles.profilePicture}
-				/>
-			)}
+			<View style={styles.profileinfo}>
+				{/* Platshållare tills uppladdning av profilbilder finns */}
+				<View style={[styles.profilePicture, styles.profilePicturePlaceholder]}>
+					<Ionicons name="person-outline" size={80} color="grey" />
+				</View>
 				<Text style={styles.name}>{profile.username}</Text>
 				<Text style={styles.bio}>Bio: {profile.description}</Text>
 			</View>
@@ -111,6 +111,11 @@ const styles = StyleSheet.create({
 		height: 200,
 		borderRadius: 100,
 		marginBottom: 16,
+	},
+	profilePicturePlaceholder: {
+		backgroundColor: 'lightgrey',
+		alignItems: 'center',
+		justifyContent: 'center',
 	},
 	profileinfo: {
 		alignItems: 'center',
