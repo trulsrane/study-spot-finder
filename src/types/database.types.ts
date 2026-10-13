@@ -139,6 +139,7 @@ export type Database = {
           address: string | null
           amenities: string[]
           building: string | null
+          category: string | null
           busyness_updated_at: string | null
           created_at: string
           created_by: string | null
@@ -156,6 +157,7 @@ export type Database = {
           address?: string | null
           amenities?: string[]
           building?: string | null
+          category?: string | null
           busyness_updated_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -173,6 +175,7 @@ export type Database = {
           address?: string | null
           amenities?: string[]
           building?: string | null
+          category?: string | null
           busyness_updated_at?: string | null
           created_at?: string
           created_by?: string | null

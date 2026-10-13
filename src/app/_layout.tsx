@@ -34,6 +34,11 @@ export default function RootLayout() {
           }}
         />
 		<Stack.Screen
+		  name="building/[id]"
+		  // Titeln (husets namn) sätts av skärmen själv
+		  options={{ title: '', headerBackTitle: 'Map' }}
+		/>
+		<Stack.Screen
 		  name="place/newPlace"
 		  options={{ presentation: 'modal', title:'Insert new place' }}
 		/>
