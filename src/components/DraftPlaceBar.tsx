@@ -2,6 +2,8 @@ import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-n
 import { colors, radius, spacing, type } from '@/src/theme';
 
 type Props = {
+  // Instruktionen överst i panelen, beror på hur man flyttar platsen på kartan
+  hint?: string;
   onCancel: () => void;
   onConfirm: () => void;
   // Placeringen på kartan (position, left, right, bottom)
@@ -9,10 +11,10 @@ type Props = {
 };
 
 // Panelen som visas medan man placerar ut en ny plats. Används både på vanliga kartan och i planvyn för ett hus.
-export function DraftPlaceBar({ onCancel, onConfirm, style }: Props) {
+export function DraftPlaceBar({ hint = 'Drag the marker to adjust the location', onCancel, onConfirm, style }: Props) {
   return (
     <View style={[styles.bar, style]}>
-      <Text style={styles.hint}>Drag the marker to adjust the location</Text>
+      <Text style={styles.hint}>{hint}</Text>
       <View style={styles.buttons}>
         <Pressable style={[styles.button, styles.cancelButton]} onPress={onCancel}>
           <Text style={styles.buttonText}>Cancel</Text>

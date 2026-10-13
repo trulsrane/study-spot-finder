@@ -144,7 +144,14 @@ export default function BuildingScreen() {
 
       {config && !draft && <MapAddButton onPress={startDraftAtCenter} style={[styles.addButton, { bottom }]} />}
 
-      {draft && <DraftPlaceBar onCancel={cancelDraft} onConfirm={confirmDraft} style={[styles.draftBar, { bottom }]} />}
+      {draft && (
+        <DraftPlaceBar
+          hint="Move the map to place the pin"
+          onCancel={cancelDraft}
+          onConfirm={confirmDraft}
+          style={[styles.draftBar, { bottom }]}
+        />
+      )}
     </View>
   );
 }

@@ -42,7 +42,8 @@ const BOOK_SVG =
   `<path fill="${colors.text}" d="M13 6.3c1.6-1.2 3.8-1.8 6.4-1.8.9 0 1.6.7 1.6 1.6v10.8c0 .9-.7 1.6-1.6 1.6-2.4 0-4.5.5-6.4 1.7z"/>` +
   '</svg>';
 
-// Grön nål för en plats som håller på att läggas till, som den gröna markören på vanliga kartan
+// Grön nål för en plats som håller på att läggas till, som den gröna markören på vanliga kartan.
+// Spetsen sitter 36 px ner i bilden (y 28.6 av 32 i viewBox, skalat till 40 px).
 const DRAFT_PIN_SVG =
   '<svg viewBox="0 0 24 32" width="30" height="40" aria-hidden="true">' +
   `<path fill="${colors.busynessDotLow}" stroke="#fff" stroke-width="1.5" d="M12 1.5C6.2 1.5 1.5 6.1 1.5 11.9c0 7.4 8.8 15.4 9.8 16.3.4.4 1 .4 1.4 0 1-.9 9.8-8.9 9.8-16.3C22.5 6.1 17.8 1.5 12 1.5z"/>` +
@@ -108,9 +109,36 @@ export function buildMazeMapHtml(config: MazeMapConfig) {
       border-radius: 50%;
       border: 1.5px solid #fff;
     }
-    .draft-pin {
-      cursor: grab;
+    /* Nålen för en ny plats står still mitt på kartan, man flyttar och zoomar kartan under den.
+       pointer-events: none så att man kan dra i kartan rakt genom nålen. */
+    #draft-pin,
+    #draft-dot {
+      display: none;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      pointer-events: none;
+      z-index: 5;
+    }
+    #draft-pin {
+      width: 30px;
+      height: 40px;
+      /* Spetsen ska peka på kartans mittpunkt */
+      margin: -36px 0 0 -15px;
       filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
+    }
+    /* Liten prick som visar exakt var spetsen pekar */
+    #draft-dot {
+      width: 6px;
+      height: 6px;
+      margin: -3px 0 0 -3px;
+      border-radius: 50%;
+      background: ${colors.text};
+      opacity: 0.5;
+    }
+    #draft-pin.visible,
+    #draft-dot.visible {
+      display: block;
     }
 
     /* Våningsväljaren i samma glasstil som knapparna på kartan */
@@ -141,20 +169,21 @@ export function buildMazeMapHtml(config: MazeMapConfig) {
 </head>
 <body>
   <div id="map"></div>
+  <div id="draft-pin">${DRAFT_PIN_SVG}</div>
+  <div id="draft-dot"></div>
   <script>
     (function () {
       var CONFIG = ${JSON.stringify(config)};
       var DOT_COLORS = ${JSON.stringify(DOT_COLORS)};
       var STYLE_OVERRIDES = ${JSON.stringify(STYLE_OVERRIDES)};
       var BOOK_SVG = ${JSON.stringify(BOOK_SVG)};
-      var DRAFT_PIN_SVG = ${JSON.stringify(DRAFT_PIN_SVG)};
       var ACTIVE_FLOOR_COLOR = ${JSON.stringify(colors.greenButtonBackground)};
       var LONG_PRESS_MS = 500;
 
       var map;
       var spots = {}; // id -> { marker, element }
       var selectedId = null;
-      var draft = null; // Den gröna nålen, eller null
+      var drafting = false; // Om man håller på att lägga till en plats (nålen syns mitt på kartan)
 
       // ---------- WebView -> appen ----------
       function send(message) {
@@ -215,39 +244,36 @@ export function buildMazeMapHtml(config: MazeMapConfig) {
       }
 
       // ---------- Lägga till en plats ----------
-      function reportDraft() {
-        var position = draft.getLngLat();
+      // Nålen står still mitt på kartan, så platsen är alltid kartans mittpunkt
+      function reportDraft(lngLat) {
+        var position = lngLat || map.getCenter();
         send({
           type: 'draftChanged',
           draft: { lat: position.lat, lng: position.lng, zLevel: map.getZLevel() },
         });
       }
 
-      function placeDraft(lngLat) {
-        if (!draft) {
-          var element = document.createElement('div');
-          element.className = 'draft-pin';
-          element.innerHTML = DRAFT_PIN_SVG;
-          // Ett tryck på nålen ska inte räknas som ett tryck på kartan
-          element.addEventListener('click', function (event) {
-            event.stopPropagation();
-          });
-          draft = new Mazemap.mapboxgl.Marker({ element: element, anchor: 'bottom', draggable: true });
-          draft.on('dragend', reportDraft);
-          draft.setLngLat(lngLat).addTo(map);
-        } else {
-          draft.setLngLat(lngLat);
-        }
-        reportDraft();
+      function setPinVisible(visible) {
+        document.getElementById('draft-pin').classList.toggle('visible', visible);
+        document.getElementById('draft-dot').classList.toggle('visible', visible);
+      }
+
+      // Utan lngLat (plus-knappen) hamnar nålen där kartan redan är. Med lngLat (långt tryck)
+      // glider kartan så att punkten hamnar under nålen.
+      function startDraft(lngLat) {
+        drafting = true;
+        setPinVisible(true);
+        reportDraft(lngLat);
+        if (lngLat) map.easeTo({ center: lngLat, duration: 300 });
       }
 
       function clearDraft() {
-        if (draft) draft.remove();
-        draft = null;
+        drafting = false;
+        setPinVisible(false);
       }
 
       function isOnMarker(target) {
-        return !!(target && target.closest && target.closest('.spot, .draft-pin, .mapboxgl-ctrl'));
+        return !!(target && target.closest && target.closest('.spot, .mapboxgl-ctrl'));
       }
 
       // ---------- Appen -> WebView ----------
@@ -261,7 +287,7 @@ export function buildMazeMapHtml(config: MazeMapConfig) {
             setSelected(message.id);
             break;
           case 'startDraftAtCenter':
-            placeDraft(map.getCenter());
+            startDraft(null);
             break;
           case 'clearDraft':
             clearDraft();
@@ -316,12 +342,17 @@ export function buildMazeMapHtml(config: MazeMapConfig) {
         send({ type: 'mapPressed' });
       });
 
-      // Nålen följer med till den våning man byter till
-      map.on('zlevel', function () {
-        if (draft) reportDraft();
+      // När kartan stannat efter att man flyttat eller zoomat ligger platsen under nålen
+      map.on('moveend', function () {
+        if (drafting) reportDraft();
       });
 
-      // Långt tryck på kartan sätter ut nålen, precis som på den vanliga kartan
+      // Nålen följer med till den våning man byter till
+      map.on('zlevel', function () {
+        if (drafting) reportDraft();
+      });
+
+      // Långt tryck på kartan börjar lägga till en plats där, precis som på den vanliga kartan
       var press = null;
       function cancelPress() {
         if (press) clearTimeout(press.timer);
@@ -336,7 +367,7 @@ export function buildMazeMapHtml(config: MazeMapConfig) {
           point: event.point,
           timer: setTimeout(function () {
             press = null;
-            placeDraft(lngLat);
+            startDraft(lngLat);
           }, LONG_PRESS_MS),
         };
       });
@@ -347,7 +378,7 @@ export function buildMazeMapHtml(config: MazeMapConfig) {
       map.on('touchcancel', cancelPress);
       // Högerklick i en webbläsare, och långt tryck på vissa Android-enheter
       map.on('contextmenu', function (event) {
-        if (!isOnMarker(event.originalEvent.target)) placeDraft(event.lngLat);
+        if (!isOnMarker(event.originalEvent.target)) startDraft(event.lngLat);
       });
     })();
   </script>
