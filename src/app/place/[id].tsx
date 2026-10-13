@@ -10,6 +10,7 @@ import { useReviews } from '@/src/hooks/useReviews';
 import { useSession } from '@/src/hooks/useSession';
 import { useCheckIns } from '@/src/hooks/useCheckIns';
 import { Image } from 'react-native';
+import { ReviewForm } from '@/src/components/ReviewForm';
 
 const tagColorMap: Record<string, string> = {
 	low: colors.busynessLow,
@@ -124,6 +125,8 @@ export default function PlaceScreen() {
 				<Text style={styles.rowTitle}>Reviews ({count}):</Text>
 				<Text style={styles.rowSmall}>Average rating: {averageRating?.toFixed(1) ?? '—'}</Text>
 
+				<ReviewForm onSubmit={submitReview} submitting={submitting} />
+
 				{/* <View style={styles.ratingBadge}>
 					<Text style={styles.ratingText}>{averageRating?.toFixed(1) ?? '—'}</Text>
 					<Ionicons name="star" size={11} color="#000" />
@@ -143,7 +146,6 @@ export default function PlaceScreen() {
 									<Ionicons name="person-outline" size={22} color="grey" />
 								</View>
 
-								{/* Allt till höger om bilden — namn, rating OCH kommentar — i samma kolumn */}
 								<View style={styles.reviewContent}>
 									<Text style={styles.reviewAuthor}>
 										{review.profiles?.display_name ?? review.profiles?.username ?? 'Unknown user'}
@@ -311,6 +313,7 @@ const styles = StyleSheet.create({
 	reviewContainer: {
 		
 	},
+	
 	// ratingBadge: {
 	// 	position: 'absolute',
 	// 	// bottom: 6,
@@ -340,7 +343,7 @@ const styles = StyleSheet.create({
 	},
 	reviewProfilePicture: {
 		flexDirection: 'row',
-		gap: spacing.sm, // eller vad du redan har där
+		gap: spacing.sm,
 	},
 	reviewContent: {
 		flex: 1,

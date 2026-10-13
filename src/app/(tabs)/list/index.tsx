@@ -11,6 +11,7 @@ import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards
 // För att testa databasen
 import { useEffect } from 'react';
 import { supabase } from '@/src/utils/supabase';
+import { ScrollView } from '@expo/ui/swift-ui';
 
 // Listan visar alla platser, så radien är stor nog för att alla i Umeå ska få ett avstånd
 const DISTANCE_RADIUS_METERS = 50_000;
@@ -47,7 +48,8 @@ export default function List() {
       extraData={favorites}
       // Utan detta hamnar innehållet bakom den genomskinliga headern med stor titel.
       contentInsetAdjustmentBehavior="automatic"
-	  contentContainerStyle={styles.list}
+	  style={styles.list}
+	  contentContainerStyle={styles.listContent}
       renderItem={({ item }) => (
         // asChild gör att Pressable blir den klickbara ytan, istället för Links egen Text.
         <Link href={{ pathname: '/list/[id]', params: { id: item.id } }} asChild>
@@ -66,6 +68,12 @@ const styles = StyleSheet.create({
   list: {
     backgroundColor: colors.background,
     flex: 1,
+  },
+  
+// För mycket padding?
+// kolla med alla andra för att se vad de tycker :)
+  listContent: {
+	padding: spacing.md,
   },
   message: {
     ...type.body,
