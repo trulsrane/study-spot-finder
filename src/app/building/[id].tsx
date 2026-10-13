@@ -9,7 +9,6 @@ import { MazeMapHandle, MazeMapView } from '@/src/components/MazeMapView';
 import { MapAddButton } from '@/src/components/MapAddButton';
 import { DraftPlaceBar } from '@/src/components/DraftPlaceBar';
 import { defaultZ, findBuilding, floorToZ, zToFloorName } from '@/src/utils/campusBuildings';
-import { matchesFilters } from '@/src/utils/placeFilters';
 import { MAZEMAP_CAMPUS_ID } from '@/src/constants';
 import { colors, spacing, type } from '@/src/theme';
 import { MapDraft, MapSpot, MazeMapConfig } from '@/src/types/mazemap';
@@ -17,8 +16,7 @@ import { MapDraft, MapSpot, MazeMapConfig } from '@/src/types/mazemap';
 // Planvyn för ett hus på campus: MazeMap med våningsväljare och husets studieplatser.
 // Öppnas från husets bubbla på kartan.
 export default function BuildingScreen() {
-  // filters är snabbfiltren från kartan, t.ex. "cafe,wifi"
-  const { id, filters } = useLocalSearchParams<{ id: string; filters?: string }>();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const session = useSession();
   const insets = useSafeAreaInsets();
@@ -54,14 +52,12 @@ export default function BuildingScreen() {
     };
   }, [building]);
 
-  const activeFilters = useMemo(() => (filters ? filters.split(',') : []), [filters]);
-
-  // Alla platser som matchar filtren ritas ut, så att man ser grannhusen också. Våningsnamnet ("2") översätts till
+  // Alla platser ritas ut, så att man ser grannhusen också. Våningsnamnet ("2") översätts till
   // MazeMaps våningsnummer för huset platsen ligger i. Saknas våningen (eller finns den inte i huset)
   // visas platsen på entréplanet. Platser utanför husen ligger utomhus och syns på alla våningar.
   const spots = useMemo<MapSpot[]>(
     () =>
-      places.filter((place) => matchesFilters(place, activeFilters)).map((place) => {
+      places.map((place) => {
         const placeBuilding = findBuilding(buildings, place.latitude, place.longitude);
         return {
           id: place.id,
@@ -71,7 +67,7 @@ export default function BuildingScreen() {
           busyness: place.current_busyness,
         };
       }),
-    [places, buildings, activeFilters]
+    [places, buildings]
   );
 
   const openPlace = (placeId: string) => {

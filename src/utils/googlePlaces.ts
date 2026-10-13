@@ -48,7 +48,6 @@ export async function fetchNearbyStudySpots(
     address: googlePlace.formattedAddress,
     opening_hours: null,
     building: null,
-    category: null,
     floor: null,
     description: null,
     current_busyness: 'unknown',

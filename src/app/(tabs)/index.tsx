@@ -10,14 +10,12 @@ import { FALLBACK_COORDS } from '@/src/constants';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { spacing } from '@/src/theme';
 import { MapSearchBar } from '@/src/components/MapSearchBar';
-import { MapFilterBar } from '@/src/components/MapFilterBar';
 import { PlaceMarker } from '@/src/components/PlaceMarker';
 import { BuildingMarker } from '@/src/components/BuildingMarker';
 import { MapCompass } from '@/src/components/MapCompass';
 import { MAP_BUTTON_SIZE, MapAddButton } from '@/src/components/MapAddButton';
 import { DraftPlaceBar } from '@/src/components/DraftPlaceBar';
 import { findBuilding } from '@/src/utils/campusBuildings';
-import { matchesFilters } from '@/src/utils/placeFilters';
 // Ungefärlig höjd på kartans logga och "Legal"-länk längst ner
 const MAP_ATTRIBUTION_HEIGHT = 28;
 
@@ -43,8 +41,6 @@ export default function Map() {
   // Hur många grader kartan är vriden från norr, används för att snurra kompassen
   const [heading, setHeading] = useState(0);
   const [zoomedIn, setZoomedIn] = useState(false);
-  // Valda snabbfilter under sökfältet, t.ex. ['cafe', 'wifi']
-  const [filters, setFilters] = useState<string[]>([]);
   const { focus } = useLocalSearchParams<{ focus?: string }>();
   const mapRef = useRef<MapView>(null);
   // Sätts när den native kartan är klar. Innan dess kraschar anrop som getCamera().
@@ -60,19 +56,18 @@ export default function Map() {
     }
   };
 
-  // Platser inne i ett campushus visas som en siffra i husets bubbla, övriga som vanliga markörer.
-  // Bara platser som matchar de valda filtren räknas.
+  // Platser inne i ett campushus visas som en siffra i husets bubbla, övriga som vanliga markörer
   const { placesOutside, countByBuilding } = useMemo(() => {
     // Vanligt objekt, eftersom komponenten heter Map och skuggar JavaScripts Map
     const counts: Record<string, number> = {};
     const outside: typeof places = [];
-    places.filter((place) => matchesFilters(place, filters)).forEach((place) => {
+    places.forEach((place) => {
       const building = findBuilding(buildings, place.latitude, place.longitude);
       if (building) counts[building.id] = (counts[building.id] ?? 0) + 1;
       else outside.push(place);
     });
     return { placesOutside: outside, countByBuilding: counts };
-  }, [places, buildings, filters]);
+  }, [places, buildings]);
 
   const locationGranted = coords !== null;
   // useMemo så att initialRegion inte blir ett nytt objekt varje render (den används i fokus-effekten nedan)
@@ -129,13 +124,12 @@ export default function Map() {
   };
 
   // Öppnar planvyn för huset. En öppen platspanel stängs först, så att planvyn inte hamnar under den.
-  // Filtren följer med, så att planvyn visar samma platser som siffran i bubblan.
   const openBuilding = (id: string) => {
     setFocusedId(null);
     if (router.canGoBack()) {
       router.back();
     }
-    router.push({ pathname: '/building/[id]', params: { id, filters: filters.join(',') } });
+    router.push({ pathname: '/building/[id]', params: { id } });
   };
 
   // Långtryck på kartan sätter ut en grön markör där den nya platsen ska ligga
@@ -214,8 +208,7 @@ export default function Map() {
 
         {buildings.map((building) => {
           const count = countByBuilding[building.id] ?? 0;
-          // Tomma hus visas bara inzoomat (för att kunna lägga till platser där), och inte alls när man filtrerar
-          if (count === 0 && (!zoomedIn || filters.length > 0)) return null;
+          if (count === 0 && !zoomedIn) return null;
           return (
             <BuildingMarker
               key={building.id}
@@ -249,7 +242,6 @@ export default function Map() {
 
       <View style={[styles.searchBar, { top: insets.top + spacing.sm }]}>
         <MapSearchBar onSelect={(place) => router.setParams({ focus: place.id })} />
-        <MapFilterBar selected={filters} onChange={setFilters} />
       </View>
 
       {!draft && (
@@ -279,7 +271,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: spacing.md,
     right: spacing.md,
-    gap: spacing.sm,
   },
   compass: {
     position: 'absolute',

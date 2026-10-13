@@ -7,7 +7,6 @@ import { useAddPlace } from '@/src/hooks/useAddPlace';
 import { useSession } from '@/src/hooks/useSession';
 import { colors, radius, spacing, type } from '@/src/theme';
 import { amenityOptions } from '@/src/utils/translatePlaceToInfoPage';
-import { PlaceCategory, placeCategories } from '@/src/utils/placeFilters';
 
 export default function NewPlaceScreen() {
   // building och floor skickas med från planvyn för ett hus, då är de redan ifyllda
@@ -26,8 +25,6 @@ export default function NewPlaceScreen() {
   const [openingHours, setOpeningHours] = useState('');
   const [amenities, setAmenities] = useState<string[]>([]);
   const [description, setDescription] = useState('');
-  // Används av snabbfiltren på kartan (Café, Library, Study space)
-  const [category, setCategory] = useState<PlaceCategory | null>(null);
 
   const toggleAmenity = (key: string) =>
     setAmenities((current) =>
@@ -63,7 +60,6 @@ export default function NewPlaceScreen() {
       opening_hours: openingHours.trim() || null,
       amenities,
       description: description.trim() || null,
-      category,
       created_by: userId,
     });
     if (place) router.back();
@@ -80,28 +76,6 @@ export default function NewPlaceScreen() {
       <Field label="Building" value={building} onChangeText={setBuilding} />
       <Field label="Floor" value={floor} onChangeText={setFloor} />
       <Field label="Opening hours" value={openingHours} onChangeText={setOpeningHours} placeholder="e.g. 08–20" />
-
-      {/* Ett val, tryck igen för att avmarkera */}
-      <View style={styles.field}>
-        <Text style={styles.label}>Type of place</Text>
-        <View style={styles.amenitiesRow}>
-          {placeCategories.map((c) => {
-            const selected = category === c.key;
-            return (
-              <Pressable
-                key={c.key}
-                style={[styles.amenityPill, selected && styles.amenityPillSelected]}
-                onPress={() => setCategory(selected ? null : c.key)}
-              >
-                <View style={styles.amenityCircle}>
-                  <Ionicons name={c.icon} size={13} color={colors.icon} />
-                </View>
-                <Text style={styles.amenityLabel}>{c.label}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      </View>
 
       {/* Samma ikoner som visas på platsens infosida, tryck för att välja/avmarkera */}
       <View style={styles.field}>
