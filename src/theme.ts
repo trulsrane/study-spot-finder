@@ -33,6 +33,7 @@ export const colors = {
   buttonBackground: '#fff',
   greenButtonBackground: '#B8CB9E',
   cardBackground: '#fff',
+  imageBackground: 'lightgray',
   
 };
 
