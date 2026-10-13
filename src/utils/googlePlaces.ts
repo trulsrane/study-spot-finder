@@ -54,6 +54,7 @@ export async function fetchNearbyStudySpots(
     current_busyness: 'unknown',
     busyness_updated_at: new Date().toISOString(),
     amenities: [],
+    image_urls: [],
     created_at: new Date().toISOString(),
     created_by: null,
   }));

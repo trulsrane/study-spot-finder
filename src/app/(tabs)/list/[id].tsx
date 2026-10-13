@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { ScrollView, View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Image, ScrollView, View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 import { usePlaces } from '@/src/hooks/usePlaces';
 import { colors, radius, spacing, type } from '@/src/theme';
@@ -8,6 +8,8 @@ import { useNearbyPlace } from '@/src/hooks/useNearbyPlaces';
 import { translatePlaceToInfoPage } from '@/src/utils/translatePlaceToInfoPage';
 import { Ionicons } from '@expo/vector-icons';
 import { openDirections } from '@/src/utils/openDirections';
+import { ReviewForm } from '@/src/components/ReviewForm';
+
 
 
 const tagColorMap: Record<string, string> = {
@@ -21,7 +23,7 @@ export default function PlaceScreen() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const { places } = usePlaces();
 	const DbPlace = places.find((p) => p.id === id);
-
+	const images = DbPlace?.image_urls ?? [];
 
 	const { place: googlePlace, loading } = useNearbyPlace(id);
 	const { reviews, averageRating, count, loading: reviewsLoading, error: reviewsError, submitReview, submitting } = useReviews(id);
@@ -30,38 +32,22 @@ export default function PlaceScreen() {
 	if (loading && !place) return <Text style={styles.missing}>Laddar plats...</Text>;
 	if (!place) return <Text style={styles.missing}>Hittade ingen plats med id {id}</Text>;
 
-
-
 	const amenities = translatePlaceToInfoPage(place).amenities ?? [];
 	const busyness = translatePlaceToInfoPage(place).busyness ?? '—';
 	const level = translatePlaceToInfoPage(place).level ?? 'unknown';
 
-	//------------------------Gamla koden som visar rawcode------------------------
-	//   return (
-	//     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-	//       <Text style={styles.title}>{place.name}</Text>
-	//       <Text style={styles.row}>Id: {place.id}</Text>
-	//       <Text style={styles.row}>Adress: {place.address ?? '—'}</Text>
-	//       <Text style={styles.row}>Byggnad: {place.building ?? '—'}</Text>
-	//       <Text style={styles.row}>Våning: {place.floor ?? '—'}</Text>
-	//       <Text style={styles.row}>Öppettider: {place.opening_hours ?? '—'}</Text>
-	//       <Text style={styles.row}>Beläggning: {place.current_busyness ?? '—'}</Text>
-	//       <Text style={styles.row}>Uppdaterad: {place.busyness_updated_at ?? '—'}</Text>
-	//       <Text style={styles.row}>Faciliteter: {place.amenities.join(', ') || '—'}</Text>
-	//       <Text style={styles.row}>Latitud: {place.latitude}</Text>
-	//       <Text style={styles.row}>Longitud: {place.longitude}</Text>
-	//     </ScrollView>
-	//   );
-
 	return (
-		<ScrollView key={id} style={styles.screen} contentContainerStyle={styles.content}>
+		<ScrollView key={id} style={styles.screen} contentContainerStyle={styles.content} contentInsetAdjustmentBehavior='automatic'>
 
 			{/* Vill vi ha bilden mindre?*/}
 			<View style={styles.imageWrapper}>
-				{/* Databasen har ingen bild-kolumn än, så vi visar alltid platshållaren */}
-				<View style={[styles.image, styles.imagePlaceholder]}>
-					<Ionicons name="image-outline" size={22} color="grey" />
-				</View>
+				{images.length > 0 ? (
+					<Image source={{ uri: images[0] }} style={styles.image} resizeMode="cover" />
+				) : (
+					<View style={[styles.image, styles.imagePlaceholder]}>
+						<Ionicons name="image-outline" size={22} color="grey" />
+					</View>
+				)}
 
 				{/* Knappen är inte klickbar än, onPress senare? */}
 				<TouchableOpacity style={styles.checkInButton}>
@@ -122,7 +108,7 @@ export default function PlaceScreen() {
 			<View style={styles.reviewContainer}>
 				<Text style={styles.rowTitle}>Reviews ({count}):</Text>
 				<Text style={styles.rowSmall}>Average rating: {averageRating?.toFixed(1) ?? '—'}</Text>
-
+				<ReviewForm onSubmit={submitReview} submitting={submitting} />
 				{/* <View style={styles.ratingBadge}>
 					<Text style={styles.ratingText}>{averageRating?.toFixed(1) ?? '—'}</Text>
 					<Ionicons name="star" size={11} color="#000" />
@@ -163,6 +149,7 @@ export default function PlaceScreen() {
 const styles = StyleSheet.create({
 	content: {
 		padding: spacing.lg,
+		
 	},
 	missing: {
 		...type.body,
@@ -225,6 +212,7 @@ const styles = StyleSheet.create({
 	image: {
 		width: '100%',
 		height: '100%',
+		backgroundColor: colors.imageBackground,
 	},
 	imagePlaceholder: {
 		//kan ha denna så länge

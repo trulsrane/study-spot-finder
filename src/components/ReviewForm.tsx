@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { Alert, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSession } from '@/src/hooks/useSession';
 import { ReviewInsert } from '@/src/types/db';
@@ -17,21 +17,24 @@ export function ReviewForm({ onSubmit, submitting }: ReviewFormProps) {
 	const [comment, setComment] = useState('');
 	const [formError, setFormError] = useState<string | null>(null);
 
-	// Om användaren inte är inloggad kan hen inte skriva en recension
-	// Vill vi att icke-användare också ska kunna skriva recesnioner?
-	if (!userId) {
-		return <Text style={styles.hint}>Log in to write a review.</Text>;
-	}
-
 	// Visar först endast en knapp
 	// Om användaren klickar på "+Write a review" så visas formuläret
 	if (!open) {
 		return (
-			<TouchableOpacity style={styles.openButton} onPress={() => setOpen(true)}>
+			<TouchableOpacity style={styles.openButton} onPress={handleOpen}>
 				<Ionicons name="add" size={16} color={colors.icon} />
 				<Text style={styles.openButtonText}>Write a review</Text>
 			</TouchableOpacity>
 		);
+	}
+
+	// Hanterar att en icke-inloggad användare inte kan skriva en recension
+	function handleOpen() {
+		if (!userId) {
+			Alert.alert('Log in', 'You need to be logged in to write a review.');
+			return;
+		}
+		setOpen(true);
 	}
 
 	async function handleSubmit() {
@@ -42,13 +45,13 @@ export function ReviewForm({ onSubmit, submitting }: ReviewFormProps) {
 		setFormError(null);
 
 		const errorMessage = await onSubmit({
-			user_id: userId!, 
+			user_id: userId!,
 			rating,
-			comment: comment.trim() || null, 
+			comment: comment.trim() || null,
 		});
 
 		if (errorMessage) {
-			setFormError(errorMessage); 
+			setFormError(errorMessage);
 			return;
 		}
 

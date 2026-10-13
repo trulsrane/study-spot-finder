@@ -9,6 +9,7 @@ import { openDirections } from '@/src/utils/openDirections';
 import { useReviews } from '@/src/hooks/useReviews';
 import { useSession } from '@/src/hooks/useSession';
 import { useCheckIns } from '@/src/hooks/useCheckIns';
+import { Image } from 'react-native';
 import { ReviewForm } from '@/src/components/ReviewForm';
 
 const tagColorMap: Record<string, string> = {
@@ -22,6 +23,7 @@ export default function PlaceScreen() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const { places, loading: placesLoading, error: placesError } = usePlaces();
 	const DbPlace = places.find((p) => p.id === id);
+	const images = DbPlace?.image_urls ?? [];
 
 	const { place: googlePlace, loading: googlePlacesLoading, error: googlePlacesError } = useNearbyPlace(id);
 	const { reviews, averageRating, count, loading: reviewsLoading, error: reviewsError, submitReview, submitting } = useReviews(id);
@@ -45,10 +47,14 @@ export default function PlaceScreen() {
 
 			{/* Vill vi ha bilden mindre?*/}
 			<View style={styles.imageWrapper}>
+				{images.length > 0 ? (
+					<Image source={{ uri: images[0] }} style={styles.image} resizeMode="cover" />
+				) : (
+					<View style={[styles.image, styles.imagePlaceholder]}>
+						<Ionicons name="image-outline" size={22} color="grey" />
+					</View>
+				)}
 				{/* Databasen har ingen bild-kolumn än, så vi visar alltid platshållaren */}
-				<View style={[styles.image, styles.imagePlaceholder]}>
-					<Ionicons name="image-outline" size={22} color="grey" />
-				</View>
 
 				{/* Samma knapp för båda: checkar ut om man redan är incheckad här, annars checkar den in.
 				    Visas bara för platser i databasen, Google-platser går inte att checka in på. */}
@@ -241,6 +247,7 @@ const styles = StyleSheet.create({
 	image: {
 		width: '100%',
 		height: '100%',
+		backgroundColor: colors.imageBackground,
 	},
 	imagePlaceholder: {
 		//kan ha denna så länge
