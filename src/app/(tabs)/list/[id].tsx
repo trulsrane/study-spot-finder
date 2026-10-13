@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { ScrollView, View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Image, ScrollView, View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 import { usePlaces } from '@/src/hooks/usePlaces';
 import { colors, radius, spacing, type } from '@/src/theme';
@@ -21,7 +21,7 @@ export default function PlaceScreen() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const { places } = usePlaces();
 	const DbPlace = places.find((p) => p.id === id);
-
+	const images = DbPlace?.image_urls ?? [];
 
 	const { place: googlePlace, loading } = useNearbyPlace(id);
 	const { reviews, averageRating, count, loading: reviewsLoading, error: reviewsError, submitReview, submitting } = useReviews(id);
@@ -58,10 +58,13 @@ export default function PlaceScreen() {
 
 			{/* Vill vi ha bilden mindre?*/}
 			<View style={styles.imageWrapper}>
-				{/* Databasen har ingen bild-kolumn än, så vi visar alltid platshållaren */}
-				<View style={[styles.image, styles.imagePlaceholder]}>
-					<Ionicons name="image-outline" size={22} color="grey" />
-				</View>
+				{images.length > 0 ? (
+					<Image source={{ uri: images[0] }} style={styles.image} resizeMode="cover" />
+				) : (
+					<View style={[styles.image, styles.imagePlaceholder]}>
+						<Ionicons name="image-outline" size={22} color="grey" />
+					</View>
+				)}
 
 				{/* Knappen är inte klickbar än, onPress senare? */}
 				<TouchableOpacity style={styles.checkInButton}>
@@ -225,6 +228,7 @@ const styles = StyleSheet.create({
 	image: {
 		width: '100%',
 		height: '100%',
+		backgroundColor: colors.imageBackground,
 	},
 	imagePlaceholder: {
 		//kan ha denna så länge
