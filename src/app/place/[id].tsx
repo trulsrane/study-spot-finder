@@ -67,6 +67,13 @@ export default function PlaceScreen() {
 				)}
 			</View>
 
+			{/* Tog bort rubrikerna, jag tänker att adressen säger sig själv */}
+			<Text style={styles.rowSmall}>
+				{place.address ?? ''}
+				{place.building ?? ''}
+				{place.floor != null && place.floor !== '' ? ` Floor: ${place.floor}` : ''}</Text>
+			<Text style={styles.rowSmall}>{place.latitude}°, {place.longitude}°</Text>
+
 			{/* Vill vi ha bilden mindre?*/}
 			<View style={styles.imageWrapper}>
 				{images.length > 0 ? (
@@ -99,9 +106,7 @@ export default function PlaceScreen() {
 				)}
 			</View>
 
-			{/* Tog bort rubrikerna, jag tänker att adressen säger sig själv */}
-			<Text style={styles.rowSmall}>{place.address ?? ''} {place.building ?? ''} {place.floor ?? ''}</Text>
-			<Text style={styles.rowSmall}>{place.latitude}°, {place.longitude}°</Text>
+
 			{/* Vägbeskrivning visas bara för platser från databasen */}
 			{DbPlace && (
 				<TouchableOpacity
@@ -140,7 +145,7 @@ export default function PlaceScreen() {
 
 			{/* Fyll denna med info om populära tider */}
 			<Text style={styles.rowTitle}>Popular times:</Text>
-			
+
 			<View style={styles.reviewContainer}>
 				<Text style={styles.rowTitle}>Reviews ({count}):</Text>
 				<Text style={styles.rowSmall}>Average rating: {averageRating?.toFixed(1) ?? '—'}</Text>
@@ -262,8 +267,9 @@ const styles = StyleSheet.create({
 		color: colors.text,
 	},
 	imageWrapper: {
+		marginTop: spacing.sm,
 		width: '100%',
-		aspectRatio: 4 / 3,
+		aspectRatio: 4.2 / 3,
 		borderRadius: radius.md,
 		overflow: 'hidden',
 		position: 'relative',
@@ -337,9 +343,9 @@ const styles = StyleSheet.create({
 		color: colors.textMuted,
 	},
 	reviewContainer: {
-		
+
 	},
-	
+
 	// ratingBadge: {
 	// 	position: 'absolute',
 	// 	// bottom: 6,
