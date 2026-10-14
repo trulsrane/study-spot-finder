@@ -80,6 +80,7 @@ export default function List() {
         <Link href={{ pathname: '/list/[id]', params: { id: item.id } }} asChild>
           <Card
             {...translatePlaceToInfoCards(item)}
+			image={item.image_urls?.[0]}
             isFavorite={isFavorite(item.id)}
             onToggleFavorite={() => toggleFavorite(item.id)}
           />
