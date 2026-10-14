@@ -7,6 +7,7 @@ import { frame, glassEffect } from '@expo/ui/swift-ui/modifiers';
 import { Place } from '@/src/types/db';
 import { colors } from '@/src/theme';
 
+
 const MARKER_SIZE = 32;
 // Vald plats visas större så att man ser vilken som är öppen
 const SELECTED_MARKER_SIZE = 42;
@@ -47,10 +48,10 @@ export function PlaceMarker({ place, selected, onPress }: Props) {
             <Image
               systemName="book.fill"
               size={iconSize}
-              color={colors.text}
+			color = {colors.text}
               modifiers={[
                 frame({ width: size, height: size }),
-                glassEffect({ glass: { variant: 'regular' }, shape: 'circle' }),
+                glassEffect({ glass: { variant: 'regular'}, shape: 'circle' })
               ]}
             />
           </Host>
