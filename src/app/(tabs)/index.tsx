@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
-import MapView, { LatLng, Marker, Region } from 'react-native-maps';
+import MapView, { LatLng, Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useMapPlaces } from '@/src/hooks/useMapPlaces';
 import { useCampusBuildings } from '@/src/hooks/useCampusBuildings';
 import { useUserLocation } from '@/src/hooks/useUserLocation';
 import { useSession } from '@/src/hooks/useSession';
 import { FALLBACK_COORDS } from '@/src/constants';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { spacing } from '@/src/theme';
+import { colors, spacing } from '@/src/theme';
 import { MapSearchBar } from '@/src/components/MapSearchBar';
 import { PlaceMarker } from '@/src/components/PlaceMarker';
 import { BuildingMarker } from '@/src/components/BuildingMarker';
@@ -132,16 +133,18 @@ export default function Map() {
     router.push({ pathname: '/building/[id]', params: { id } });
   };
 
-  // Långtryck på kartan sätter ut en grön markör där den nya platsen ska ligga
+  // Långtryck på kartan börjar lägga till en plats där. Nålen står still mitt på skärmen och man flyttar
+  // kartan under den, så kartan centreras på punkten man höll in på.
   const startDraft = (coordinate: LatLng) => {
     if (!session) {
       Alert.alert('Log in', 'You need to be logged in to add a place.');
       return;
     }
     setDraft(coordinate);
+    mapRef.current?.animateCamera({ center: coordinate }, { duration: 300 });
   };
 
-  // Plus-knappen sätter ut markören mitt på den del av kartan som syns just nu
+  // Plus-knappen börjar lägga till en plats mitt på den del av kartan som syns just nu
   const startDraftAtCenter = async () => {
     const camera = await getCameraSafely();
     if (camera) startDraft(camera.center);
@@ -153,9 +156,12 @@ export default function Map() {
     if (camera) setHeading(camera.heading);
   };
 
+  // När kartan stannat: uppdatera kompassen och vilka husbubblor som syns, och om man håller på
+  // att lägga till en plats är nålens position kartans nya mittpunkt
   const handleRegionChangeComplete = (region: Region) => {
     updateHeading();
     setZoomedIn(region.latitudeDelta < SHOW_EMPTY_BUILDINGS_DELTA);
+    if (draft) setDraft({ latitude: region.latitude, longitude: region.longitude });
   };
 
 
@@ -168,12 +174,13 @@ export default function Map() {
   // Knapparna lyfts över kartans logga och "Legal"-länken längst ner, som inte får täckas
   const mapButtonBottom = insets.bottom + MAP_ATTRIBUTION_HEIGHT + spacing.sm;
 
-  // Öppnar formuläret med markörens position
-  const confirmDraft = () => {
+  // Öppnar formuläret med nålens position. Läser kartans mittpunkt direkt, ifall kartan fortfarande rör sig.
+  const confirmDraft = async () => {
     if (!draft) return;
+    const position = (await getCameraSafely())?.center ?? draft;
     router.push({
       pathname: '../place/newPlace',
-      params: { lat: String(draft.latitude), lng: String(draft.longitude) },
+      params: { lat: String(position.latitude), lng: String(position.longitude) },
     });
     setDraft(null);
   };
@@ -218,17 +225,19 @@ export default function Map() {
             />
           );
         })}
-
-        {draft && (
-          <Marker
-            key="draft"
-            coordinate={draft}
-            pinColor="green"
-            draggable
-            onDragEnd={(e) => setDraft(e.nativeEvent.coordinate)}
-          />
-        )}
       </MapView>
+
+      {/* Nålen för en ny plats står still mitt på kartan, man flyttar och zoomar kartan under den.
+          pointerEvents="none" så att man kan dra i kartan rakt genom nålen. */}
+      {draft && (
+        <View style={styles.draftPinLayer} pointerEvents="none">
+          <View style={styles.draftPin}>
+            <Ionicons name="location" size={DRAFT_PIN_SIZE} color={colors.busynessDotLow} />
+          </View>
+          {/* Liten prick som visar exakt var spetsen pekar */}
+          <View style={styles.draftPinDot} />
+        </View>
+      )}
 
       {/* Kompass nere till vänster, i höjd med plus-knappen. Döljs när panelen för ny plats visas. */}
       {!draft && (
@@ -250,6 +259,7 @@ export default function Map() {
 
       {draft && (
         <DraftPlaceBar
+          hint="Move the map to place the pin"
           onCancel={() => setDraft(null)}
           onConfirm={confirmDraft}
           style={[styles.draftBar, { bottom: mapButtonBottom }]}
@@ -259,9 +269,32 @@ export default function Map() {
   );
 }
 
+const DRAFT_PIN_SIZE = 44;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  draftPinLayer: {
+    ...StyleSheet.absoluteFill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  draftPin: {
+    position: 'absolute',
+    // Ikonens spets ska peka på kartans mittpunkt, så den lyfts upp nästan en hel ikonhöjd
+    transform: [{ translateY: -DRAFT_PIN_SIZE * 0.45 }],
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  draftPinDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.text,
+    opacity: 0.5,
   },
   map: {
     width: '100%',

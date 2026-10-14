@@ -9,6 +9,7 @@ import { openDirections } from '@/src/utils/openDirections';
 import { useReviews } from '@/src/hooks/useReviews';
 import { useSession } from '@/src/hooks/useSession';
 import { useCheckIns } from '@/src/hooks/useCheckIns';
+import { useFavorites } from '@/src/hooks/useFavorites';
 import { Image } from 'react-native';
 import { ReviewForm } from '@/src/components/ReviewForm';
 
@@ -28,6 +29,7 @@ export default function PlaceScreen() {
 	const { place: googlePlace, loading: googlePlacesLoading, error: googlePlacesError } = useNearbyPlace(id);
 	const { reviews, averageRating, count, loading: reviewsLoading, error: reviewsError, submitReview, submitting } = useReviews(id);
 	const { checkIn, checkOut, myCheckIn, saving, loading: checkInsLoading, error: checkInsError } = useCheckIns(DbPlace?.id);
+	const { isFavorite, toggleFavorite } = useFavorites();
 
 	const place = DbPlace ?? googlePlace;
 	const loading = placesLoading || reviewsLoading || checkInsLoading || googlePlacesLoading;
@@ -45,6 +47,26 @@ export default function PlaceScreen() {
 	return (
 		<ScrollView key={id} style={styles.screen} contentContainerStyle={styles.content}>
 
+			<View style={styles.titleRow}>
+				<Text style={styles.title}>{place.name}</Text>
+
+				{/* Favoritmarkering, samma hjärta som på korten i listvyn. Bara för platser i databasen,
+				    Google-platser går inte att spara. */}
+				{DbPlace && (
+					<TouchableOpacity
+						onPress={() => toggleFavorite(DbPlace.id)}
+						hitSlop={8}
+						accessibilityLabel={isFavorite(DbPlace.id) ? 'Remove from favorites' : 'Add to favorites'}
+					>
+						<Ionicons
+							name={isFavorite(DbPlace.id) ? 'heart' : 'heart-outline'}
+							size={20}
+							color="#000"
+						/>
+					</TouchableOpacity>
+				)}
+			</View>
+
 			{/* Vill vi ha bilden mindre?*/}
 			<View style={styles.imageWrapper}>
 				{images.length > 0 ? (
@@ -55,6 +77,12 @@ export default function PlaceScreen() {
 					</View>
 				)}
 				{/* Databasen har ingen bild-kolumn än, så vi visar alltid platshållaren */}
+
+				{/* Busyness, placerad längst upp i det vänstra hörnet, på bilden.
+				    Ligger inuti bildramen så att den följer med bilden. */}
+				<View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
+					<Text style={styles.tagText}>{busyness}</Text>
+				</View>
 
 				{/* Samma knapp för båda: checkar ut om man redan är incheckad här, annars checkar den in.
 				    Visas bara för platser i databasen, Google-platser går inte att checka in på. */}
@@ -70,14 +98,6 @@ export default function PlaceScreen() {
 					</TouchableOpacity>
 				)}
 			</View>
-
-			{/* Busyness, placerad längst upp i det vänstra hörnet, på bilden */}
-			<View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
-				<Text style={styles.tagText}>{busyness}</Text>
-			</View>
-
-
-			<Text style={styles.title}>{place.name}</Text>
 
 			{/* Tog bort rubrikerna, jag tänker att adressen säger sig själv */}
 			<Text style={styles.rowSmall}>{place.address ?? ''} {place.building ?? ''} {place.floor ?? ''}</Text>
@@ -190,11 +210,16 @@ const styles = StyleSheet.create({
 		backgroundColor: colors.background,
 		flex: 1,
 	},
+	titleRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: spacing.sm,
+	},
 	title: {
 		...type.title,
+		flex: 1,
 		color: colors.text,
 		marginBottom: spacing.sm,
-		marginTop: spacing.sm,
 	},
 	amenitiesRow: {
 		flexDirection: 'row',
@@ -224,13 +249,12 @@ const styles = StyleSheet.create({
 	tag: {
 		alignSelf: 'flex-start',
 		position: 'absolute',
-		top: 28,
-		left: 35,
+		// Mätt från bildens hörn, eftersom etiketten ligger inuti bildramen
+		top: 12,
+		left: 12,
 		borderRadius: radius.pill,
 		paddingHorizontal: 12,
 		paddingVertical: 5,
-		marginTop: 8,
-
 	},
 	tagText: {
 		fontSize: type.tag.fontSize,
@@ -243,6 +267,8 @@ const styles = StyleSheet.create({
 		borderRadius: radius.md,
 		overflow: 'hidden',
 		position: 'relative',
+		// Luft mellan bilden och adressen under
+		marginBottom: spacing.sm,
 	},
 	image: {
 		width: '100%',

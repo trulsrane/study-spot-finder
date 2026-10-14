@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { supabase } from '@/src/utils/supabase';
 import { useSession } from '@/src/hooks/useSession';
 
@@ -10,7 +11,9 @@ export function useFavorites() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  // Hämtas varje gång skärmen visas, så att en favorit som markerats på en annan skärm
+  // (t.ex. platspanelen på kartan) också syns i listvyn och på profilen.
+  useFocusEffect(useCallback(() => {
     // Inte inloggad: inga favoriter att hämta
     if (!userId) {
       setFavorites([]);
@@ -32,7 +35,7 @@ export function useFavorites() {
     })();
 
     return () => { cancelled = true; };
-  }, [userId]);
+  }, [userId]));
 
   function isFavorite(placeId: string) {
     return favorites.includes(placeId); // returnerar om platsen finns i listan med favoriter
