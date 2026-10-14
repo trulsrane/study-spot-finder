@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Alert } from 'react-native'
 import { supabase } from '@/src/utils/supabase'
 
 export default function useAuth() {
@@ -6,38 +7,27 @@ export default function useAuth() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  // Visas på sidan under fälten i stället för som popup
-  const [error, setError] = useState<string | null>(null)
-  const [info, setInfo] = useState<string | null>(null)
 
   async function signInWithEmail() {
-    if (!email.trim() || !password) return setError('Enter your email and password')
-    setError(null)
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
-    if (error) setError(error.message)
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) Alert.alert(error.message)
     setLoading(false)
   }
 
   async function signUpWithEmail() {
-    if (!email.trim() || !password) return setError('Enter your email and password')
-    if (!username.trim()) return setError('Choose a username')
-    setError(null)
-    setInfo(null)
+    if (!username.trim()) return Alert.alert('Choose a username')
     setLoading(true)
     // username sparas i användarens metadata, och en trigger i databasen skapar profilen utifrån den
     const { data: { session }, error } = await supabase.auth.signUp({
-      email: email.trim(),
+      email,
       password,
       options: { data: { username: username.trim() } },
     })
-    if (error) setError(error.message)
-    else if (!session) setInfo('Check your inbox to verify your email!')
+    if (error) Alert.alert(error.message)
+    else if (!session) Alert.alert('Check your inbox to verify your email!')
     setLoading(false)
   }
 
-  return {
-    email, setEmail, username, setUsername, password, setPassword,
-    loading, error, info, signInWithEmail, signUpWithEmail,
-  }
+  return { email, setEmail, username, setUsername, password, setPassword, loading, signInWithEmail, signUpWithEmail }
 }
