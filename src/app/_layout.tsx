@@ -17,7 +17,7 @@ export default function RootLayout() {
           options={{
             // En native modal som dyker upp ovanpå tabbarna. Man kan dra 30%, 60% eller hela vägen upp. Kartan är fortfarande synlig bakom modalen.
             presentation: 'formSheet',
-            sheetAllowedDetents: [0.3, 0.6, 1],
+            sheetAllowedDetents: [0.45, 0.6, 1],
             sheetLargestUndimmedDetentIndex: 1,
             sheetGrabberVisible: true,
             headerShown: false,
