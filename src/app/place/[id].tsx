@@ -69,8 +69,10 @@ export default function PlaceScreen() {
 				{ text: 'Low', onPress: () => reportAndCheckIn('low') },
 				{ text: 'Medium', onPress: () => reportAndCheckIn('medium') },
 				{ text: 'High', onPress: () => reportAndCheckIn('high') },
+				// Visas bara på iOS, Android har max tre knappar och stänger istället vid tryck utanför/bakåt
+				{ text: 'Cancel', style: 'destructive' },
 			],
-			{ cancelable: false }, // Android: går inte att stänga genom att trycka utanför
+			{ cancelable: true },
 		);
 	}
 
