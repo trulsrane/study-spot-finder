@@ -12,6 +12,7 @@ import { useCheckIns } from '@/src/hooks/useCheckIns';
 import { useFavorites } from '@/src/hooks/useFavorites';
 import { Image } from 'react-native';
 import { ReviewForm } from '@/src/components/ReviewForm';
+import { BusynessReportForm } from '@/src/components/BusynessReportForm';
 
 const tagColorMap: Record<string, string> = {
 	low: colors.busynessLow,
@@ -22,7 +23,7 @@ const tagColorMap: Record<string, string> = {
 // Panelen som dras upp från kartan. Egen fil från listans detaljsida, så de kan visa olika saker framöver.
 export default function PlaceScreen() {
 	const { id } = useLocalSearchParams<{ id: string }>();
-	const { places, loading: placesLoading, error: placesError } = usePlaces();
+	const { places, loading: placesLoading, error: placesError, refetch } = usePlaces();
 	const DbPlace = places.find((p) => p.id === id);
 	const images = DbPlace?.image_urls ?? [];
 
@@ -112,6 +113,8 @@ export default function PlaceScreen() {
 					<Text style={styles.directionsText}>Directions</Text>
 				</TouchableOpacity>
 			)}
+			{DbPlace && <BusynessReportForm placeId={DbPlace.id} onReported={refetch} />}
+
 
 
 			{/* Ikonerna för bekvämligheterna som finns på studieplatsen */}
