@@ -15,7 +15,7 @@ export const colors = {
   text: '#2F2319',
   lightText: '#fff',
   textMuted: '#827B75',
-  background: '#EDEDE9',
+  background: '#EEF3E8',
   border: '#e5e7eb',
   tint: '#2563eb',
   icon: '#2F2319',

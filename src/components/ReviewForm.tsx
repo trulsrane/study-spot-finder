@@ -51,7 +51,9 @@ export function ReviewForm({ onSubmit, submitting }: ReviewFormProps) {
 		});
 
 		if (errorMessage) {
-			setFormError(errorMessage);
+			// setFormError(errorMessage);
+			// return;
+			Alert.alert('Cannot write a review', 'You have already written a review for this place.');
 			return;
 		}
 

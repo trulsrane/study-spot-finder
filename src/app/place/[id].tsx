@@ -78,25 +78,34 @@ export default function PlaceScreen() {
 	return (
 		<ScrollView key={id} style={styles.screen} contentContainerStyle={styles.content}>
 
+
+
 			<View style={styles.titleRow}>
+				<View style={styles.titleSide}>
+					<View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
+						<Text style={styles.tagText}><Ionicons name = 'person' color='#2F2319'/>{busyness}</Text>
+					</View>
+				</View>
+
 				<Text style={styles.title}>{place.name}</Text>
 
-				{/* Favoritmarkering, samma hjärta som på korten i listvyn. Bara för platser i databasen,
-				    Google-platser går inte att spara. */}
-				{DbPlace && (
-					<TouchableOpacity
-						onPress={() => toggleFavorite(DbPlace.id)}
-						hitSlop={8}
-						accessibilityLabel={isFavorite(DbPlace.id) ? 'Remove from favorites' : 'Add to favorites'}
-					>
-						<Ionicons
-							name={isFavorite(DbPlace.id) ? 'heart' : 'heart-outline'}
-							size={20}
-							color="#000"
-						/>
-					</TouchableOpacity>
-				)}
+				<View style={[styles.titleSide, styles.titleSideRight]}>
+					{DbPlace && (
+						<TouchableOpacity
+							onPress={() => toggleFavorite(DbPlace.id)}
+							hitSlop={8}
+							accessibilityLabel={isFavorite(DbPlace.id) ? 'Remove from favorites' : 'Add to favorites'}
+						>
+							<Ionicons
+								name={isFavorite(DbPlace.id) ? 'heart' : 'heart-outline'}
+								size={20}
+								color="#2F2319"
+							/>
+						</TouchableOpacity>
+					)}
+				</View>
 			</View>
+
 
 			{/* Vill vi ha bilden mindre?*/}
 			<View style={styles.imageWrapper}>
@@ -111,9 +120,9 @@ export default function PlaceScreen() {
 
 				{/* Busyness, placerad längst upp i det vänstra hörnet, på bilden.
 				    Ligger inuti bildramen så att den följer med bilden. */}
-				<View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
+				{/* <View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
 					<Text style={styles.tagText}>{busyness}</Text>
-				</View>
+				</View> */}
 
 				{/* Samma knapp för båda: checkar ut om man redan är incheckad här, annars checkar den in.
 				    Visas bara för platser i databasen, Google-platser går inte att checka in på. */}
@@ -129,10 +138,14 @@ export default function PlaceScreen() {
 					</TouchableOpacity>
 				)}
 			</View>
-
 			{/* Tog bort rubrikerna, jag tänker att adressen säger sig själv */}
-			<Text style={styles.rowSmall}>{place.address ?? ''} {place.building ?? ''} {place.floor ?? ''}</Text>
+			<Text style={styles.rowSmall}>
+				{[place.address, place.building].filter(Boolean).join(' ')}
+				{place.floor != null && place.floor !== '' ? ` Floor: ${place.floor}` : ''}
+			</Text>
 			<Text style={styles.rowSmall}>{place.latitude}°, {place.longitude}°</Text>
+
+
 			{/* Vägbeskrivning visas bara för platser från databasen */}
 			{DbPlace && (
 				<TouchableOpacity
@@ -173,7 +186,7 @@ export default function PlaceScreen() {
 
 			{/* Fyll denna med info om populära tider */}
 			<Text style={styles.rowTitle}>Popular times:</Text>
-			
+
 			<View style={styles.reviewContainer}>
 				<Text style={styles.rowTitle}>Reviews ({count}):</Text>
 				<Text style={styles.rowSmall}>Average rating: {averageRating?.toFixed(1) ?? '—'}</Text>
@@ -217,7 +230,8 @@ export default function PlaceScreen() {
 
 const styles = StyleSheet.create({
 	content: {
-		padding: spacing.lg,
+		paddingTop: spacing.lg,
+		padding: spacing.md,
 	},
 	missing: {
 		...type.body,
@@ -245,14 +259,22 @@ const styles = StyleSheet.create({
 	},
 	titleRow: {
 		flexDirection: 'row',
-		alignItems: 'center',
+		alignItems: 'flex-start',
 		gap: spacing.sm,
+		marginBottom: spacing.sm,
+	},
+	titleSide: {
+		flex: 1,
+		minWidth: 90,
+	},
+	titleSideRight: {
+		alignItems: 'flex-end',
 	},
 	title: {
 		...type.title,
-		flex: 1,
 		color: colors.text,
-		marginBottom: spacing.sm,
+		textAlign: 'center',
+		flexShrink: 1, // långa namn radbryts istället för att trycka ut sidorna
 	},
 	amenitiesRow: {
 		flexDirection: 'row',
@@ -281,10 +303,6 @@ const styles = StyleSheet.create({
 	},
 	tag: {
 		alignSelf: 'flex-start',
-		position: 'absolute',
-		// Mätt från bildens hörn, eftersom etiketten ligger inuti bildramen
-		top: 12,
-		left: 12,
 		borderRadius: radius.pill,
 		paddingHorizontal: 12,
 		paddingVertical: 5,
@@ -295,8 +313,9 @@ const styles = StyleSheet.create({
 		color: colors.text,
 	},
 	imageWrapper: {
+		marginTop: spacing.sm,
 		width: '100%',
-		aspectRatio: 4 / 3,
+		aspectRatio: 4.2 / 3,
 		borderRadius: radius.md,
 		overflow: 'hidden',
 		position: 'relative',
@@ -370,9 +389,9 @@ const styles = StyleSheet.create({
 		color: colors.textMuted,
 	},
 	reviewContainer: {
-		
+
 	},
-	
+
 	// ratingBadge: {
 	// 	position: 'absolute',
 	// 	// bottom: 6,
