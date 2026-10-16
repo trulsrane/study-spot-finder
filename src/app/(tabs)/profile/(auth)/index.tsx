@@ -103,8 +103,7 @@ export default function ProfilePage() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		padding: 16,
-
+		padding: spacing.md,
 	},
 	profilePicture: {
 		width: 200,
