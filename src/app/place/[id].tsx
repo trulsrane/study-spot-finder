@@ -52,7 +52,7 @@ export default function PlaceScreen() {
 			<View style={styles.titleRow}>
 				<View style={styles.titleSide}>
 					<View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
-						<Text style={styles.tagText}>{busyness}</Text>
+						<Text style={styles.tagText}><Ionicons name = 'person' color='#2F2319'/>{busyness}</Text>
 					</View>
 				</View>
 
@@ -68,7 +68,7 @@ export default function PlaceScreen() {
 							<Ionicons
 								name={isFavorite(DbPlace.id) ? 'heart' : 'heart-outline'}
 								size={20}
-								color="#000"
+								color="#2F2319"
 							/>
 						</TouchableOpacity>
 					)}
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
 	},
 	titleSide: {
 		flex: 1,
-		minWidth: 80,
+		minWidth: 90,
 	},
 	titleSideRight: {
 		alignItems: 'flex-end',
