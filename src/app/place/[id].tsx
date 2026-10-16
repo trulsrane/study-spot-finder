@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNearbyPlace, useNearbyPlaces, } from '@/src/hooks/useNearbyPlaces';
 import { usePlaces } from '@/src/hooks/usePlaces';
 import { colors, spacing, type, radius } from '@/src/theme';
@@ -13,6 +13,8 @@ import { useFavorites } from '@/src/hooks/useFavorites';
 import { Image } from 'react-native';
 import { ReviewForm } from '@/src/components/ReviewForm';
 import { BusynessReportForm } from '@/src/components/BusynessReportForm';
+import { Busyness } from '@/src/types/db';
+import { useReportBusyness } from '@/src/hooks/useReportBusyness';
 
 const tagColorMap: Record<string, string> = {
 	low: colors.busynessLow,
@@ -22,6 +24,8 @@ const tagColorMap: Record<string, string> = {
 };
 // Panelen som dras upp från kartan. Egen fil från listans detaljsida, så de kan visa olika saker framöver.
 export default function PlaceScreen() {
+	const userId = useSession()?.user.id;
+	const { reportBusyness } = useReportBusyness();
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const { places, loading: placesLoading, error: placesError, refetch } = usePlaces();
 	const DbPlace = places.find((p) => p.id === id);
@@ -44,6 +48,32 @@ export default function PlaceScreen() {
 	const amenities = translatePlaceToInfoPage(place).amenities ?? [];
 	const busyness = translatePlaceToInfoPage(place).busyness ?? '—';
 	const level = translatePlaceToInfoPage(place).level ?? 'unknown';
+
+	// Användaren måste rapportera hur fullt det är för att kunna checka in
+	function handleCheckIn() {
+		if (!userId || !DbPlace) {
+			Alert.alert('Log in', 'You need to be logged in to check in.');
+			return;
+		}
+
+		async function reportAndCheckIn(level: Busyness) {
+			const result = await reportBusyness({ place_id: DbPlace!.id, user_id: userId!, level });
+			if (result) refetch();
+			await checkIn();
+		}
+
+		Alert.alert(
+			'How busy is it?',
+			'Report the busyness to check in.',
+			[
+				{ text: 'Low', onPress: () => reportAndCheckIn('low') },
+				{ text: 'Medium', onPress: () => reportAndCheckIn('medium') },
+				{ text: 'High', onPress: () => reportAndCheckIn('high') },
+			],
+			{ cancelable: false }, // Android: går inte att stänga genom att trycka utanför
+		);
+	}
+
 
 	return (
 		<ScrollView key={id} style={styles.screen} contentContainerStyle={styles.content}>
@@ -90,7 +120,7 @@ export default function PlaceScreen() {
 				{DbPlace && (
 					<TouchableOpacity
 						style={styles.checkInButton}
-						onPress={myCheckIn ? checkOut : checkIn}
+						onPress={myCheckIn ? checkOut : handleCheckIn}
 						disabled={saving}
 						activeOpacity={0.8}
 					>
