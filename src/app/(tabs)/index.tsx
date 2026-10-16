@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import MapView, { LatLng, Region } from 'react-native-maps';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMapPlaces } from '@/src/hooks/useMapPlaces';
 import { useCampusBuildings } from '@/src/hooks/useCampusBuildings';
 import { useUserLocation } from '@/src/hooks/useUserLocation';
 import { useSession } from '@/src/hooks/useSession';
 import { FALLBACK_COORDS } from '@/src/constants';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { colors, spacing } from '@/src/theme';
+import { spacing,colors } from '@/src/theme';
 import { MapSearchBar } from '@/src/components/MapSearchBar';
 import { PlaceMarker } from '@/src/components/PlaceMarker';
 import { BuildingMarker } from '@/src/components/BuildingMarker';
@@ -133,8 +133,7 @@ export default function Map() {
     router.push({ pathname: '/building/[id]', params: { id } });
   };
 
-  // Långtryck på kartan börjar lägga till en plats där. Nålen står still mitt på skärmen och man flyttar
-  // kartan under den, så kartan centreras på punkten man höll in på.
+  // Långtryck på kartan sätter ut en grön markör där den nya platsen ska ligga
   const startDraft = (coordinate: LatLng) => {
     if (!session) {
       Alert.alert('Log in', 'You need to be logged in to add a place.');
@@ -156,11 +155,10 @@ export default function Map() {
     if (camera) setHeading(camera.heading);
   };
 
-  // När kartan stannat: uppdatera kompassen och vilka husbubblor som syns, och om man håller på
-  // att lägga till en plats är nålens position kartans nya mittpunkt
+  // När kartan stannat: uppdatera kompassen, och om man håller på att lägga till en plats
+  // är nålens position kartans nya mittpunkt
   const handleRegionChangeComplete = (region: Region) => {
     updateHeading();
-    setZoomedIn(region.latitudeDelta < SHOW_EMPTY_BUILDINGS_DELTA);
     if (draft) setDraft({ latitude: region.latitude, longitude: region.longitude });
   };
 
