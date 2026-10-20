@@ -14,12 +14,15 @@ import { colors, radius, spacing, type } from '@/src/theme';
 import { MapSearchBar } from '@/src/components/MapSearchBar';
 import { PlaceMarker } from '@/src/components/PlaceMarker';
 import { MapCompass } from '@/src/components/MapCompass';
+import { BusynessLegend } from '@/src/components/BusynessLegend';
 import { pickVisibleLabels } from '@/src/utils/pickVisibleLabels';
 
 // Storlek på de runda knapparna nere på kartan (kompassen och plus-knappen)
 const MAP_BUTTON_SIZE = 56;
 // Ungefärlig höjd på kartans logga och "Legal"-länk längst ner
 const MAP_ATTRIBUTION_HEIGHT = 28;
+// Ungefärlig höjd på sökfältet högst upp, så att legenden kan läggas precis under det
+const SEARCH_BAR_HEIGHT = 48;
 // Namnen på platserna visas bara när man zoomat in så här långt (mindre värde = mer inzoomat)
 const LABEL_ZOOM_DELTA = 0.01;
 
@@ -250,6 +253,14 @@ export default function Map() {
         />
       )}
 
+      {/* Förklaring till färgen på prickarna, uppe till vänster under sökfältet. Ligger före sökfältet
+          så att träfflistan hamnar ovanpå. Döljs när man lägger till en plats. */}
+      {!draft && (
+        <BusynessLegend
+          style={[styles.legend, { top: insets.top + spacing.sm + SEARCH_BAR_HEIGHT + spacing.sm }]}
+        />
+      )}
+
       <View style={[styles.searchBar, { top: insets.top + spacing.sm }]}>
         <MapSearchBar onSelect={(place) => router.setParams({ focus: place.id })} />
       </View>
@@ -334,6 +345,10 @@ const styles = StyleSheet.create({
     right: spacing.md,
   },
   compass: {
+    position: 'absolute',
+    left: spacing.md,
+  },
+  legend: {
     position: 'absolute',
     left: spacing.md,
   },
