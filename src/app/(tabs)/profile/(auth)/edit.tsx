@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { View, TextInput, Button, StyleSheet, Text } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text, Alert, Linking, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useProfile } from '../../../../hooks/useProfile';
+import * as FileSystem from "expo-file-system";
+import { decode } from "base64-arraybuffer";
+import { supabase } from '@/src/utils/supabase';
 
 export default function editProfilePage() {
 	const { profile, loading, error, updateProfile } = useProfile();
@@ -21,21 +24,52 @@ export default function editProfilePage() {
 		setprofilePictureUrl(profile.avatar_url ?? '');
 	}, [profile]);
 
+	const uploadImage = async(uri: string, mimeType?: string) => {
+		const { data: { user } } = await supabase.auth.getUser();
+		if (!user) throw new Error('Not logged in');
+
+		const base64 = await new FileSystem.File(uri).base64();  
+		const arrayBuffer = decode(base64);
+		const fileExt = uri.split('.').pop()?.split('?')[0] ?? 'jpg';
+		const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+		const { error } = await supabase.storage
+			.from('profile_pictures') // Replace with your storage bucket name
+			.upload(fileName, arrayBuffer, {
+				contentType: mimeType ?? `image/${fileExt}`
+			});
+		if (error) throw error;
+		return supabase.storage.from('profile_pictures').getPublicUrl(fileName).data.publicUrl;
+	};
+
 	const pickImage = async () => {
-		const { status } = await ImagePicker.getMediaLibraryPermissionsAsync();
+		const { status, canAskAgain } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+		
 		if(status !== 'granted') {
-			alert('You need to give the app access to your photos to be able to choose a profile picture.')
+			if(!canAskAgain){
+				Alert.alert("Premission needed", "Enable photo access in your device settings",
+				[
+					{text: "Cancel", style: 'cancel'},
+					{text: "Open settings", onPress: () => Linking.openSettings()},
+				]
+				);
+			}
 			return;
 		}
-
+		
 		const result = await ImagePicker.launchImageLibraryAsync({
-			mediaTypes: ImagePicker.MediaTypeOptions.Images,
+			mediaTypes: ['images'],
 			allowsEditing: true,
 			aspect: [1, 1],
 		});
 
-		if(!result.canceled){
-			setprofilePictureUrl(result.assets[0].uri);
+		if(result.canceled) return;
+		
+		const imageUri = result.assets[0];
+		try {
+			const publicUrl = await uploadImage(imageUri.uri, imageUri.mimeType);
+			setprofilePictureUrl(publicUrl);
+		} catch (error: any) {
+			Alert.alert('Upload failed', error.message ?? 'Something went wrong');
 		}
 	}
 
@@ -54,10 +88,12 @@ export default function editProfilePage() {
 
 	return (
 		<View style={styles.container}>
-			{/* Platshållare tills uppladdning av profilbilder finns */}
-			<View style={[styles.preview, styles.previewPlaceholder]}>
-				<Ionicons name="person-outline" size={80} color="grey" />
-			</View>
+			{profilePictureUrl ? ( <Image source={{ uri: profilePictureUrl }} style={styles.preview} resizeMode="cover" />
+			) : (
+				<View style={[styles.preview, styles.previewPlaceholder]}>
+					<Ionicons name="person-outline" size={80} color="grey" />
+				</View>
+			)}
 			<Button title="Choose profile picture" onPress={pickImage} />
 			<TextInput style={styles.input} value={name} onChangeText={setName} placeholder='Name'/>
 			<TextInput style={styles.input} value={bio} onChangeText={setBio} placeholder='Bio'/>
@@ -65,6 +101,7 @@ export default function editProfilePage() {
 		</View>
 	);
 }
+
 	
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },

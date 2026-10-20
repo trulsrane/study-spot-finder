@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback} from 'react';
 import { supabase } from '@/src/utils/supabase';
 import { Profile, ProfileUpdate } from '@/src/types/db';
 import { useSession } from '@/src/hooks/useSession';
@@ -9,6 +9,8 @@ export function useProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const refetch = useCallback(() => setReloadKey((k) => k + 1), []);
 
   useEffect(() => {
     // Inte inloggad: ingen profil att hämta
@@ -33,7 +35,7 @@ export function useProfile() {
     })();
 
     return () => { cancelled = true; };
-  }, [userId]);
+  }, [userId, reloadKey]);
 
   // Returnerar ett felmeddelande, eller null om det gick bra.
   async function updateProfile(updates: ProfileUpdate) {
@@ -45,5 +47,7 @@ export function useProfile() {
     return error ? error.message : null; // returnerar felmeddelande om det finns ett, annars null. null betyder att det gick bra.
   }
 
-  return { profile, loading, error, updateProfile }; // returnerar profilen, laddningsstatus, eventuellt felmeddelande och funktionen för att uppdatera profilen
+  return { profile, loading, error, updateProfile, refetch }; // returnerar profilen, laddningsstatus, eventuellt felmeddelande och funktionen för att uppdatera profilen
+
+  
 }

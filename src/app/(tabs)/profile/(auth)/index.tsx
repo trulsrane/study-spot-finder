@@ -1,7 +1,6 @@
-import { View, Text, StyleSheet, Button, ScrollView, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, Button, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useProfile } from '@/src/hooks/useProfile';
-import { useRouter, Link } from 'expo-router'
+import { useRouter, Link, useFocusEffect } from 'expo-router'
 import { usePlaces } from '@/src/hooks/usePlaces';
 import { useFavorites } from '@/src/hooks/useFavorites';
 import { useMyReviews } from '@/src/hooks/useMyReviews';
@@ -9,11 +8,12 @@ import { colors, radius, spacing, type } from '@/src/theme';
 import { Card } from '@/src/components/CardContainer';
 import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards';
 import { supabase } from '@/src/utils/supabase';
+import { useCallback, useRef } from 'react';
 
 
 export default function ProfilePage() {
 	const router = useRouter();
-	const { profile, loading: profileLoading, error: profileError } = useProfile();
+	const { profile, loading: profileLoading, error: profileError, refetch, } = useProfile();
 	const { places, loading: placesLoading, error: placesError } = usePlaces();
 	const { favorites, loading: favoritesLoading, error: favoritesError, toggleFavorite, isFavorite } = useFavorites();
 	const favoritePlaces = places.filter((p) => favorites.includes(p.id))
@@ -21,6 +21,17 @@ export default function ProfilePage() {
 
 	const loading = profileLoading || placesLoading || favoritesLoading;
 	const error = profileError ?? placesError ?? favoritesError;
+
+	const isFirstFocus = useRef(true);
+	  useFocusEffect(
+		useCallback(() => {
+		  if (isFirstFocus.current) {
+			isFirstFocus.current = false;
+			return;
+		  }
+		  refetch();
+		}, [refetch])
+	  );
 
 	if (loading) return <Text style={styles.message}>Loading...</Text>;
 	if (error) return <Text style={styles.message}>{error}</Text>;
@@ -34,10 +45,12 @@ export default function ProfilePage() {
 				<Button title="Friends" onPress={() => router.push('/profile/friends')} />
 			</View>
 			<View style={styles.profileinfo}>
-				{/* Platshållare tills uppladdning av profilbilder finns */}
-				<View style={[styles.profilePicture, styles.profilePicturePlaceholder]}>
-					<Ionicons name="person-outline" size={80} color="grey" />
-				</View>
+				{profile.avatar_url ? ( 
+					<Image source={{ uri: profile.avatar_url }} 
+					style={styles.profilePicture} 
+					resizeMode="cover" 
+					/>
+				) : null}
 				<Text style={styles.name}>{profile.username}</Text>
 				<Text style={styles.bio}>Bio: {profile.description}</Text>
 			</View>
@@ -111,11 +124,6 @@ const styles = StyleSheet.create({
 		height: 200,
 		borderRadius: 100,
 		marginBottom: 16,
-	},
-	profilePicturePlaceholder: {
-		backgroundColor: 'lightgrey',
-		alignItems: 'center',
-		justifyContent: 'center',
 	},
 	profileinfo: {
 		alignItems: 'center',
