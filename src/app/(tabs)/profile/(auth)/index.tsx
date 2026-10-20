@@ -31,6 +31,7 @@ export default function ProfilePage() {
 			<View style={styles.buttonContainer}>
 				<Button title="Edit Profile" onPress={() => router.push('/profile/edit')} />
 				<Button title="Log out" onPress={() => supabase.auth.signOut()} />
+				<Button title="Friends" onPress={() => router.push('/profile/friends')} />
 			</View>
 			<View style={styles.profileinfo}>
 				{/* Platshållare tills uppladdning av profilbilder finns */}
