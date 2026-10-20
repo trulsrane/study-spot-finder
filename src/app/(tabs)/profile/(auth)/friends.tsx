@@ -109,7 +109,8 @@ export default function FriendsScreen() {
 					{outgoing.map((f) => (
 						<View key={f.id} style={styles.row}>
 							<Text style={styles.name}>{nameOf(f)}</Text>
-							<TouchableOpacity style={styles.plainButton} onPress={() => run(() => removeFriendship(f.id))} disabled={busy}> {/* Avbryt skickad förfrågan */}
+							{/* Avbryt skickad förfrågan */}
+							<TouchableOpacity style={styles.plainButton} onPress={() => run(() => removeFriendship(f.id))} disabled={busy}>
 								<Text style={styles.mutedText}>Cancel</Text>
 							</TouchableOpacity>
 						</View>
@@ -125,7 +126,8 @@ export default function FriendsScreen() {
 				friends.map((f) => (
 					<View key={f.id} style={styles.row}>
 						<Text style={styles.name}>{nameOf(f)}</Text>
-						<TouchableOpacity style={styles.plainButton} onPress={() => confirmRemove(f)} disabled={busy}> {/* Tar bort vänrelationen, visar en bekräftelsedialog först */}
+						{/* Tar bort vänrelationen, visar en bekräftelsedialog först */}
+						<TouchableOpacity style={styles.plainButton} onPress={() => confirmRemove(f)} disabled={busy}>
 							<Text style={styles.mutedText}>Remove</Text>
 						</TouchableOpacity>
 					</View>
