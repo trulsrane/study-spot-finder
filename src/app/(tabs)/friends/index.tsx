@@ -138,7 +138,7 @@ export default function FriendsScreen() {
 }
 
 const styles = StyleSheet.create({
-	container: { flex: 1, padding: spacing.md },
+	container: { flex: 1, padding: spacing.md, backgroundColor: colors.background},
 	caption: { ...type.heading, color: colors.text, marginTop: spacing.lg, marginBottom: spacing.sm },
 	message: { ...type.body, color: colors.textMuted },
 	addRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
@@ -173,4 +173,5 @@ const styles = StyleSheet.create({
 	mutedText: { color: colors.textMuted, fontSize: type.buttonText.fontSize },
 	error: { ...type.caption, color: colors.favorite, marginTop: spacing.xs },
 	info: { ...type.caption, color: colors.textMuted, marginTop: spacing.xs },
+
 });

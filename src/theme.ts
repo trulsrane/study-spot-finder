@@ -32,6 +32,9 @@ export const colors = {
   busynessDotHigh: '#C74068',
   buttonBackground: '#fff',
   greenButtonBackground: '#B8CB9E',
+  // Mörkare salviagrön för primärknappar och ikoner, samt färgen på profilens omslag
+  primary: '#76885F',
+  coverBackground: '#CBD8BC',
   cardBackground: '#fff',
   imageBackground: 'lightgray',
   

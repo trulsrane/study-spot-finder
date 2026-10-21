@@ -7,6 +7,7 @@ import { useProfile } from '../../../../hooks/useProfile';
 import * as FileSystem from "expo-file-system";
 import { decode } from "base64-arraybuffer";
 import { supabase } from '@/src/utils/supabase';
+import { TabBarIcon } from '@/src/components/TabBarIcon';
 
 export default function editProfilePage() {
 	const { profile, loading, error, updateProfile } = useProfile();
@@ -83,6 +84,13 @@ export default function editProfilePage() {
 		else router.back();
 	}
 
+	const handleLogout = () => {
+		Alert.alert('Log out', 'Are you sure you want to log out?', [
+			{ text: 'Cancel', style: 'cancel' },
+			{ text: 'Log out', style: 'destructive', onPress: () => supabase.auth.signOut() },
+		]);
+	}
+
 	if (loading) return <Text style={styles.message}>Loading...</Text>;
 	if (error) return <Text style={styles.message}>{error}</Text>;
 
@@ -98,6 +106,10 @@ export default function editProfilePage() {
 			<TextInput style={styles.input} value={name} onChangeText={setName} placeholder='Name'/>
 			<TextInput style={styles.input} value={bio} onChangeText={setBio} placeholder='Bio'/>
 			<Button title='Save' onPress={handleSave}/>
+
+			<View style={styles.logout}>
+				<Button title='Log out' color='#C74068' onPress={handleLogout} />
+			</View>
 		</View>
 	);
 }
@@ -125,4 +137,5 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   message: { padding: 16 },
+  logout: { marginTop: 'auto', marginBottom: 'auto' },
 });

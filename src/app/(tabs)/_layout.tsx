@@ -5,7 +5,7 @@ import { useSession } from  '@/src/hooks/useSession';
 export default function TabLayout() {
 	const session = useSession();
   return (
-    <NativeTabs minimizeBehavior="onScrollDown">
+    <NativeTabs minimizeBehavior="never">
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Badge>9+</NativeTabs.Trigger.Badge>
         <NativeTabs.Trigger.Icon sf={{ default: 'map', selected: 'map.fill' }} />
