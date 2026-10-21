@@ -13,7 +13,7 @@ import { useCallback, useRef } from 'react';
 
 export default function ProfilePage() {
 	const router = useRouter();
-	const { profile, loading: profileLoading, error: profileError, refetch, } = useProfile();
+	const { profile, loading: profileLoading, error: profileError, refetch } = useProfile();
 	const { places, loading: placesLoading, error: placesError } = usePlaces();
 	const { favorites, loading: favoritesLoading, error: favoritesError, toggleFavorite, isFavorite } = useFavorites();
 	const favoritePlaces = places.filter((p) => favorites.includes(p.id))
