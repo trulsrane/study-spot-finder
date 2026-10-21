@@ -33,7 +33,7 @@ export default function editProfilePage() {
 		const fileExt = uri.split('.').pop()?.split('?')[0] ?? 'jpg';
 		const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 		const { error } = await supabase.storage
-			.from('profile_pictures') // Replace with your storage bucket name
+			.from('profile_pictures')
 			.upload(fileName, arrayBuffer, {
 				contentType: mimeType ?? `image/${fileExt}`
 			});
