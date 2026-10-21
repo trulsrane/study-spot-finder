@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNearbyPlace, useNearbyPlaces, } from '@/src/hooks/useNearbyPlaces';
 import { usePlaces } from '@/src/hooks/usePlaces';
 import { colors, spacing, type, radius } from '@/src/theme';
@@ -12,6 +12,9 @@ import { useCheckIns } from '@/src/hooks/useCheckIns';
 import { useFavorites } from '@/src/hooks/useFavorites';
 import { Image } from 'react-native';
 import { ReviewForm } from '@/src/components/ReviewForm';
+import { BusynessReportForm } from '@/src/components/BusynessReportForm';
+import { Busyness } from '@/src/types/db';
+import { useReportBusyness } from '@/src/hooks/useReportBusyness';
 
 const tagColorMap: Record<string, string> = {
 	low: colors.busynessLow,
@@ -21,8 +24,10 @@ const tagColorMap: Record<string, string> = {
 };
 // Panelen som dras upp från kartan. Egen fil från listans detaljsida, så de kan visa olika saker framöver.
 export default function PlaceScreen() {
+	const userId = useSession()?.user.id;
+	const { reportBusyness } = useReportBusyness();
 	const { id } = useLocalSearchParams<{ id: string }>();
-	const { places, loading: placesLoading, error: placesError } = usePlaces();
+	const { places, loading: placesLoading, error: placesError, refetch } = usePlaces();
 	const DbPlace = places.find((p) => p.id === id);
 	const images = DbPlace?.image_urls ?? [];
 
@@ -44,35 +49,65 @@ export default function PlaceScreen() {
 	const busyness = translatePlaceToInfoPage(place).busyness ?? '—';
 	const level = translatePlaceToInfoPage(place).level ?? 'unknown';
 
+	// Användaren måste rapportera hur fullt det är för att kunna checka in
+	function handleCheckIn() {
+		if (!userId || !DbPlace) {
+			Alert.alert('Log in', 'You need to be logged in to check in.');
+			return;
+		}
+
+		async function reportAndCheckIn(level: Busyness) {
+			const result = await reportBusyness({ place_id: DbPlace!.id, user_id: userId!, level });
+			if (result) refetch();
+			await checkIn();
+		}
+
+		Alert.alert(
+			'How busy is it?',
+			'Report the busyness to check in.',
+			[
+				{ text: 'Low', onPress: () => reportAndCheckIn('low') },
+				{ text: 'Medium', onPress: () => reportAndCheckIn('medium') },
+				{ text: 'High', onPress: () => reportAndCheckIn('high') },
+				// Visas bara på iOS, Android har max tre knappar och stänger istället vid tryck utanför/bakåt
+				{ text: 'Cancel', style: 'destructive' },
+			],
+			{ cancelable: true },
+		);
+	}
+
+
 	return (
 		<ScrollView key={id} style={styles.screen} contentContainerStyle={styles.content}>
 
+
+
 			<View style={styles.titleRow}>
+				<View style={styles.titleSide}>
+					<View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
+						<Text style={styles.tagText}><Ionicons name = 'person' color='#2F2319'/>{busyness}</Text>
+					</View>
+				</View>
+
 				<Text style={styles.title}>{place.name}</Text>
 
-				{/* Favoritmarkering, samma hjärta som på korten i listvyn. Bara för platser i databasen,
-				    Google-platser går inte att spara. */}
-				{DbPlace && (
-					<TouchableOpacity
-						onPress={() => toggleFavorite(DbPlace.id)}
-						hitSlop={8}
-						accessibilityLabel={isFavorite(DbPlace.id) ? 'Remove from favorites' : 'Add to favorites'}
-					>
-						<Ionicons
-							name={isFavorite(DbPlace.id) ? 'heart' : 'heart-outline'}
-							size={20}
-							color="#000"
-						/>
-					</TouchableOpacity>
-				)}
+				<View style={[styles.titleSide, styles.titleSideRight]}>
+					{DbPlace && (
+						<TouchableOpacity
+							onPress={() => toggleFavorite(DbPlace.id)}
+							hitSlop={8}
+							accessibilityLabel={isFavorite(DbPlace.id) ? 'Remove from favorites' : 'Add to favorites'}
+						>
+							<Ionicons
+								name={isFavorite(DbPlace.id) ? 'heart' : 'heart-outline'}
+								size={20}
+								color="#2F2319"
+							/>
+						</TouchableOpacity>
+					)}
+				</View>
 			</View>
 
-			{/* Tog bort rubrikerna, jag tänker att adressen säger sig själv */}
-			<Text style={styles.rowSmall}>
-				{place.address ?? ''}
-				{place.building ?? ''}
-				{place.floor != null && place.floor !== '' ? ` Floor: ${place.floor}` : ''}</Text>
-			<Text style={styles.rowSmall}>{place.latitude}°, {place.longitude}°</Text>
 
 			{/* Vill vi ha bilden mindre?*/}
 			<View style={styles.imageWrapper}>
@@ -87,16 +122,16 @@ export default function PlaceScreen() {
 
 				{/* Busyness, placerad längst upp i det vänstra hörnet, på bilden.
 				    Ligger inuti bildramen så att den följer med bilden. */}
-				<View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
+				{/* <View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
 					<Text style={styles.tagText}>{busyness}</Text>
-				</View>
+				</View> */}
 
 				{/* Samma knapp för båda: checkar ut om man redan är incheckad här, annars checkar den in.
 				    Visas bara för platser i databasen, Google-platser går inte att checka in på. */}
 				{DbPlace && (
 					<TouchableOpacity
 						style={styles.checkInButton}
-						onPress={myCheckIn ? checkOut : checkIn}
+						onPress={myCheckIn ? checkOut : handleCheckIn}
 						disabled={saving}
 						activeOpacity={0.8}
 					>
@@ -105,6 +140,12 @@ export default function PlaceScreen() {
 					</TouchableOpacity>
 				)}
 			</View>
+			{/* Tog bort rubrikerna, jag tänker att adressen säger sig själv */}
+			<Text style={styles.rowSmall}>
+				{[place.address, place.building].filter(Boolean).join(' ')}
+				{place.floor != null && place.floor !== '' ? ` Floor: ${place.floor}` : ''}
+			</Text>
+			<Text style={styles.rowSmall}>{place.latitude}°, {place.longitude}°</Text>
 
 
 			{/* Vägbeskrivning visas bara för platser från databasen */}
@@ -117,6 +158,8 @@ export default function PlaceScreen() {
 					<Text style={styles.directionsText}>Directions</Text>
 				</TouchableOpacity>
 			)}
+			{DbPlace && <BusynessReportForm placeId={DbPlace.id} onReported={refetch} />}
+
 
 
 			{/* Ikonerna för bekvämligheterna som finns på studieplatsen */}
@@ -189,7 +232,8 @@ export default function PlaceScreen() {
 
 const styles = StyleSheet.create({
 	content: {
-		padding: spacing.lg,
+		paddingTop: spacing.lg,
+		padding: spacing.md,
 	},
 	missing: {
 		...type.body,
@@ -217,14 +261,22 @@ const styles = StyleSheet.create({
 	},
 	titleRow: {
 		flexDirection: 'row',
-		alignItems: 'center',
+		alignItems: 'flex-start',
 		gap: spacing.sm,
+		marginBottom: spacing.sm,
+	},
+	titleSide: {
+		flex: 1,
+		minWidth: 90,
+	},
+	titleSideRight: {
+		alignItems: 'flex-end',
 	},
 	title: {
 		...type.title,
-		flex: 1,
 		color: colors.text,
-		marginBottom: spacing.sm,
+		textAlign: 'center',
+		flexShrink: 1, // långa namn radbryts istället för att trycka ut sidorna
 	},
 	amenitiesRow: {
 		flexDirection: 'row',
@@ -253,10 +305,6 @@ const styles = StyleSheet.create({
 	},
 	tag: {
 		alignSelf: 'flex-start',
-		position: 'absolute',
-		// Mätt från bildens hörn, eftersom etiketten ligger inuti bildramen
-		top: 12,
-		left: 12,
 		borderRadius: radius.pill,
 		paddingHorizontal: 12,
 		paddingVertical: 5,

@@ -60,12 +60,16 @@ export default function PlaceScreen() {
 				<Text style={styles.tagText}>{busyness}</Text>
 			</View>
 
-
 			<Text style={styles.title}>{place.name}</Text>
 
 			{/* Tog bort rubrikerna, jag tänker att adressen säger sig själv */}
-			<Text style={styles.rowSmall}>{place.address ?? ''} {place.building ?? ''} {place.floor ?? ''}</Text>
+			{/* <Text style={styles.rowSmall}>{place.address ?? ''} {place.building ?? ''} {place.floor ?? ''}</Text> */}
+			<Text style={styles.rowSmall}>
+				{place.address ?? ''}
+				{place.building ?? ''}
+				{place.floor != null && place.floor !== '' ? ` Floor: ${place.floor}` : ''}</Text>
 			<Text style={styles.rowSmall}>{place.latitude}°, {place.longitude}°</Text>
+			{/* <Text style={styles.rowSmall}>{place.latitude}°, {place.longitude}°</Text> */}
 			{/* Vägbeskrivning visas bara för platser från databasen */}
 			{DbPlace && (
 				<TouchableOpacity
@@ -73,7 +77,7 @@ export default function PlaceScreen() {
 					onPress={() => openDirections(DbPlace.latitude, DbPlace.longitude)}
 				>
 					<Ionicons name="navigate-outline" size={16} color={colors.icon} />
-					<Text style={styles.directionsText}>Vägbeskrivning</Text>
+					<Text style={styles.directionsText}>Directions</Text>
 				</TouchableOpacity>
 			)}
 
@@ -148,9 +152,12 @@ export default function PlaceScreen() {
 
 const styles = StyleSheet.create({
 	content: {
-		padding: spacing.lg,
-		
+		padding: spacing.md,
+
 	},
+	textContent: {
+	paddingHorizontal: spacing.md,
+},
 	missing: {
 		...type.body,
 		color: colors.textMuted,

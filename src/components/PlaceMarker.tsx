@@ -1,4 +1,4 @@
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { Host, Image } from '@expo/ui/swift-ui';
@@ -7,10 +7,16 @@ import { frame, glassEffect } from '@expo/ui/swift-ui/modifiers';
 import { Place } from '@/src/types/db';
 import { colors } from '@/src/theme';
 
-const MARKER_SIZE = 32;
+// Storlekarna exporteras så att kartan kan räkna ut var namnen hamnar och undvika krockar
+export const MARKER_SIZE = 32;
 // Vald plats visas större så att man ser vilken som är öppen
-const SELECTED_MARKER_SIZE = 42;
+export const SELECTED_MARKER_SIZE = 42;
 const DOT_SIZE = 10;
+const LABEL_GAP = 2;
+export const LABEL_MAX_WIDTH = 120;
+const LABEL_LINE_HEIGHT = 14;
+// Lika mycket plats läggs under cirkeln som namnet tar ovanför, så att cirkeln alltid är i mitten
+export const LABEL_SPACE = LABEL_LINE_HEIGHT + LABEL_GAP;
 
 // Färgen på pricken som visar hur mycket folk det är. Okänt visar ingen prick.
 const busynessDotColor: Record<Place['current_busyness'], string | null> = {
@@ -24,49 +30,76 @@ type Props = {
   place: Place;
   selected: boolean;
   onPress: () => void;
+  showLabel: boolean;
 };
 
 // Rund glasmarkör med en ikon och en färgad prick för hur mycket folk det är på platsen.
-export function PlaceMarker({ place, selected, onPress }: Props) {
+export function PlaceMarker({ place, selected, onPress, showLabel }: Props) {
   const size = selected ? SELECTED_MARKER_SIZE : MARKER_SIZE;
   const iconSize = Math.round(size * 0.45);
   const dotColor = busynessDotColor[place.current_busyness];
 
   return (
     <Marker
+      // Kartan hänger inte med när en markör byter storlek, och ritar den då förskjuten.
+      // En ny key när storleken eller pricken ändras gör att markören skapas om och ritas rätt i stället.
+      key={`${selected}-${showLabel}-${place.current_busyness}`}
       coordinate={{ latitude: place.latitude, longitude: place.longitude }}
       onPress={onPress}
       anchor={{ x: 0.5, y: 0.5 }}
       zIndex={selected ? 1 : 0}
     >
       {/* pointerEvents="none" så att trycket går till Marker:n och inte fastnar i glaset */}
-      <View pointerEvents="none" style={{ width: size, height: size }}>
-        {Platform.OS === 'ios' ? (
-          // Liquid Glass, samma stil som klustren och knapparna på kartan
-          <Host matchContents>
-            <Image
-              systemName="book.fill"
-              size={iconSize}
-              color={colors.text}
-              modifiers={[
-                frame({ width: size, height: size }),
-                glassEffect({ glass: { variant: 'regular' }, shape: 'circle' }),
-              ]}
-            />
-          </Host>
-        ) : (
-          <View style={[styles.fallback, { width: size, height: size }]}>
-            <Ionicons name="book" size={iconSize} color={colors.text} />
-          </View>
+      <View pointerEvents="none" style={[styles.column, showLabel && { paddingBottom: LABEL_SPACE }]}>
+        {showLabel && (
+          <Text style={styles.label} numberOfLines={1}>
+            {place.name}
+          </Text>
         )}
 
-        {dotColor && <View style={[styles.dot, { backgroundColor: dotColor }]} />}
+        <View style={{ width: size, height: size }}>
+          {Platform.OS === 'ios' ? (
+            <Host matchContents>
+              <Image
+                systemName="book.fill"
+                size={iconSize}
+                color={colors.text}
+                modifiers={[
+                  frame({ width: size, height: size }),
+                  glassEffect({ glass: { variant: 'regular' }, shape: 'circle' }),
+                ]}
+              />
+            </Host>
+          ) : (
+            <View style={[styles.fallback, { width: size, height: size }]}>
+              <Ionicons name="book" size={iconSize} color={colors.text} />
+            </View>
+          )}
+
+          {dotColor && <View style={[styles.dot, { backgroundColor: dotColor }]} />}
+        </View>
       </View>
     </Marker>
   );
 }
 
 const styles = StyleSheet.create({
+  column: {
+    alignItems: 'center',
+  },
+  label: {
+    marginBottom: LABEL_GAP,
+    maxWidth: LABEL_MAX_WIDTH,
+    height: LABEL_LINE_HEIGHT,
+    lineHeight: LABEL_LINE_HEIGHT,
+    textAlign: 'center',
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.background,
+    // Ljus kant runt texten så att den syns mot kartan
+    textShadowRadius: 3,
+    textShadowOffset: { width: 0, height: 1 },
+  },
   fallback: {
     borderRadius: 999,
     backgroundColor: colors.buttonBackground,

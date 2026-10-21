@@ -16,9 +16,16 @@ import { BuildingMarker } from '@/src/components/BuildingMarker';
 import { MapCompass } from '@/src/components/MapCompass';
 import { MAP_BUTTON_SIZE, MapAddButton } from '@/src/components/MapAddButton';
 import { DraftPlaceBar } from '@/src/components/DraftPlaceBar';
+import { BusynessLegend } from '@/src/components/BusynessLegend';
 import { findBuilding } from '@/src/utils/campusBuildings';
+import { pickVisibleLabels } from '@/src/utils/pickVisibleLabels';
+
 // Ungefärlig höjd på kartans logga och "Legal"-länk längst ner
 const MAP_ATTRIBUTION_HEIGHT = 28;
+// Ungefärlig höjd på sökfältet högst upp, så att legenden kan läggas precis under det
+const SEARCH_BAR_HEIGHT = 48;
+// Namnen på platserna visas bara när man zoomat in så här långt (mindre värde = mer inzoomat)
+const LABEL_ZOOM_DELTA = 0.01;
 
 // Hus utan studieplatser visas bara när man zoomat in så här långt, annars blir campus fullt av bubblor
 const SHOW_EMPTY_BUILDINGS_DELTA = 0.012;
@@ -47,6 +54,11 @@ export default function Map() {
   // Sätts när den native kartan är klar. Innan dess kraschar anrop som getCamera().
   const mapReady = useRef(false);
 
+  // Platserna som visar sitt namn just nu. Bara när man zoomat in, och bara namn som inte krockar.
+  const [labelIds, setLabelIds] = useState<Set<string>>(new Set());
+  // Senaste området kartan stannade på, så att namnen kan räknas om när platserna eller valet ändras
+  const lastRegion = useRef<Region | null>(null);
+
   // Hämtar kartans kamera (mitt, vridning osv.), eller null om kartan inte är redo
   const getCameraSafely = async () => {
     if (!mapReady.current || !mapRef.current) return null;
@@ -69,6 +81,36 @@ export default function Map() {
     });
     return { placesOutside: outside, countByBuilding: counts };
   }, [places, buildings]);
+
+  // Räknar ut vilka namn som får plats. Frågar kartan var varje markör hamnar på skärmen,
+  // så att det blir rätt även när kartan är vriden.
+  const updateLabels = async (region: Region) => {
+    const map = mapRef.current;
+    if (region.latitudeDelta >= LABEL_ZOOM_DELTA || !mapReady.current || !map) {
+      setLabelIds(new Set());
+      return;
+    }
+    // Bara platser i närheten av det som syns, så att vi inte frågar kartan om alla platser
+    // Platser inne i ett hus har ingen egen markör, så de behöver inget namn
+    const nearby = placesOutside.filter(
+      (p) =>
+        Math.abs(p.latitude - region.latitude) < region.latitudeDelta &&
+        Math.abs(p.longitude - region.longitude) < region.longitudeDelta
+    );
+    try {
+      const points = await Promise.all(
+        nearby.map((p) => map.pointForCoordinate({ latitude: p.latitude, longitude: p.longitude }))
+      );
+      setLabelIds(pickVisibleLabels(nearby.map((place, i) => ({ place, point: points[i] })), focusedId));
+    } catch {
+      // Kartan kan ha försvunnit medan vi väntade, då struntar vi i att uppdatera
+    }
+  };
+
+  // Den valda markören är större och får välja namn först, så räkna om när valet eller platserna ändras
+  useEffect(() => {
+    if (lastRegion.current) updateLabels(lastRegion.current);
+  }, [placesOutside, focusedId]);
 
   const locationGranted = coords !== null;
   // useMemo så att initialRegion inte blir ett nytt objekt varje render (den används i fokus-effekten nedan)
@@ -159,6 +201,8 @@ export default function Map() {
   // är nålens position kartans nya mittpunkt
   const handleRegionChangeComplete = (region: Region) => {
     updateHeading();
+    lastRegion.current = region;
+    updateLabels(region);
     if (draft) setDraft({ latitude: region.latitude, longitude: region.longitude });
   };
 
@@ -207,6 +251,7 @@ export default function Map() {
             key={place.id}
             place={place}
             selected={place.id === focusedId}
+            showLabel={labelIds.has(place.id)}
             onPress={() => openPlace(place.id)}
           />
         ))}
@@ -234,6 +279,8 @@ export default function Map() {
           </View>
           {/* Liten prick som visar exakt var spetsen pekar */}
           <View style={styles.draftPinDot} />
+		  
+
         </View>
       )}
 
@@ -244,6 +291,14 @@ export default function Map() {
           size={MAP_BUTTON_SIZE}
           onPress={resetNorth}
           style={[styles.compass, { bottom: mapButtonBottom }]}
+        />
+      )}
+
+      {/* Förklaring till färgen på prickarna, uppe till vänster under sökfältet. Ligger före sökfältet
+          så att träfflistan hamnar ovanpå. Döljs när man lägger till en plats. */}
+      {!draft && (
+        <BusynessLegend
+          style={[styles.legend, { top: insets.top + spacing.sm + SEARCH_BAR_HEIGHT + spacing.sm }]}
         />
       )}
 
@@ -304,6 +359,10 @@ const styles = StyleSheet.create({
     right: spacing.md,
   },
   compass: {
+    position: 'absolute',
+    left: spacing.md,
+  },
+  legend: {
     position: 'absolute',
     left: spacing.md,
   },
