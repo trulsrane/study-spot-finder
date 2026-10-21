@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, Alert, Linking, Image} from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,10 @@ import { useAddPlace } from '@/src/hooks/useAddPlace';
 import { useSession } from '@/src/hooks/useSession';
 import { colors, radius, spacing, type } from '@/src/theme';
 import { amenityOptions } from '@/src/utils/translatePlaceToInfoPage';
+import * as FileSystem from "expo-file-system";
+import { decode } from "base64-arraybuffer";
+import { supabase } from '@/src/utils/supabase';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function NewPlaceScreen() {
   const { lat, lng } = useLocalSearchParams<{ lat: string; lng: string }>();
@@ -14,8 +18,9 @@ export default function NewPlaceScreen() {
   const longitude = Number(lng);
   const router = useRouter();
   const userId = useSession()?.user.id;
-  const { addPlace, saving, error } = useAddPlace();
+  const { addPlace, saving, error} = useAddPlace();
 
+  const [placePicture, setPlacePicture] = useState('');
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [building, setBuilding] = useState('');
@@ -44,6 +49,56 @@ export default function NewPlaceScreen() {
     return () => { cancelled = true; };
   }, [latitude, longitude]);
 
+	const uploadImage = async(uri: string, mimeType?: string) => {
+		const { data: { user } } = await supabase.auth.getUser();
+		if (!user) throw new Error('Not logged in');
+
+		const base64 = await new FileSystem.File(uri).base64();  
+		const arrayBuffer = decode(base64);
+		const fileExt = uri.split('.').pop()?.split('?')[0] ?? 'jpg';
+		const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+		const { error } = await supabase.storage
+			.from('place_images')
+			.upload(fileName, arrayBuffer, {
+				contentType: mimeType ?? `image/${fileExt}`
+			});
+		if (error) throw error;
+		return supabase.storage.from('place_images').getPublicUrl(fileName).data.publicUrl;
+	};
+
+	const pickImage = async () => {
+		const { status, canAskAgain } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+		
+		if(status !== 'granted') {
+			if(!canAskAgain){
+				Alert.alert("Premission needed", "Enable photo access in your device settings",
+				[
+					{text: "Cancel", style: 'cancel'},
+					{text: "Open settings", onPress: () => Linking.openSettings()},
+				]
+				);
+			}
+			return;
+		}
+		
+		const result = await ImagePicker.launchImageLibraryAsync({
+			mediaTypes: ['images'],
+			allowsEditing: true,
+			aspect: [1, 1],
+		});
+
+		if(result.canceled) return;
+		
+		const imageUri = result.assets[0];
+		try {
+			const publicUrl = await uploadImage(imageUri.uri, imageUri.mimeType);
+			setPlacePicture(publicUrl);
+		} catch (error: any) {
+			Alert.alert('Upload failed', error.message ?? 'Something went wrong');
+		}
+	}
+
+
   const canSave = name.trim().length > 0 && !saving && !!userId;
 
   const handleSave = async () => {
@@ -59,6 +114,7 @@ export default function NewPlaceScreen() {
       amenities,
       description: description.trim() || null,
       created_by: userId,
+    image_urls: placePicture ? [placePicture] : [],
     });
     if (place) router.back();
   };
@@ -69,6 +125,14 @@ export default function NewPlaceScreen() {
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
+	  <Pressable style={styles.imagePicker} onPress={pickImage}>{
+		placePicture ? ( <Image source={{ uri: placePicture }} style={styles.imagePreview} />
+		) : (
+			<>
+				<Ionicons name="images" size={80} color="grey" /><Text style={styles.label}>Add photo</Text>
+			</>
+		)}
+	  </Pressable>
       <Field label="Name *" value={name} onChangeText={setName} placeholder="e.g. Reading room, floor 2" />
       <Field label="Address" value={address} onChangeText={setAddress} placeholder="Fetching address..." />
       <Field label="Building" value={building} onChangeText={setBuilding} />
@@ -221,4 +285,18 @@ const styles = StyleSheet.create({
     ...type.buttonText,
     color: colors.text,
   },
+  imagePicker: {
+	height: 180,
+	borderRadius: radius.md,
+	  borderWidth: 1,
+	borderColor: colors.border,
+	backgroundColor: colors.buttonBackground,
+	alignItems: 'center',
+	justifyContent: 'center',
+	overflow: 'hidden'
+  },
+  imagePreview: {
+	width: '100%',
+	height: '100%'
+  }
 });
