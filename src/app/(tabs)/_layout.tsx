@@ -1,7 +1,9 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { useSession } from  '@/src/hooks/useSession';
 
 // Renderars på iOS och Android istället för standard js/ts-versionen.
 export default function TabLayout() {
+	const session = useSession();
   return (
     <NativeTabs minimizeBehavior="onScrollDown">
       <NativeTabs.Trigger name="index">
@@ -13,10 +15,15 @@ export default function TabLayout() {
         <NativeTabs.Trigger.Icon sf="list.bullet" />
         <NativeTabs.Trigger.Label>List</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
+	  <NativeTabs.Trigger name="friends" hidden={!session}>
+		<NativeTabs.Trigger.Icon sf={{ default: 'person.2.shield', selected: 'person.2.shield.fill' }} />
+		<NativeTabs.Trigger.Label>Friends</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
 	  <NativeTabs.Trigger name="profile">
 		<NativeTabs.Trigger.Icon sf={{ default: 'person', selected: 'person.fill' }} />
 		<NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
+	
     </NativeTabs>
   );
 }

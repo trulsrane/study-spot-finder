@@ -32,29 +32,47 @@ export default function ProfilePage() {
 		  refetch();
 		}, [refetch])
 	  );
-
+	  
 	if (loading) return <Text style={styles.message}>Loading...</Text>;
 	if (error) return <Text style={styles.message}>{error}</Text>;
 	if (!profile) return <Text style={styles.message}>No profile found</Text>;
 
 	return (
 		<ScrollView style={styles.container}>
-			<View style={styles.buttonContainer}>
-				<Button title="Edit Profile" onPress={() => router.push('/profile/edit')} />
-				<Button title="Log out" onPress={() => supabase.auth.signOut()} />
-				<Button title="Friends" onPress={() => router.push('/profile/friends')} />
+
+			<View style={styles.header}>
+				<View style={styles.buttonContainer}>
+				<Button title="Edit Profile" color={colors.text} onPress={() => router.push('/profile/edit')} />
 			</View>
-			<View style={styles.profileinfo}>
-				{profile.avatar_url ? ( 
-					<Image source={{ uri: profile.avatar_url }} 
-					style={styles.profilePicture} 
-					resizeMode="cover" 
-					/>
-				) : null}
+				{profile.avatar_url ? (
+					<Image source={{ uri: profile.avatar_url }} style={styles.profilePicture} />
+				) : (
+					<View style={[styles.profilePicture, styles.profilePictureFallback]}>
+						<Text style={styles.profilePictureInitial}>
+							{profile.username?.charAt(0).toUpperCase() ?? 'U'}
+						</Text>
+					</View>
+				)}
+
 				<Text style={styles.name}>{profile.username}</Text>
-				<Text style={styles.bio}>Bio: {profile.description}</Text>
+				{profile.description ? (
+					<Text style={styles.bio}>{profile.description}</Text>
+				) : null}
+
+				<View style={styles.stats}>
+					<View style={styles.statItem}>
+						<Text style={styles.statValue}>{favoritePlaces.length}</Text>
+						<Text style={styles.statLabel}>Favorites</Text>
+					</View>
+					<View style={styles.statDivider} />
+					<View style={styles.statItem}>
+						<Text style={styles.statValue}>{reviews.length}</Text>
+						<Text style={styles.statLabel}>Reviews</Text>
+					</View>
+				</View>
 			</View>
-			<Text style={styles.caption}>Favorite study places:</Text>
+
+			<Text style={styles.caption}>Favorite study places</Text>
 			<View style={styles.list}>
 				{favoritePlaces.map((item) => (
 					<Link
@@ -67,12 +85,7 @@ export default function ProfilePage() {
 				))}
 			</View>
 
-			{/* Tillfälligt: rå data för att testa useFavorites */}
-			{/* <Text>useFavorites (place_id:n):</Text>
-			<Text>{JSON.stringify(favorites, null, 2)}</Text> */}
-			{/* <Text>useMyReviews:</Text>
-			<Text>{reviewsLoading ? 'Laddar...' : reviewsError ?? JSON.stringify(reviews, null, 2)}</Text> */}
-			<Text style={styles.caption}>My reviews ({reviews.length}):</Text>
+			<Text style={styles.caption}>My reviews</Text>
 			<View style={styles.reviewContainer}>
 				{reviewsLoading ? (
 					<Text style={styles.message}>Loading reviews...</Text>
@@ -93,8 +106,6 @@ export default function ProfilePage() {
 									<Text style={styles.reviewPlace} numberOfLines={1}>
 										{review.places?.name ?? 'Unknown place'}
 									</Text>
-									
-									{/* Lade till datum, är det något vi vill ha med? */}
 									<Text style={styles.reviewDate}>
 										{new Date(review.created_at).toLocaleDateString('sv-SE')}
 									</Text>
@@ -109,7 +120,9 @@ export default function ProfilePage() {
 				)}
 			</View>
 
-
+			<View style={styles.logoutButton}>
+				<Button title="Log out" color={colors.favorite} onPress={() => supabase.auth.signOut()} />
+			</View>
 		</ScrollView>
 	);
 }
@@ -118,33 +131,15 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		padding: spacing.md,
-	},
-	profilePicture: {
-		width: 200,
-		height: 200,
-		borderRadius: 100,
-		marginBottom: 16,
-	},
-	profileinfo: {
-		alignItems: 'center',
-		paddingBottom: 16,
+		backgroundColor: colors.background
 	},
 	caption: {
 		...type.heading,
 		paddingBottom: 10,
 	},
-	name: {
-		...type.title,
-		color: colors.text,
-		paddingBottom: 10,
-	},
-	bio: {
-		fontSize: 14,
-		color: colors.textMuted,
-	},
 	buttonContainer: {
 		alignSelf: 'flex-end',
-		marginVertical: 12,
+		
 	},
 	list: {
 		flex: 1,
@@ -154,21 +149,8 @@ const styles = StyleSheet.create({
 		color: colors.textMuted,
 		padding: spacing.lg,
 	},
-	meta: {
-		...type.caption,
-		color: colors.textMuted,
-		marginTop: spacing.xs,
-	},
-	row: {
-		borderBottomColor: colors.border,
-		borderBottomWidth: 1,
-		padding: spacing.md,
-	},
 	reviewContainer: {
 
-	},
-	reviewList: {
-		marginBottom: spacing.lg,
 	},
 	reviewItem: {
 		backgroundColor: colors.cardBackground,
@@ -201,5 +183,73 @@ const styles = StyleSheet.create({
 		...type.body,
 		color: colors.text,
 		marginTop: spacing.xs,
+	},
+	logoutButton: {
+		marginTop: spacing.lg,
+		paddingBottom: spacing.xl,
+		alignSelf: 'center',
+	},
+	header: {
+		alignItems: 'center',
+		backgroundColor: colors.cardBackground,
+		borderRadius: radius.lg,
+		paddingVertical: spacing.md,
+		paddingHorizontal: spacing.md,
+		marginBottom: spacing.lg,
+	},
+	profilePicture: {
+		width: 120,
+		height: 120,
+		borderRadius: radius.pill,
+		marginBottom: spacing.md,
+	},
+	profilePictureFallback: {
+		backgroundColor: colors.amenityCircle,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	profilePictureInitial: {
+		fontSize: 44,
+		fontWeight: '600',
+		color: colors.text,
+	},
+	name: {
+		...type.title,
+		color: colors.text,
+	},
+	bio: {
+		...type.body,
+		color: colors.textMuted,
+		textAlign: 'center',
+		maxWidth: 280,
+		marginTop: spacing.xs,
+	},
+	stats: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		alignSelf: 'stretch',
+		marginTop: spacing.lg,
+		paddingTop: spacing.md,
+		borderTopWidth: StyleSheet.hairlineWidth,
+		borderTopColor: colors.border,
+	},
+	statItem: {
+		flex: 1,
+		alignItems: 'center',
+		paddingVertical: spacing.xs,
+	},
+	statValue: {
+		...type.heading,
+		color: colors.text,
+	},
+	statLabel: {
+		...type.caption,
+		color: colors.textMuted,
+		marginTop: 2,
+	},
+	statDivider: {
+		width: StyleSheet.hairlineWidth,
+		height: 28,
+		backgroundColor: colors.border,
 	},
 });
