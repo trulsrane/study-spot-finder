@@ -80,9 +80,32 @@ export default function PlaceScreen() {
 	return (
 		<ScrollView key={id} style={styles.screen} contentContainerStyle={styles.content}>
 
+			<View style={styles.topRow}>
+				<View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
+					<Text style={styles.tagText}>
+						<Ionicons name="person" color="#2F2319" /> {busyness}
+					</Text>
+				</View>
 
+				{DbPlace && (
+					<TouchableOpacity
+						onPress={() => toggleFavorite(DbPlace.id)}
+						hitSlop={8}
+						accessibilityLabel={isFavorite(DbPlace.id) ? 'Remove from favorites' : 'Add to favorites'}
+					>
+						<Ionicons
+							name={isFavorite(DbPlace.id) ? 'heart' : 'heart-outline'}
+							size={20}
+							color="#2F2319"
+						/>
+					</TouchableOpacity>
+				)}
+			</View>
 
-			<View style={styles.titleRow}>
+			{/* Rad 2: titeln, centrerad på hela sidans bredd */}
+			<Text style={styles.title}>{place.name}</Text>
+
+			{/* <View style={styles.titleRow}>
 				<View style={styles.titleSide}>
 					<View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
 						<Text style={styles.tagText}><Ionicons name = 'person' color='#2F2319'/>{busyness}</Text>
@@ -106,7 +129,8 @@ export default function PlaceScreen() {
 						</TouchableOpacity>
 					)}
 				</View>
-			</View>
+			</View> */}
+
 
 
 			{/* Vill vi ha bilden mindre?*/}
@@ -259,24 +283,36 @@ const styles = StyleSheet.create({
 		backgroundColor: colors.background,
 		flex: 1,
 	},
-	titleRow: {
+	// titleRow: {
+	// 	flexDirection: 'row',
+	// 	alignItems: 'flex-start',
+	// 	gap: spacing.sm,
+	// 	marginBottom: spacing.sm,
+	// },
+	// titleSide: {
+	// 	flex: 1,
+	// 	minWidth: 90,
+	// },
+	// titleSideRight: {
+	// 	alignItems: 'flex-end',
+	// },
+	// title: {
+	// 	...type.title,
+	// 	color: colors.text,
+	// 	textAlign: 'center',
+	// 	flexShrink: 1, // långa namn radbryts istället för att trycka ut sidorna
+	// },
+	topRow: {
 		flexDirection: 'row',
-		alignItems: 'flex-start',
-		gap: spacing.sm,
-		marginBottom: spacing.sm,
-	},
-	titleSide: {
-		flex: 1,
-		minWidth: 90,
-	},
-	titleSideRight: {
-		alignItems: 'flex-end',
+		alignItems: 'center',
+		justifyContent: 'space-between', // taggen till vänster, hjärtat till höger
 	},
 	title: {
 		...type.title,
 		color: colors.text,
 		textAlign: 'center',
-		flexShrink: 1, // långa namn radbryts istället för att trycka ut sidorna
+		marginTop: spacing.xs,
+		marginBottom: spacing.xs,
 	},
 	amenitiesRow: {
 		flexDirection: 'row',
