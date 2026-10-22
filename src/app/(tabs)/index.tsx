@@ -15,6 +15,7 @@ import { MapSearchBar } from '@/src/components/MapSearchBar';
 import { PlaceMarker } from '@/src/components/PlaceMarker';
 import { MapCompass } from '@/src/components/MapCompass';
 import { BusynessLegend } from '@/src/components/BusynessLegend';
+import { AMENITY_FILTER_HEIGHT, AmenityFilter } from '@/src/components/AmenityFilter';
 import { pickVisibleLabels } from '@/src/utils/pickVisibleLabels';
 
 // Storlek på de runda knapparna nere på kartan (kompassen och plus-knappen)
@@ -53,6 +54,24 @@ export default function Map() {
   // Senaste området kartan stannade på, så att namnen kan räknas om när platserna eller valet ändras
   const lastRegion = useRef<Region | null>(null);
 
+  // Bekvämligheterna man filtrerar på. Tom lista betyder att alla platser visas.
+  const [amenityFilter, setAmenityFilter] = useState<string[]>([]);
+  const toggleAmenity = (key: string) =>
+    setAmenityFilter((current) =>
+      current.includes(key) ? current.filter((k) => k !== key) : [...current, key]
+    );
+  // Platserna som har alla valda bekvämligheter. Den valda platsen visas alltid,
+  // så att den inte försvinner om man sökt fram den eller kommit dit från en annan sida.
+  const visiblePlaces = useMemo(
+    () =>
+      amenityFilter.length === 0
+        ? places
+        : places.filter(
+            (p) => p.id === focusedId || amenityFilter.every((a) => p.amenities.includes(a))
+          ),
+    [places, amenityFilter, focusedId]
+  );
+
   // Hämtar kartans kamera (mitt, vridning osv.), eller null om kartan inte är redo
   const getCameraSafely = async () => {
     if (!mapReady.current || !mapRef.current) return null;
@@ -72,7 +91,7 @@ export default function Map() {
       return;
     }
     // Bara platser i närheten av det som syns, så att vi inte frågar kartan om alla platser
-    const nearby = places.filter(
+    const nearby = visiblePlaces.filter(
       (p) =>
         Math.abs(p.latitude - region.latitude) < region.latitudeDelta &&
         Math.abs(p.longitude - region.longitude) < region.longitudeDelta
@@ -90,7 +109,7 @@ export default function Map() {
   // Den valda markören är större och får välja namn först, så räkna om när valet eller platserna ändras
   useEffect(() => {
     if (lastRegion.current) updateLabels(lastRegion.current);
-  }, [places, focusedId]);
+  }, [visiblePlaces, focusedId]);
 
   const locationGranted = coords !== null;
   // useMemo så att initialRegion inte blir ett nytt objekt varje render (den används i fokus-effekten nedan)
@@ -218,7 +237,7 @@ export default function Map() {
         onPress={() => setFocusedId(null)}
         onLongPress={(e) => startDraft(e.nativeEvent.coordinate)}
       >
-        {places.map((place) => (
+        {visiblePlaces.map((place) => (
           <PlaceMarker
             key={place.id}
             place={place}
@@ -253,11 +272,22 @@ export default function Map() {
         />
       )}
 
-      {/* Förklaring till färgen på prickarna, uppe till vänster under sökfältet. Ligger före sökfältet
-          så att träfflistan hamnar ovanpå. Döljs när man lägger till en plats. */}
+      {/* Filterknapparna och förklaringen till färgen på prickarna ligger under sökfältet. De ligger före
+          sökfältet så att träfflistan hamnar ovanpå. Döljs när man lägger till en plats. */}
+      {!draft && (
+        <AmenityFilter
+          selected={amenityFilter}
+          onToggle={toggleAmenity}
+          style={[styles.amenityFilter, { top: insets.top + spacing.sm + SEARCH_BAR_HEIGHT + spacing.xs }]}
+        />
+      )}
+
       {!draft && (
         <BusynessLegend
-          style={[styles.legend, { top: insets.top + spacing.sm + SEARCH_BAR_HEIGHT + spacing.sm }]}
+          style={[
+            styles.legend,
+            { top: insets.top + spacing.sm + SEARCH_BAR_HEIGHT + spacing.xs + AMENITY_FILTER_HEIGHT + spacing.xs },
+          ]}
         />
       )}
 
@@ -347,6 +377,12 @@ const styles = StyleSheet.create({
   compass: {
     position: 'absolute',
     left: spacing.md,
+  },
+  // Lika bred som sökfältet
+  amenityFilter: {
+    position: 'absolute',
+    left: spacing.md,
+    right: spacing.md,
   },
   legend: {
     position: 'absolute',
