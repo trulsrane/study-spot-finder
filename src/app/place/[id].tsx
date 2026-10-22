@@ -80,8 +80,6 @@ export default function PlaceScreen() {
 	return (
 		<ScrollView key={id} style={styles.screen} contentContainerStyle={styles.content}>
 
-
-
 			<View style={styles.titleRow}>
 				<View style={styles.titleSide}>
 					<View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
@@ -108,7 +106,6 @@ export default function PlaceScreen() {
 				</View>
 			</View>
 
-
 			{/* Vill vi ha bilden mindre?*/}
 			<View style={styles.imageWrapper}>
 				{images.length > 0 ? (
@@ -119,12 +116,6 @@ export default function PlaceScreen() {
 					</View>
 				)}
 				{/* Databasen har ingen bild-kolumn än, så vi visar alltid platshållaren */}
-
-				{/* Busyness, placerad längst upp i det vänstra hörnet, på bilden.
-				    Ligger inuti bildramen så att den följer med bilden. */}
-				{/* <View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
-					<Text style={styles.tagText}>{busyness}</Text>
-				</View> */}
 
 				{/* Samma knapp för båda: checkar ut om man redan är incheckad här, annars checkar den in.
 				    Visas bara för platser i databasen, Google-platser går inte att checka in på. */}
@@ -140,26 +131,29 @@ export default function PlaceScreen() {
 					</TouchableOpacity>
 				)}
 			</View>
+			
 			{/* Tog bort rubrikerna, jag tänker att adressen säger sig själv */}
-			<Text style={styles.rowSmall}>
-				{[place.address, place.building].filter(Boolean).join(' ')}
-				{place.floor != null && place.floor !== '' ? ` Floor: ${place.floor}` : ''}
-			</Text>
-			<Text style={styles.rowSmall}>{place.latitude}°, {place.longitude}°</Text>
+			<View style={styles.addressRow}>
+				<View style={styles.addressText}>
+					<Text style={styles.rowSmall}>
+						{[place.address, place.building].filter(Boolean).join(' ')}
+						{place.floor != null && place.floor !== '' ? ` Floor: ${place.floor}` : ''}
+					</Text>
+					<Text style={styles.rowSmall}>{place.latitude}°, {place.longitude}°</Text>
+				</View>
 
+				{/* Vägbeskrivning visas bara för platser från databasen */}
+				{DbPlace && (
+					<TouchableOpacity
+						style={styles.directionsButton}
+						onPress={() => openDirections(DbPlace.latitude, DbPlace.longitude)}
+					>
+						<Ionicons name="navigate-outline" size={16} color={colors.icon} />
+						<Text style={styles.directionsText}>Directions</Text>
+					</TouchableOpacity>
+				)}
 
-			{/* Vägbeskrivning visas bara för platser från databasen */}
-			{DbPlace && (
-				<TouchableOpacity
-					style={styles.directionsButton}
-					onPress={() => openDirections(DbPlace.latitude, DbPlace.longitude)}
-				>
-					<Ionicons name="navigate-outline" size={16} color={colors.icon} />
-					<Text style={styles.directionsText}>Directions</Text>
-				</TouchableOpacity>
-			)}
-			{DbPlace && <BusynessReportForm placeId={DbPlace.id} onReported={refetch} />}
-
+			</View>
 
 
 			{/* Ikonerna för bekvämligheterna som finns på studieplatsen */}
@@ -176,6 +170,8 @@ export default function PlaceScreen() {
 				))}
 			</View>
 
+			{/* Rapportera in trängseln */}
+			{DbPlace && <BusynessReportForm placeId={DbPlace.id} onReported={refetch} />}
 
 			<Text style={styles.row}>Opening hours: {place.opening_hours ?? '—'}</Text>
 
@@ -276,7 +272,7 @@ const styles = StyleSheet.create({
 		...type.title,
 		color: colors.text,
 		textAlign: 'center',
-		flexShrink: 1, // långa namn radbryts istället för att trycka ut sidorna
+		flexShrink: 1, 
 	},
 	amenitiesRow: {
 		flexDirection: 'row',
@@ -355,22 +351,6 @@ const styles = StyleSheet.create({
 		fontSize: type.buttonText.fontSize,
 		fontWeight: type.buttonText.fontWeight,
 	},
-	directionsButton: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		alignSelf: 'flex-start',
-		gap: 6,
-		backgroundColor: colors.greenButtonBackground,
-		borderRadius: radius.pill,
-		paddingHorizontal: spacing.md,
-		paddingVertical: spacing.sm,
-		marginTop: spacing.sm,
-	},
-	directionsText: {
-		color: colors.text,
-		fontSize: type.buttonText.fontSize,
-		fontWeight: type.buttonText.fontWeight,
-	},
 
 	reviewItem: {
 		marginTop: spacing.sm,
@@ -429,6 +409,31 @@ const styles = StyleSheet.create({
 		flex: 1,
 		flexShrink: 1,
 		paddingRight: spacing.sm,
+	},
+	addressRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		gap: spacing.sm,
+	},
+	addressText: {
+		flex: 1
+	},
+	directionsButton: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		alignSelf: 'flex-start',
+		gap: 6,
+		backgroundColor: colors.greenButtonBackground,
+		borderRadius: radius.pill,
+		paddingHorizontal: spacing.md,
+		paddingVertical: spacing.sm,
+		marginTop: spacing.sm,
+	},
+	directionsText: {
+		color: colors.text,
+		fontSize: type.buttonText.fontSize,
+		fontWeight: type.buttonText.fontWeight,
 	},
 
 });
