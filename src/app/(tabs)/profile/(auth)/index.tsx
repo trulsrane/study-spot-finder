@@ -111,8 +111,8 @@ export default function ProfilePage() {
 				<View style={styles.shareRow}>
 					<Ionicons name="people" size={20} color={colors.primary} />
 					<View style={styles.shareText}>
-						<Text style={styles.shareTitle}>Share check-ins</Text>'
-						<Text style={styles.shareHint}>When enabled, your friends can see where you are checked in</Text>'
+						<Text style={styles.shareTitle}>Share check-ins</Text>
+						<Text style={styles.shareHint}>When enabled, your friends can see where you are checked in</Text>
 					</View>
 					<Switch value={sharing} onValueChange={toggleSharing} trackColor={{ true: colors.primary }} />
 				</View>
