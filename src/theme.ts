@@ -39,6 +39,7 @@ export const colors = {
   coverBackground: '#CBD8BC',
   cardBackground: '#fff',
   imageBackground: 'lightgray',
+  overlay: 'rgba(0, 0, 0, 0.25)',
   //För knapptryck med TouchableOpacityHighlight
   buttonpress: '#EEF3E8'
 };

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { Alert, View, Text, TextInput, TouchableOpacity, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSession } from '@/src/hooks/useSession';
 import { ReviewInsert } from '@/src/types/db';
@@ -8,9 +8,14 @@ import { colors, spacing, type, radius } from '@/src/theme';
 type ReviewFormProps = {
 	onSubmit: (input: Pick<ReviewInsert, 'user_id' | 'rating' | 'comment'>) => Promise<string | null>;
 	submitting: boolean;
+	// I popupen efter utcheckning: formuläret visas direkt, och Cancel/Post stänger popupen
+	alwaysOpen?: boolean;
+	onClose?: () => void;
+	// Ersätter utseendet på den vita rutan runt formuläret, t.ex. så att glaset syns bakom i popupen
+	style?: StyleProp<ViewStyle>;
 };
 
-export function ReviewForm({ onSubmit, submitting }: ReviewFormProps) {
+export function ReviewForm({ onSubmit, submitting, alwaysOpen, onClose, style }: ReviewFormProps) {
 	const userId = useSession()?.user.id;
 	const [open, setOpen] = useState(false);
 	const [rating, setRating] = useState(0);
@@ -19,7 +24,7 @@ export function ReviewForm({ onSubmit, submitting }: ReviewFormProps) {
 
 	// Visar först endast en knapp
 	// Om användaren klickar på "+Write a review" så visas formuläret
-	if (!open) {
+	if (!open && !alwaysOpen) {
 		return (
 			<TouchableOpacity style={styles.openButton} onPress={handleOpen}>
 				<Ionicons name="add" size={16} color={colors.icon} />
@@ -53,7 +58,7 @@ export function ReviewForm({ onSubmit, submitting }: ReviewFormProps) {
 		if (errorMessage) {
 			// setFormError(errorMessage);
 			// return;
-			Alert.alert('Cannot write a review', 'You have already written a review for this place.');
+			Alert.alert('Could not save review', errorMessage);
 			return;
 		}
 
@@ -61,10 +66,11 @@ export function ReviewForm({ onSubmit, submitting }: ReviewFormProps) {
 		setRating(0);
 		setComment('');
 		setOpen(false);
+		onClose?.();
 	}
 
 	return (
-		<View style={styles.form}>
+		<View style={[styles.form, style]}>
 			{/* Klickbara stjärnor där användaren kan klicka i sitt betyg */}
 			{/* Från claude... */}
 			{/* Kan ändra ikoner, utseende, osv senare <3 */}
@@ -96,7 +102,7 @@ export function ReviewForm({ onSubmit, submitting }: ReviewFormProps) {
 			<View style={styles.buttonsRow}>
 				<TouchableOpacity
 					style={styles.cancelButton}
-					onPress={() => { setOpen(false); setFormError(null); }}
+					onPress={() => { setOpen(false); setFormError(null); onClose?.(); }}
 					disabled={submitting}
 				>
 					<Text style={styles.cancelText}>Cancel</Text>

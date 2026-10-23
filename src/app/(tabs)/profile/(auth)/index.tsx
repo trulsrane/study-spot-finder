@@ -9,12 +9,14 @@ import { colors, radius, spacing, type } from '@/src/theme';
 import { Card } from '@/src/components/CardContainer';
 import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards';
 import { useCallback, useRef, useState, useEffect } from 'react';
+import { useUserLocation } from '@/src/hooks/useUserLocation';
 
 
 export default function ProfilePage() {
 	const router = useRouter();
 	const { profile, loading: profileLoading, error: profileError, refetch, updateProfile } = useProfile();
-	const { places, loading: placesLoading, error: placesError, refetch: refetchPlaces } = usePlaces();
+	const { coords } = useUserLocation();
+	const { places, loading: placesLoading, error: placesError, refetch: refetchPlaces } = usePlaces(coords, 50000); // 50 km radie, så alla i Umeå får med sina platser
 	const { favorites, loading: favoritesLoading, error: favoritesError, toggleFavorite, isFavorite, refetch: refetchFavorites } = useFavorites();
 	const favoritePlaces = places.filter((p) => favorites.includes(p.id))
 	const { reviews, loading: reviewsLoading, error: reviewsError, refetch: refetchReviews } = useMyReviews(profile?.id ?? '');
