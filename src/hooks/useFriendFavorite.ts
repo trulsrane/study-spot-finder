@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { supabase } from '@/src/utils/supabase';
 
-// place_id:n som en given användare har sparat i saved_places. Bara läsning.
+// place_id:n som en given användare har sparat i saved_places. Bara läsning
 export function useFriendFavorite(userId?: string) {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
