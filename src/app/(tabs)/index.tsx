@@ -21,6 +21,7 @@ import { findBuilding } from '@/src/utils/campusBuildings';
 import { AMENITY_FILTER_HEIGHT, AmenityFilter } from '@/src/components/AmenityFilter';
 import { pickVisibleLabels } from '@/src/utils/pickVisibleLabels';
 import { useFriendCheckIns } from '@/src/hooks/useFriendCheckIn';
+import { CheckInWithProfile } from '@/src/hooks/useCheckIns';
 
 // Ungefärlig höjd på kartans logga och "Legal"-länk längst ner
 const MAP_ATTRIBUTION_HEIGHT = 28;
@@ -90,18 +91,27 @@ export default function Map() {
     }
   };
 
-  // Platser inne i ett campushus visas som en siffra i husets bubbla, övriga som vanliga markörer
-  const { placesOutside, countByBuilding } = useMemo(() => {
-    // Vanligt objekt, eftersom komponenten heter Map och skuggar JavaScripts Map
+  // Platser inne i ett campushus visas som en siffra i husets bubbla, övriga som vanliga markörer.
+  // En vän som är incheckad i huset visas på bubblan, eftersom platserna där inte har egna markörer.
+  const { placesOutside, countByBuilding, friendByBuilding } = useMemo(() => {
+    // Vanliga objekt, eftersom komponenten heter Map och skuggar JavaScripts Map
     const counts: Record<string, number> = {};
+    const friends: Record<string, CheckInWithProfile> = {};
     const outside: typeof places = [];
     visiblePlaces.forEach((place) => {
       const building = findBuilding(buildings, place.latitude, place.longitude);
-      if (building) counts[building.id] = (counts[building.id] ?? 0) + 1;
-      else outside.push(place);
+      if (!building) {
+        outside.push(place);
+        return;
+      }
+      counts[building.id] = (counts[building.id] ?? 0) + 1;
+      // Den som checkade in senast i huset
+      const friend = friendsByPlace[place.id]?.[0];
+      const current = friends[building.id];
+      if (friend && (!current || friend.checked_in_at > current.checked_in_at)) friends[building.id] = friend;
     });
-    return { placesOutside: outside, countByBuilding: counts };
-  }, [visiblePlaces, buildings]);
+    return { placesOutside: outside, countByBuilding: counts, friendByBuilding: friends };
+  }, [visiblePlaces, buildings, friendsByPlace]);
 
   // Räknar ut vilka namn som får plats. Frågar kartan var varje markör hamnar på skärmen,
   // så att det blir rätt även när kartan är vriden.
@@ -287,6 +297,7 @@ export default function Map() {
               key={building.id}
               building={building}
               count={count}
+              friendHere={friendByBuilding[building.id]}
               onPress={() => openBuilding(building.id)}
             />
           );

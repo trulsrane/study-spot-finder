@@ -16,3 +16,4 @@ export type BusynessReportInsert = Tables['busyness_reports']['Insert'];
 export type CheckIn = Tables['check_ins']['Row'];
 export type CheckInInsert = Tables['check_ins']['Insert'];
 export type CheckOut = Tables['check_ins']['Row'];
+export type PopularTime = Database['public']['Functions']['popular_times']['Returns'][number];

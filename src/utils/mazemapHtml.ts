@@ -109,6 +109,29 @@ export function buildMazeMapHtml(config: MazeMapConfig) {
       border-radius: 50%;
       border: 1.5px solid #fff;
     }
+    /* Vän som är incheckad på platsen, nere till höger som i PlaceMarker */
+    .spot-friend {
+      position: absolute;
+      right: -2px;
+      bottom: -2px;
+      width: 50%;
+      height: 50%;
+      box-sizing: border-box;
+      border-radius: 50%;
+      border: 1.5px solid #fff;
+      overflow: hidden;
+      background: ${colors.amenityCircle};
+      color: ${colors.text};
+      font: 700 9px -apple-system, system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .spot-friend img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
     /* Nålen för en ny plats står still mitt på kartan, man flyttar och zoomar kartan under den.
        pointer-events: none så att man kan dra i kartan rakt genom nålen. */
     #draft-pin,
@@ -210,6 +233,19 @@ export function buildMazeMapHtml(config: MazeMapConfig) {
         element.innerHTML =
           '<div class="spot-glass">' + BOOK_SVG + '</div>' +
           (dotColor ? '<div class="spot-dot" style="background:' + dotColor + '"></div>' : '');
+        if (spot.friend) {
+          // Byggs med DOM i stället för innerHTML, eftersom namn och bild-URL kommer från användare
+          var friend = document.createElement('div');
+          friend.className = 'spot-friend';
+          if (spot.friend.avatarUrl) {
+            var img = document.createElement('img');
+            img.src = spot.friend.avatarUrl;
+            friend.appendChild(img);
+          } else {
+            friend.textContent = spot.friend.initial;
+          }
+          element.appendChild(friend);
+        }
 
         var indoor = spot.zLevel !== null;
         var marker = new Mazemap.ZLevelMarker(element, {

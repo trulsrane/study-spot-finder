@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePlaces } from '@/src/hooks/usePlaces';
 import { useSession } from '@/src/hooks/useSession';
 import { useCampusBuildings } from '@/src/hooks/useCampusBuildings';
+import { useFriendCheckIns } from '@/src/hooks/useFriendCheckIn';
 import { MazeMapHandle, MazeMapView } from '@/src/components/MazeMapView';
 import { MapAddButton } from '@/src/components/MapAddButton';
 import { DraftPlaceBar } from '@/src/components/DraftPlaceBar';
@@ -22,6 +23,7 @@ export default function BuildingScreen() {
   const insets = useSafeAreaInsets();
   const { buildings, error: buildingsError } = useCampusBuildings();
   const { places, refetch } = usePlaces();
+  const { byPlace: friendsByPlace, refetch: refetchFriends } = useFriendCheckIns();
   const mapRef = useRef<MazeMapHandle>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draft, setDraft] = useState<MapDraft | null>(null);
@@ -38,7 +40,8 @@ export default function BuildingScreen() {
         return;
       }
       refetch();
-    }, [refetch])
+      refetchFriends();
+    }, [refetch, refetchFriends])
   );
 
   // Kartan startar mitt på huset, på entréplanet. useMemo så att kartan inte laddas om i onödan.
@@ -59,15 +62,20 @@ export default function BuildingScreen() {
     () =>
       places.map((place) => {
         const placeBuilding = findBuilding(buildings, place.latitude, place.longitude);
+        const friend = friendsByPlace[place.id]?.[0];
+        const friendName = friend?.profiles?.display_name ?? friend?.profiles?.username ?? '?';
         return {
           id: place.id,
           lat: place.latitude,
           lng: place.longitude,
           zLevel: placeBuilding ? (floorToZ(placeBuilding, place.floor) ?? defaultZ(placeBuilding)) : null,
           busyness: place.current_busyness,
+          friend: friend
+            ? { avatarUrl: friend.profiles?.avatar_url ?? null, initial: friendName.charAt(0).toUpperCase() }
+            : null,
         };
       }),
-    [places, buildings]
+    [places, buildings, friendsByPlace]
   );
 
   const openPlace = (placeId: string) => {

@@ -15,6 +15,8 @@ import { ReviewForm } from '@/src/components/ReviewForm';
 import { BusynessReportForm } from '@/src/components/BusynessReportForm';
 import { Busyness } from '@/src/types/db';
 import { useReportBusyness } from '@/src/hooks/useReportBusyness';
+import { usePopularTimes } from '@/src/hooks/usePopularTimes';
+import { PopularTimesChart } from '@/src/components/PopularTimesChart';
 import { useState } from 'react';
 
 const tagColorMap: Record<string, string> = {
@@ -36,6 +38,7 @@ export default function PlaceScreen() {
 	const { reviews, averageRating, count, loading: reviewsLoading, error: reviewsError, submitReview, submitting } = useReviews(id);
 	const { checkIn, checkOut, myCheckIn, saving, loading: checkInsLoading, error: checkInsError } = useCheckIns(DbPlace?.id);
 	const { isFavorite, toggleFavorite } = useFavorites();
+	const { popularTimes, loading: popularTimesLoading, error: popularTimesError, refetch: refetchPopularTimes } = usePopularTimes(DbPlace?.id);
 	const [titleWrapped, setTitleWrapped] = useState(false);
 	const place = DbPlace ?? googlePlace;
 	const loading = placesLoading || reviewsLoading || checkInsLoading || googlePlacesLoading;
@@ -58,7 +61,7 @@ export default function PlaceScreen() {
 
 		async function reportAndCheckIn(level: Busyness) {
 			const result = await reportBusyness({ place_id: DbPlace!.id, user_id: userId!, level });
-			if (result) refetch();
+			if (result) { refetch(); refetchPopularTimes(); }
 			await checkIn();
 		}
 
@@ -228,7 +231,7 @@ export default function PlaceScreen() {
 
 			{/* Rapportera in trängseln */}
 			<View style={styles.busynessContainer}>
-				{DbPlace && <BusynessReportForm placeId={DbPlace.id} onReported={refetch} />}
+				{DbPlace && <BusynessReportForm placeId={DbPlace.id} onReported={() => { refetch(); refetchPopularTimes(); }} />}
 			</View>
 
 
@@ -241,8 +244,19 @@ export default function PlaceScreen() {
 			<Text style={styles.rowTitle}>Info about the place:</Text>
 			<Text style={styles.row}>{place.description ?? 'No info about this place yet.'}</Text>
 
-			{/* Fyll denna med info om populära tider */}
-			<Text style={styles.rowTitle}>Popular times:</Text>
+			{/* Populära tider, byggs på trängselrapporterna. Google-platser har ingen historik hos oss */}
+			{DbPlace && (
+				<View style={styles.popularTimesContainer}>
+					<Text style={styles.rowTitle}>Popular times</Text>
+					{popularTimesLoading ? (
+						<Text style={styles.rowSmall}>Loading popular times...</Text>
+					) : popularTimesError ? (
+						<Text style={styles.rowSmall}>Error loading popular times: {popularTimesError}</Text>
+					) : (
+						<PopularTimesChart popularTimes={popularTimes} />
+					)}
+				</View>
+			)}
 
 			<View style={styles.reviewContainer}>
 				<Text style={styles.rowTitle}>Reviews ({count}):</Text>
@@ -533,6 +547,17 @@ const styles = StyleSheet.create({
 		left: 0,
 		right: 0,
 		opacity: 0,
+	},
+	popularTimesContainer: {
+		marginTop: spacing.md,
+		marginBottom: spacing.sm,
+		backgroundColor: colors.cardBackground,
+		borderRadius: radius.md,
+		padding: spacing.md,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.06,
+		shadowRadius: 4,
 	},
 	busynessContainer: {
 		paddingTop: spacing.sm,

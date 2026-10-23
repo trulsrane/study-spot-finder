@@ -9,6 +9,8 @@ export type MapSpot = {
   lng: number;
   zLevel: number | null; // MazeMaps våningsnummer, null = syns på alla våningar
   busyness: Busyness;
+  // En vän som är incheckad på platsen. Bilden visas om den finns, annars första bokstaven.
+  friend: { avatarUrl: string | null; initial: string } | null;
 };
 
 // Den gröna markören för en plats som håller på att läggas till
