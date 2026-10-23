@@ -9,7 +9,9 @@
     "lint": "eslint \"**/*.{js,jsx,ts,tsx}\" && prettier -c \"**/*.{js,jsx,ts,tsx,json}\"",
     "format": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix && prettier \"**/*.{js,jsx,ts,tsx,json}\" --write",
     "web": "expo start --web",
-    "types": "supabase gen types typescript --project-id pgialmtoulnmfrivjqeq > src/types/database.types.ts"
+    "types": "supabase gen types typescript --project-id pgialmtoulnmfrivjqeq > src/types/database.types.ts",
+    "db:dump": "supabase db dump --linked -s public -f supabase/schema.sql",
+    "db:sync": "npm run types && npm run db:dump"
   },
   "dependencies": {
     "@expo/log-box": "^57.0.4",

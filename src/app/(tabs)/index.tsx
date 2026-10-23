@@ -20,6 +20,7 @@ import { BusynessLegend } from '@/src/components/BusynessLegend';
 import { findBuilding } from '@/src/utils/campusBuildings';
 import { AMENITY_FILTER_HEIGHT, AmenityFilter } from '@/src/components/AmenityFilter';
 import { pickVisibleLabels } from '@/src/utils/pickVisibleLabels';
+import { useFriendCheckIns } from '@/src/hooks/useFriendCheckIn';
 
 // Ungefärlig höjd på kartans logga och "Legal"-länk längst ner
 const MAP_ATTRIBUTION_HEIGHT = 28;
@@ -43,6 +44,7 @@ export default function Map() {
   const session = useSession();
   const { places, refetch } = useMapPlaces();
   const { buildings } = useCampusBuildings();
+  const { byPlace: friendsByPlace, refetch: refetchFriends } = useFriendCheckIns();
   const { coords, loading: locationLoading } = useUserLocation();
   const [focusedId, setFocusedId] = useState<string | null>(null);
   // Positionen för en plats som håller på att läggas till (den gröna markören)
@@ -148,7 +150,8 @@ export default function Map() {
         return;
       }
       refetch();
-    }, [refetch])
+      refetchFriends();
+    }, [refetch, refetchFriends])
   );
 
   // Körs när en annan sida (t.ex. profilen) vill visa en plats på kartan.
@@ -271,6 +274,7 @@ export default function Map() {
             place={place}
             selected={place.id === focusedId}
             showLabel={labelIds.has(place.id)}
+            friendHere={friendsByPlace[place.id]?.[0]}
             onPress={() => openPlace(place.id)}
           />
         ))}

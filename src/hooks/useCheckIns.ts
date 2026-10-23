@@ -40,6 +40,8 @@ export function useCheckIns(placeId?: string) {
     if (!userId) { setError('You need to be logged in to check in'); return; }
     if (!placeId) { setError('You can only check in to places in the database'); return; }
     setSaving(true);
+    const { error: checkOutError } = await closeOpenCheckIn();
+    if (checkOutError) { setError(checkOutError.message); setSaving(false); return; }
     const { data, error } = await supabase
       .from('check_ins')
       .insert({ user_id: userId, place_id: placeId })
@@ -49,16 +51,24 @@ export function useCheckIns(placeId?: string) {
     else setCheckIns((prev) => [...prev, data]);
     setSaving(false);
   }
+
   async function checkOut() {
     if (!myCheckIn) { setError('You are not checked in'); return; }
     setSaving(true);
-    const { error } = await supabase
-      .from('check_ins')
-      .update({ checked_out_at: new Date().toISOString() })
-      .eq('id', myCheckIn.id);
+    const { error } = await closeOpenCheckIn();
     if (error) setError(error.message);
     else setCheckIns((prev) => prev.filter((c) => c.id !== myCheckIn.id)); // tas bort ur listan så knappen byter till "Check in"
     setSaving(false);
+  }
+
+  // Checkar ut från den pågående incheckningen, var den än är.
+  // Man kan bara ha en åt gången (unikt index i databasen), så det räcker att leta på user_id.
+  function closeOpenCheckIn() {
+    return supabase
+      .from('check_ins')
+      .update({ checked_out_at: new Date().toISOString() })
+      .eq('user_id', userId!)
+      .is('checked_out_at', null);
   }
 
   return { checkIns, myCheckIn, loading, error, saving, checkIn, checkOut };
