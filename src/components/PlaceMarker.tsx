@@ -3,6 +3,8 @@ import { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { Host, Image } from '@expo/ui/swift-ui';
 import { frame, glassEffect } from '@expo/ui/swift-ui/modifiers';
+import { FriendAvatar } from '@/src/components/FriendAvatar';
+import { CheckInWithProfile } from '@/src/hooks/useCheckIns';
 
 import { Place } from '@/src/types/db';
 import { colors } from '@/src/theme';
@@ -31,10 +33,11 @@ type Props = {
   selected: boolean;
   onPress: () => void;
   showLabel: boolean;
+  friendHere?: CheckInWithProfile;
 };
 
 // Rund glasmarkör med en ikon och en färgad prick för hur mycket folk det är på platsen.
-export function PlaceMarker({ place, selected, onPress, showLabel }: Props) {
+export function PlaceMarker({ place, selected, onPress, showLabel, friendHere }: Props) {
   const size = selected ? SELECTED_MARKER_SIZE : MARKER_SIZE;
   const iconSize = Math.round(size * 0.45);
   const dotColor = busynessDotColor[place.current_busyness];
@@ -43,7 +46,7 @@ export function PlaceMarker({ place, selected, onPress, showLabel }: Props) {
     <Marker
       // Kartan hänger inte med när en markör byter storlek, och ritar den då förskjuten.
       // En ny key när storleken eller pricken ändras gör att markören skapas om och ritas rätt i stället.
-      key={`${selected}-${showLabel}-${place.current_busyness}`}
+      key={`${selected}-${showLabel}-${place.current_busyness}-${friendHere ?.user_id ?? ''}`}
       coordinate={{ latitude: place.latitude, longitude: place.longitude }}
       onPress={onPress}
       anchor={{ x: 0.5, y: 0.5 }}
@@ -77,6 +80,9 @@ export function PlaceMarker({ place, selected, onPress, showLabel }: Props) {
           )}
 
           {dotColor && <View style={[styles.dot, { backgroundColor: dotColor }]} />}
+          {friendHere && (
+            <FriendAvatar profile={friendHere.profiles} size={Math.round(size * 0.5)} style={styles.friend} />
+          )}
         </View>
       </View>
     </Marker>
@@ -116,5 +122,10 @@ const styles = StyleSheet.create({
     borderRadius: DOT_SIZE / 2,
     borderWidth: 1.5,
     borderColor: colors.lightText,
+  },
+  friend: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
   },
 });
