@@ -2,6 +2,7 @@
 
 import { Ionicons } from '@expo/vector-icons';
 import { Place } from '@/src/types/db';
+import { currentBusyness } from '@/src/utils/busyness';
 
 //Översätter bekvämlighter till ikoner som visas i korten
 const amenityIconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -30,10 +31,11 @@ function formatDistance(meters: number) {
 
 // distance_meters finns bara när usePlaces fått en position, annars visas inget avstånd
 export function translatePlaceToInfoCards(place: Place & { distance_meters?: number | null }) {
+	const level = currentBusyness(place);
 	return {
 		title: place.name,
 		status: place.opening_hours ?? 'Open',
-		level: place.current_busyness ?? 'unknown',
+		level,
 		distance: place.distance_meters != null ? formatDistance(place.distance_meters) : undefined,
 		// Första bilden visas i kortet, saknas den visas den grå platshållaren
 		image: place.image_urls[0],
@@ -42,6 +44,6 @@ export function translatePlaceToInfoCards(place: Place & { distance_meters?: num
 			key,
 			icon: amenityIconMap[key] || 'help-circle-outline',
 		})),
-		busyness: levelOfBusynessMap[place.current_busyness ?? 'unknown'] ?? levelOfBusynessMap.unknown,
+		busyness: levelOfBusynessMap[level] ?? levelOfBusynessMap.unknown,
 	};
 }
