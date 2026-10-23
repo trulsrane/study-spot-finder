@@ -34,6 +34,7 @@ export const colors = {
   greenButtonBackground: '#B8CB9E',
   // Mörkare salviagrön för primärknappar och ikoner, samt färgen på profilens omslag
   primary: '#76885F',
+  logout: '#C74068',
   coverBackground: '#CBD8BC',
   cardBackground: '#fff',
   imageBackground: 'lightgray',
