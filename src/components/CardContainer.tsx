@@ -78,14 +78,15 @@ export function Card({
 			</View>
 
 			<View style={styles.content}>
+				{/* Överdel: titel och status, alltid högst upp */}
 				<View style={styles.headerRow}>
 					<View style={{ flex: 1 }}>
-						<Text style={styles.title} numberOfLines={1}>
-							{title}
-						</Text>
-						<Text style={styles.status}>
-							{distance ? `${status} · ${distance}` : status}
-						</Text>
+						<Text style={styles.title} numberOfLines={1}>{title}</Text>
+						<View style={styles.statusRow}>
+							<Text style={[styles.status, styles.statusText]} numberOfLines={1}>{status}</Text>
+							
+						</View>
+						{distance ? <Text style={styles.status}>{distance}</Text> : null}
 					</View>
 
 					{/* Favoritmarkering */}
@@ -98,21 +99,19 @@ export function Card({
 					</TouchableOpacity>
 				</View>
 
-				{/* <View style={styles.tag}>
-          <Text style={styles.tagText}>{busyness}</Text>
-        </View> */}
+				{/* Underdel: trängsel och bekvämligheter, alltid längst ner */}
+				<View>
+					<View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
+						<Text style={styles.tagText}>{busyness}</Text>
+					</View>
 
-				<View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
-					<Text style={styles.tagText}>{busyness}</Text>
-				</View>
-
-				{/* Ikonerna för bekvämligheterna som finns på studieplatsen */}
-				<View style={styles.amenitiesRow}>
-					{amenities.map((a) => (
-						<View key={a.key} style={styles.amenityCircle}>
-							<Ionicons name={a.icon} size={13} color={colors.icon} />
-						</View>
-					))}
+					<View style={styles.amenitiesRow}>
+						{amenities.map((a) => (
+							<View key={a.key} style={styles.amenityCircle}>
+								<Ionicons name={a.icon} size={13} color={colors.icon} />
+							</View>
+						))}
+					</View>
 				</View>
 			</View>
 		</TouchableOpacity>
@@ -123,19 +122,22 @@ const styles = StyleSheet.create({
 	card: {
 		flexDirection: 'row',
 		backgroundColor: colors.buttonBackground,
-		borderRadius: 12,
-		padding: 8,
-		marginBottom: 12,
+		borderRadius: radius.md,
+		padding: spacing.sm,
+		paddingBottom: spacing.sm,
+		marginBottom: spacing.sm,
 		shadowColor: '#000',
 		shadowOffset: { width: 0, height: 1 },
 		shadowOpacity: 0.06,
 		shadowRadius: 4,
 		elevation: 2,
+		borderWidth: 1,
+		borderColor: colors.borderColor,
 	},
 	imageWrapper: {
 		width: IMAGE_SIZE,
 		height: IMAGE_SIZE,
-		borderRadius: 12,
+		borderRadius: radius.sm,
 		overflow: 'hidden',
 	},
 	image: {
@@ -166,11 +168,11 @@ const styles = StyleSheet.create({
 		fontWeight: '600',
 		color: colors.text,
 	},
-	content: {
-		flex: 1,
-		marginLeft: 12,
-		justifyContent: 'center',
-	},
+	// content: {
+	// 	flex: 1,
+	// 	marginLeft: 12,
+	// 	justifyContent: 'center',
+	// },
 	headerRow: {
 		flexDirection: 'row',
 		alignItems: 'flex-start',
@@ -189,7 +191,7 @@ const styles = StyleSheet.create({
 		alignSelf: 'flex-start',
 		backgroundColor: colors.background,
 		borderRadius: radius.pill,
-		paddingHorizontal: 12,
+		paddingHorizontal: spacing.md,
 		paddingVertical: 5,
 		marginTop: 8,
 	},
@@ -198,12 +200,12 @@ const styles = StyleSheet.create({
 		fontWeight: '700',
 		color: colors.text,
 	},
-	amenitiesRow: {
-		flexDirection: 'row',
-		flexWrap: 'wrap',
-		gap: 5,
-		marginTop: 8,
-	},
+	// amenitiesRow: {
+	// 	flexDirection: 'row',
+	// 	flexWrap: 'wrap',
+	// 	gap: 5,
+	// 	marginTop: 8,
+	// },
 	amenityCircle: {
 		width: 28,
 		height: 28,
@@ -211,5 +213,25 @@ const styles = StyleSheet.create({
 		backgroundColor: colors.amenityCircle,
 		alignItems: 'center',
 		justifyContent: 'center',
+	},
+	content: {
+		flex: 1,
+		marginLeft: 12,
+		height: IMAGE_SIZE,                 // lika hög som bilden, så kortet alltid är lika högt
+		justifyContent: 'space-between',    // överdelen uppe, underdelen nere
+		
+	},
+	statusRow: {
+		flexDirection: 'row',
+	},
+	statusText: {
+		flexShrink: 1,                      // långa öppettider kapas med "…" i stället för att tränga undan avståndet
+	},
+	amenitiesRow: {
+		flexDirection: 'row',
+		flexWrap: 'wrap',
+		gap: 5,
+		marginTop: spacing.sm,
+		minHeight: 28,                      // håller kvar taggen på samma höjd även när platsen saknar bekvämligheter
 	},
 });
