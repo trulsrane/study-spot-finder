@@ -15,6 +15,7 @@ import { ReviewForm } from '@/src/components/ReviewForm';
 import { BusynessReportForm } from '@/src/components/BusynessReportForm';
 import { Busyness } from '@/src/types/db';
 import { useReportBusyness } from '@/src/hooks/useReportBusyness';
+import { useState } from 'react';
 
 const tagColorMap: Record<string, string> = {
 	low: colors.busynessLow,
@@ -35,14 +36,13 @@ export default function PlaceScreen() {
 	const { reviews, averageRating, count, loading: reviewsLoading, error: reviewsError, submitReview, submitting } = useReviews(id);
 	const { checkIn, checkOut, myCheckIn, saving, loading: checkInsLoading, error: checkInsError } = useCheckIns(DbPlace?.id);
 	const { isFavorite, toggleFavorite } = useFavorites();
-
+	const [titleWrapped, setTitleWrapped] = useState(false);
 	const place = DbPlace ?? googlePlace;
 	const loading = placesLoading || reviewsLoading || checkInsLoading || googlePlacesLoading;
 	const error = placesError ?? reviewsError ?? checkInsError ?? googlePlacesError;
 	if (loading && !place) return <Text style={styles.missing}>Loading place...</Text>;
 	if (error && !place) return <Text style={styles.missing}>Error loading place: {error}</Text>;
 	if (!place) return <Text style={styles.missing}>Hittade ingen plats med id {id}</Text>
-
 
 
 	const amenities = translatePlaceToInfoPage(place).amenities ?? [];
@@ -81,14 +81,30 @@ export default function PlaceScreen() {
 		<ScrollView key={id} style={styles.screen} contentContainerStyle={styles.content}>
 
 			<View style={styles.titleRow}>
+				{/* Vänster: trängsel */}
 				<View style={styles.titleSide}>
 					<View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
-						<Text style={styles.tagText}><Ionicons name = 'person' color='#2F2319'/>{busyness}</Text>
+						<Text style={styles.tagText}>
+							<Ionicons name="person" color="#2F2319" /> {busyness}
+						</Text>
 					</View>
 				</View>
 
-				<Text style={styles.title}>{place.name}</Text>
+				{/* Mitten: en rad, kapas med "…". Mätkopian upptäcker om namnet inte fick plats */}
+				<View style={styles.titleCenter}>
+					<Text style={styles.title} numberOfLines={1}>{place.name}</Text>
+					<Text
+						style={[styles.title, styles.titleMeasure]}
+						onTextLayout={(e) => setTitleWrapped(e.nativeEvent.lines.length > 1)}
+						pointerEvents="none"
+						accessibilityElementsHidden
+						importantForAccessibility="no-hide-descendants"
+					>
+						{place.name}
+					</Text>
+				</View>
 
+				{/* Höger: favorit. Kolumnen finns kvar även utan hjärta, så titeln ligger kvar mitt på sidan */}
 				<View style={[styles.titleSide, styles.titleSideRight]}>
 					{DbPlace && (
 						<TouchableOpacity
@@ -105,6 +121,46 @@ export default function PlaceScreen() {
 					)}
 				</View>
 			</View>
+			{/* ----------- */}
+			{/* Rad 1: trängsel till vänster, favorit till höger */}
+			{/* <View style={styles.topRow}>
+				<View style={[styles.tag, { backgroundColor: tagColorMap[level ?? 'unknown'] }]}>
+					<Text style={styles.tagText}>
+						<Ionicons name="person" color="#2F2319" /> {busyness}
+					</Text>
+				</View>
+
+				{DbPlace && (
+					<TouchableOpacity
+						onPress={() => toggleFavorite(DbPlace.id)}
+						hitSlop={8}
+						accessibilityLabel={isFavorite(DbPlace.id) ? 'Remove from favorites' : 'Add to favorites'}
+					>
+						<Ionicons
+							name={isFavorite(DbPlace.id) ? 'heart' : 'heart-outline'}
+							size={20}
+							color="#2F2319"
+						/>
+					</TouchableOpacity>
+				)}
+			</View> */}
+
+			{/* Rad 2: titeln på hela sidans bredd */}
+			{/* <View style={styles.titleBox}> */}
+			{/* Synlig rubrik: alltid en rad, med "…" i slutet om namnet inte får plats */}
+			{/* <Text style={styles.title} numberOfLines={1}>{place.name}</Text> */}
+
+			{/* Osynlig kopia utan radgräns, används bara för att mäta om namnet skulle behöva fler rader */}
+			{/* <Text
+					style={[styles.title, styles.titleMeasure]}
+					onTextLayout={(e) => setTitleWrapped(e.nativeEvent.lines.length > 1)}
+					pointerEvents="none"
+					accessibilityElementsHidden
+					importantForAccessibility="no-hide-descendants"
+				>
+					{place.name}
+				</Text>
+			</View> */}
 
 			{/* Vill vi ha bilden mindre?*/}
 			<View style={styles.imageWrapper}>
@@ -131,7 +187,7 @@ export default function PlaceScreen() {
 					</TouchableOpacity>
 				)}
 			</View>
-			
+			{titleWrapped && <Text style={styles.fullTitle}>{place.name}</Text>}
 			{/* Tog bort rubrikerna, jag tänker att adressen säger sig själv */}
 			<View style={styles.addressRow}>
 				<View style={styles.addressText}>
@@ -139,7 +195,7 @@ export default function PlaceScreen() {
 						{[place.address, place.building].filter(Boolean).join(' ')}
 						{place.floor != null && place.floor !== '' ? ` Floor: ${place.floor}` : ''}
 					</Text>
-					<Text style={styles.rowSmall}>{place.latitude}°, {place.longitude}°</Text>
+					{/* <Text style={styles.rowSmall}>{place.latitude}°, {place.longitude}°</Text> */}
 				</View>
 
 				{/* Vägbeskrivning visas bara för platser från databasen */}
@@ -171,7 +227,10 @@ export default function PlaceScreen() {
 			</View>
 
 			{/* Rapportera in trängseln */}
-			{DbPlace && <BusynessReportForm placeId={DbPlace.id} onReported={refetch} />}
+			<View style={styles.busynessContainer}>
+				{DbPlace && <BusynessReportForm placeId={DbPlace.id} onReported={refetch} />}
+			</View>
+
 
 			<Text style={styles.row}>Opening hours: {place.opening_hours ?? '—'}</Text>
 
@@ -255,25 +314,25 @@ const styles = StyleSheet.create({
 		backgroundColor: colors.background,
 		flex: 1,
 	},
-	titleRow: {
-		flexDirection: 'row',
-		alignItems: 'flex-start',
-		gap: spacing.sm,
-		marginBottom: spacing.sm,
-	},
-	titleSide: {
-		flex: 1,
-		minWidth: 90,
-	},
-	titleSideRight: {
-		alignItems: 'flex-end',
-	},
-	title: {
-		...type.title,
-		color: colors.text,
-		textAlign: 'center',
-		flexShrink: 1, 
-	},
+	// titleRow: {
+	// 	flexDirection: 'row',
+	// 	alignItems: 'flex-start',
+	// 	gap: spacing.sm,
+	// 	marginBottom: spacing.sm,
+	// },
+	// titleSide: {
+	// 	flex: 1,
+	// 	minWidth: 90,
+	// },
+	// titleSideRight: {
+	// 	alignItems: 'flex-end',
+	// },
+	// title: {
+	// 	...type.title,
+	// 	color: colors.text,
+	// 	textAlign: 'center',
+	// 	flexShrink: 1,
+	// },
 	amenitiesRow: {
 		flexDirection: 'row',
 		flexWrap: 'wrap',
@@ -435,5 +494,60 @@ const styles = StyleSheet.create({
 		fontSize: type.buttonText.fontSize,
 		fontWeight: type.buttonText.fontWeight,
 	},
+	// titleMeasure: {
+	// 	position: 'absolute',
+	// 	top: 0,
+	// 	left: 0,
+	// 	right: 0,
+	// 	opacity: 0,
+	// },
+	fullTitle: {
+		...type.heading,       // lite mindre än type.title
+		color: colors.text,
+		marginBottom: spacing.xs,
+	},
+	titleRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: spacing.sm,
+		marginBottom: spacing.sm,
+	},
+	titleSide: {
+		width: 100,          // lika bred på båda sidor, så att titeln hamnar mitt på sidan
+	},
+	titleSideRight: {
+		alignItems: 'flex-end',
+	},
+	titleCenter: {
+		flex: 1,             // fyller exakt det som blir kvar mellan sidorna, aldrig mer
+		minWidth: 0,         // låter texten krympa och kapas istället för att trycka ut hjärtat
+	},
+	title: {
+		...type.title,
+		color: colors.text,
+		textAlign: 'center',
+	},
+	titleMeasure: {
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		right: 0,
+		opacity: 0,
+	},
+	busynessContainer: {
+		paddingTop: spacing.sm,
+		paddingBottom: spacing.md,
+		marginTop: spacing.sm,
+		backgroundColor: colors.buttonBackground,
+		borderRadius: radius.md,
+		padding: spacing.md,
+		marginBottom: spacing.sm,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.06,
+		shadowRadius: 4,
+		elevation: 2,
+	},
+
 
 });
