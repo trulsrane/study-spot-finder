@@ -17,6 +17,7 @@ import { MapCompass } from '@/src/components/MapCompass';
 import { BusynessLegend } from '@/src/components/BusynessLegend';
 import { AMENITY_FILTER_HEIGHT, AmenityFilter } from '@/src/components/AmenityFilter';
 import { pickVisibleLabels } from '@/src/utils/pickVisibleLabels';
+import { useFriendCheckIns } from '@/src/hooks/useFriendCheckIn';
 
 // Storlek på de runda knapparna nere på kartan (kompassen och plus-knappen)
 const MAP_BUTTON_SIZE = 56;
@@ -38,6 +39,7 @@ export default function Map() {
   const router = useRouter();
   const session = useSession();
   const { places, refetch } = useMapPlaces();
+  const { byPlace: friendsByPlace, refetch: refetchFriends } = useFriendCheckIns();
   const { coords, loading: locationLoading } = useUserLocation();
   const [focusedId, setFocusedId] = useState<string | null>(null);
   // Positionen för en plats som håller på att läggas till (den gröna markören)
@@ -128,7 +130,8 @@ export default function Map() {
         return;
       }
       refetch();
-    }, [refetch])
+      refetchFriends();
+    }, [refetch, refetchFriends])
   );
 
   // Körs när en annan sida (t.ex. profilen) vill visa en plats på kartan.
@@ -243,6 +246,7 @@ export default function Map() {
             place={place}
             selected={place.id === focusedId}
             showLabel={labelIds.has(place.id)}
+            friendHere={friendsByPlace[place.id]?.[0]}
             onPress={() => openPlace(place.id)}
           />
         ))}
