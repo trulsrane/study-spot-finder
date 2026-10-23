@@ -141,6 +141,8 @@ const styles = StyleSheet.create({
 		padding: spacing.md,
 		backgroundColor: colors.cardBackground,
 		borderRadius: radius.md,
+		borderWidth: 1,
+		borderColor: colors.borderColor,
 	},
 	label: {
 		...type.caption,
@@ -158,7 +160,7 @@ const styles = StyleSheet.create({
 		minHeight: 80,
 		textAlignVertical: 'top',
 		borderWidth: 1,
-		borderColor: colors.border,
+		borderColor: colors.borderColor,
 		borderRadius: radius.md,
 		padding: spacing.sm,
 	},

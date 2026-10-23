@@ -50,13 +50,15 @@ export function BusynessReportForm({ placeId, onReported }: BusynessReportFormPr
 }
 
 const styles = StyleSheet.create({
-	container: { marginTop: spacing.sm },
-	label: { ...type.caption, color: colors.textMuted, marginBottom: spacing.xs },
-	buttonsRow: { flexDirection: 'row', gap: spacing.sm },
+	container: {  },
+	label: { ...type.heading, color: colors.text, marginBottom: spacing.xs },
+	buttonsRow: { flexDirection: 'row', gap: spacing.sm, paddingLeft: spacing.md, paddingRight: spacing.md},
 	button: {
 		borderRadius: radius.pill,
 		paddingHorizontal: spacing.md,
 		paddingVertical: spacing.sm,
+		flex: 1,
+		alignItems: 'center'
 	},
 	buttonText: {
 		color: colors.text,

@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 12,
     fontWeight: '700',
-    color: colors.lightText,
+    color: colors.text,
   },
   row: {
     flexDirection: 'row',
@@ -92,6 +92,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     fontWeight: '600',
-    color: colors.lightText,
+    color: colors.text,
   },
 });

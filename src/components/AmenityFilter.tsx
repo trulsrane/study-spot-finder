@@ -83,7 +83,7 @@ function FilterChip({ icon, label, active, onPress }: ChipProps) {
       )}
 
       <View style={styles.content} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
-        <Ionicons name={icon} size={14} color={colors.lightIcon} />
+        <Ionicons name={icon} size={14} color={colors.text} />
         <Text style={[styles.label, active && styles.labelSelected]}>{label}</Text>
       </View>
     </Pressable>
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   label: {
     ...type.caption,
     fontWeight: '600',
-    color: colors.lightText,
+    color: colors.text,
   },
   labelSelected: {
     color: colors.lightText,

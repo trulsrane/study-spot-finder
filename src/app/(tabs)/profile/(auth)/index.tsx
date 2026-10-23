@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, RefreshControl, Alert, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useProfile } from '@/src/hooks/useProfile';
 import { useRouter, Link, useFocusEffect } from 'expo-router'
@@ -8,13 +8,12 @@ import { useMyReviews } from '@/src/hooks/useMyReviews';
 import { colors, radius, spacing, type } from '@/src/theme';
 import { Card } from '@/src/components/CardContainer';
 import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards';
-import { useCallback, useRef } from 'react';
-import { id } from '@expo/ui/swift-ui/modifiers';
+import { useCallback, useRef, useState, useEffect } from 'react';
 
 
 export default function ProfilePage() {
 	const router = useRouter();
-	const { profile, loading: profileLoading, error: profileError, refetch } = useProfile();
+	const { profile, loading: profileLoading, error: profileError, refetch, updateProfile } = useProfile();
 	const { places, loading: placesLoading, error: placesError, refetch: refetchPlaces } = usePlaces();
 	const { favorites, loading: favoritesLoading, error: favoritesError, toggleFavorite, isFavorite, refetch: refetchFavorites } = useFavorites();
 	const favoritePlaces = places.filter((p) => favorites.includes(p.id))
@@ -41,6 +40,21 @@ export default function ProfilePage() {
 		  refetch();
 		}, [refetch])
 	  );
+
+	// Om vänner får se var jag är incheckad. Visas direkt och sparas sedan i databasen.
+	const [sharing, setSharing] = useState(false);
+	useEffect(() => {
+		if (profile) setSharing(profile.share_location);
+	}, [profile]);
+
+	async function toggleSharing(value: boolean) {
+		setSharing(value);
+		const saveError = await updateProfile({ share_location: value });
+		if (saveError) {
+			setSharing(!value); // gick inte att spara, visa det gamla läget igen
+			Alert.alert('Could not save', saveError);
+		}
+	}
 
 	// Recensionerna innehåller bara platsens namn, så bilden hämtas från de redan laddade platserna
 	const placeImage = (placeId: string) => places.find((p) => p.id === placeId)?.image_urls[0];
@@ -80,7 +94,7 @@ export default function ProfilePage() {
 				<View style={styles.stats}>
 					<View style={styles.statItem}>
 						<View style={styles.statValueRow}>
-							<Ionicons name="location" size={20} color={colors.primary} />
+							<Ionicons name="location" size={20} color={colors.text} />
 							<Text style={styles.statValue}>{favoritePlaces.length}</Text>
 						</View>
 						<Text style={styles.statLabel}>Saved places</Text>
@@ -88,11 +102,19 @@ export default function ProfilePage() {
 					<View style={styles.statDivider} />
 					<View style={styles.statItem}>
 						<View style={styles.statValueRow}>
-							<Ionicons name="star" size={20} color={colors.primary} />
+							<Ionicons name="star" size={20} color={colors.text} />
 							<Text style={styles.statValue}>{reviews.length}</Text>
 						</View>
 						<Text style={styles.statLabel}>Reviews</Text>
 					</View>
+				</View>
+				<View style={styles.shareRow}>
+					<Ionicons name="people" size={20} color={colors.text} />
+					<View style={styles.shareText}>
+						<Text style={styles.shareTitle}>Share check-ins</Text>
+						<Text style={styles.shareHint}>When enabled, your friends can see where you are checked in</Text>
+					</View>
+					<Switch value={sharing} onValueChange={toggleSharing} trackColor={{ true: colors.primary }} />
 				</View>
 
 				<TouchableOpacity style={styles.primaryButton} activeOpacity={0.8} onPress={() => router.push('/profile/edit')}>
@@ -105,7 +127,7 @@ export default function ProfilePage() {
 			{favoritePlaces.length === 0 ? (
 				<View style={styles.section}>
 					<View style={styles.sectionTitleRow}>
-						<Ionicons name="location" size={24} color={colors.primary} />
+						<Ionicons name="location" size={24} color={colors.text} />
 						<Text style={styles.sectionTitle}>Favorite study places</Text>
 					</View>
 					<View style={styles.emptyRow}>
@@ -116,13 +138,13 @@ export default function ProfilePage() {
 								<Text style={styles.primaryButtonText}>Explore study places</Text>
 							</TouchableOpacity>
 						</View>
-						<Ionicons name="map-outline" size={52} color={colors.primary} />
+						<Ionicons name="map-outline" size={52} color={colors.text} />
 					</View>
 				</View>
 			) : (
 				<>
 					<View style={styles.captionRow}>
-						<Ionicons name="location" size={20} color={colors.primary} />
+						<Ionicons name="location" size={20} color={colors.text} />
 						<Text style={styles.caption}>Favorite study places</Text>
 					</View>
 					<View style={styles.list}>
@@ -355,14 +377,16 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		gap: spacing.md,
 		backgroundColor: colors.cardBackground,
-		borderRadius: radius.lg,
-		padding: spacing.sm + 4,
+		borderRadius: radius.md,
+		padding: spacing.sm,
 		marginBottom: spacing.sm,
+		borderWidth: 1,
+		borderColor: colors.borderColor,
 	},
 	reviewImage: {
 		width: 64,
 		height: 64,
-		borderRadius: radius.md,
+		borderRadius: radius.sm,
 	},
 	reviewImageFallback: {
 		backgroundColor: colors.background,
@@ -394,5 +418,29 @@ const styles = StyleSheet.create({
 		...type.body,
 		color: colors.text,
 		marginTop: spacing.xs,
+	},
+		shareRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		alignSelf: 'stretch',
+		gap: spacing.sm,
+		backgroundColor: colors.cardBackground,
+		borderRadius: radius.md,
+		borderWidth: 1,
+		borderColor: colors.background,
+		padding: spacing.sm + 4,
+		marginTop: spacing.sm,
+	},
+	shareText: {
+		flex: 1,
+	},
+	shareTitle: {
+		...type.body,
+		fontWeight: '600',
+		color: colors.text,
+	},
+	shareHint: {
+		...type.caption,
+		color: colors.textMuted,
 	},
 });
