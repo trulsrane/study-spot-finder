@@ -5,7 +5,7 @@ import { FlatList, StyleSheet, Text } from 'react-native';
 import { usePlaces } from '@/src/hooks/usePlaces';
 import { useFavorites } from '@/src/hooks/useFavorites';
 import { useUserLocation } from '@/src/hooks/useUserLocation';
-import { colors, spacing, type } from '@/src/theme';
+import { colors, spacing, type, radius } from '@/src/theme';
 import { Card } from '@/src/components/CardContainer';
 import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards';
 import { createPlaceSearcher, searchPlaces } from '@/src/scripts/searchPlaces';
@@ -121,4 +121,5 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     padding: spacing.md,
   },
+  
 });
