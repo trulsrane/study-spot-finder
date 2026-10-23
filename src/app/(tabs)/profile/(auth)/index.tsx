@@ -19,7 +19,7 @@ export default function ProfilePage() {
 	const { places, loading: placesLoading, error: placesError, refetch: refetchPlaces } = usePlaces(coords, 50000); // 50 km radie, så alla i Umeå får med sina platser
 	const { favorites, loading: favoritesLoading, error: favoritesError, toggleFavorite, isFavorite, refetch: refetchFavorites } = useFavorites();
 	const favoritePlaces = places.filter((p) => favorites.includes(p.id))
-	const { reviews, loading: reviewsLoading, error: reviewsError, refetch: refetchReviews } = useMyReviews();
+	const { reviews, loading: reviewsLoading, error: reviewsError, refetch: refetchReviews } = useMyReviews(profile?.id ?? '');
 
 	// Hämtar om allt på sidan när man drar nedåt
 	const refetchAll = useCallback(() => {

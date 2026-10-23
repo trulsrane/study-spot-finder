@@ -17,6 +17,7 @@ import { Busyness } from '@/src/types/db';
 import { useReportBusyness } from '@/src/hooks/useReportBusyness';
 import { useState } from 'react';
 import { ReviewModal } from '@/src/components/ReviewModal';
+import { useNow } from '@/src/hooks/useNow';
 
 const tagColorMap: Record<string, string> = {
 	low: colors.busynessLow,
@@ -39,6 +40,8 @@ export default function PlaceScreen() {
 	const { isFavorite, toggleFavorite } = useFavorites();
 	const [titleWrapped, setTitleWrapped] = useState(false);
 	const [reviewOpen, setReviewOpen] = useState(false);
+	// Räknar upp "x mins ago" varje minut och växlar till Unknown när rapporten blir en timme gammal
+	const now = useNow();
 	const place = DbPlace ?? googlePlace;
 	const loading = placesLoading || reviewsLoading || checkInsLoading || googlePlacesLoading;
 	const error = placesError ?? reviewsError ?? checkInsError ?? googlePlacesError;
@@ -47,9 +50,10 @@ export default function PlaceScreen() {
 	if (!place) return <Text style={styles.missing}>Hittade ingen plats med id {id}</Text>
 
 
-	const amenities = translatePlaceToInfoPage(place).amenities ?? [];
-	const busyness = translatePlaceToInfoPage(place).busyness ?? '—';
-	const level = translatePlaceToInfoPage(place).level ?? 'unknown';
+	const info = translatePlaceToInfoPage(place, now);
+	const amenities = info.amenities ?? [];
+	const busyness = info.busyness ?? '—';
+	const level = info.level ?? 'unknown';
 
 	// Användaren måste rapportera hur fullt det är för att kunna checka in
 	function handleCheckIn() {
@@ -97,7 +101,7 @@ export default function PlaceScreen() {
 						</Text>
 					</View>
 				</View>
-
+			
 				{/* Mitten: en rad, kapas med "…". Mätkopian upptäcker om namnet inte fick plats */}
 				<View style={styles.titleCenter}>
 					<Text style={styles.title} numberOfLines={1}>{place.name}</Text>
@@ -129,6 +133,7 @@ export default function PlaceScreen() {
 					)}
 				</View>
 			</View>
+			<Text style={styles.row}>Last updated: {info.lastUpdated}</Text>
 			{/* ----------- */}
 			{/* Rad 1: trängsel till vänster, favorit till höger */}
 			{/* <View style={styles.topRow}>
@@ -250,7 +255,7 @@ export default function PlaceScreen() {
 
 			<Text style={styles.row}>Opening hours: {place.opening_hours ?? '—'}</Text>
 
-			<Text style={styles.row}>Updated: {place.busyness_updated_at ?? '—'}</Text>
+			
 			{/* Fyll denna med info om populära tider */}
 			<Text style={styles.rowTitle}>Popular times:</Text>
 

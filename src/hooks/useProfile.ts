@@ -4,8 +4,9 @@ import { Profile, ProfileUpdate } from '@/src/types/db';
 import { useSession } from '@/src/hooks/useSession';
 
 // Profilen för den inloggade användaren. Utan inloggning är profile null.
-export function useProfile() {
-  const userId = useSession()?.user.id;
+export function useProfile(otherUserId?: string) {
+  const sessionUserId = useSession()?.user.id;
+  const userId = otherUserId ?? sessionUserId; // Hämtar antingen kompisens profil eller ens egna
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +44,7 @@ export function useProfile() {
     const { error } = await supabase
       .from('profiles')
       .update(updates)
-      .eq('id', userId);
+      .eq('id', sessionUserId);
     return error ? error.message : null; // returnerar felmeddelande om det finns ett, annars null. null betyder att det gick bra.
   }
 

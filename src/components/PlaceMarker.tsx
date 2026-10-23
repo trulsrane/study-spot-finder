@@ -7,6 +7,7 @@ import { FriendAvatar } from '@/src/components/FriendAvatar';
 import { CheckInWithProfile } from '@/src/hooks/useCheckIns';
 
 import { Place } from '@/src/types/db';
+import { currentBusyness } from '@/src/utils/busyness';
 import { colors } from '@/src/theme';
 
 // Storlekarna exporteras så att kartan kan räkna ut var namnen hamnar och undvika krockar
@@ -40,13 +41,14 @@ type Props = {
 export function PlaceMarker({ place, selected, onPress, showLabel, friendHere }: Props) {
   const size = selected ? SELECTED_MARKER_SIZE : MARKER_SIZE;
   const iconSize = Math.round(size * 0.45);
-  const dotColor = busynessDotColor[place.current_busyness];
+  const busyness = currentBusyness(place);
+  const dotColor = busynessDotColor[busyness];
 
   return (
     <Marker
       // Kartan hänger inte med när en markör byter storlek, och ritar den då förskjuten.
       // En ny key när storleken eller pricken ändras gör att markören skapas om och ritas rätt i stället.
-      key={`${selected}-${showLabel}-${place.current_busyness}-${friendHere ?.user_id ?? ''}`}
+      key={`${selected}-${showLabel}-${busyness}-${friendHere ?.user_id ?? ''}`}
       coordinate={{ latitude: place.latitude, longitude: place.longitude }}
       onPress={onPress}
       anchor={{ x: 0.5, y: 0.5 }}
