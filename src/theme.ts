@@ -26,6 +26,7 @@ export const colors = {
   busynessMedium: '#EDDAC2',
   busynessHigh: '#E8CDD5',
   busynessUnknown: '#D9D9D9',
+  borderColor: '#b8cb9e87',
   // Starkare varianter för små prickar på kartan, där pastellfärgerna ovan blir för bleka
   busynessDotLow: '#6FA04A',
   busynessDotMedium: '#E0A040',
