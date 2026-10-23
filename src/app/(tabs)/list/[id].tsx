@@ -103,7 +103,7 @@ export default function PlaceScreen() {
 			</View>
 			<Text style={styles.row}>Opening hours: {place.opening_hours ?? '—'}</Text>
 
-			<Text style={styles.row}>Updated: {place.busyness_updated_at ?? '—'}</Text>
+			<Text style={styles.row}>Last updated: {translatePlaceToInfoPage(place).lastUpdated}</Text>
 
 
 			{/* Fyll denna med info om populära tider */}

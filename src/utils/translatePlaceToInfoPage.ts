@@ -2,6 +2,7 @@
 
 import { Ionicons } from '@expo/vector-icons';
 import { Place } from '../types/db';
+import { currentBusyness, formatLastUpdated } from './busyness';
 
 //Översätter bekvämlighter till ikoner som visas i korten
 const amenityIconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -40,17 +41,19 @@ const levelOfBusynessMap: Record<string, string> = {
 	unknown: 'UNKNOWN',
 };
 
-export function translatePlaceToInfoPage(place: Place) {
+export function translatePlaceToInfoPage(place: Place, now = Date.now()) {
+	const level = currentBusyness(place, now);
 	return {
 		title: place.name,
 		status: place.opening_hours ?? 'Open',
-		level: place.current_busyness ?? 'unknown',
+		level,
+		lastUpdated: formatLastUpdated(place, now),
 
 		amenities: place.amenities.map((key) => ({
 			key,
 			icon: amenityIconMap[key] || 'help-circle-outline',
 			label: amenityLabelMap[key] ?? key,
 		})),
-		busyness: levelOfBusynessMap[place.current_busyness ?? 'unknown'] ?? levelOfBusynessMap.unknown,
+		busyness: levelOfBusynessMap[level] ?? levelOfBusynessMap.unknown,
 	};
 }
