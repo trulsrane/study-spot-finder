@@ -45,7 +45,7 @@ export function useReviews(placeId: string) {
 
     const { data, error } = await supabase
       .from('reviews')
-      .insert({ ...input, place_id: placeId })
+      .upsert({ ...input, place_id: placeId }, { onConflict: 'user_id,place_id' }) // om användaren redan har recenserat platsen, uppdatera den raden istället för att skapa en ny
       .select('*, profiles(username, display_name, avatar_url)') // samma join som ovan, så den nya recensionen också har info om användaren
       .single();
 

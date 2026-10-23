@@ -53,12 +53,13 @@ export function useCheckIns(placeId?: string) {
   }
 
   async function checkOut() {
-    if (!myCheckIn) { setError('You are not checked in'); return; }
+    if (!myCheckIn) { setError('You are not checked in'); return false; }
     setSaving(true);
     const { error } = await closeOpenCheckIn();
     if (error) setError(error.message);
     else setCheckIns((prev) => prev.filter((c) => c.id !== myCheckIn.id)); // tas bort ur listan så knappen byter till "Check in"
     setSaving(false);
+    return !error;
   }
 
   // Checkar ut från den pågående incheckningen, var den än är.

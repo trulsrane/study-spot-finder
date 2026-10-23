@@ -16,6 +16,7 @@ import { BusynessReportForm } from '@/src/components/BusynessReportForm';
 import { Busyness } from '@/src/types/db';
 import { useReportBusyness } from '@/src/hooks/useReportBusyness';
 import { useState } from 'react';
+import { ReviewModal } from '@/src/components/ReviewModal';
 
 const tagColorMap: Record<string, string> = {
 	low: colors.busynessLow,
@@ -37,6 +38,7 @@ export default function PlaceScreen() {
 	const { checkIn, checkOut, myCheckIn, saving, loading: checkInsLoading, error: checkInsError } = useCheckIns(DbPlace?.id);
 	const { isFavorite, toggleFavorite } = useFavorites();
 	const [titleWrapped, setTitleWrapped] = useState(false);
+	const [reviewOpen, setReviewOpen] = useState(false);
 	const place = DbPlace ?? googlePlace;
 	const loading = placesLoading || reviewsLoading || checkInsLoading || googlePlacesLoading;
 	const error = placesError ?? reviewsError ?? checkInsError ?? googlePlacesError;
@@ -76,6 +78,12 @@ export default function PlaceScreen() {
 		);
 	}
 
+	// Checkar ut och visar recensionsrutan, men bara om man inte redan har recenserat platsen
+	async function handleCheckOut() {
+		const checkedOut = await checkOut();
+		const alreadyReviewed = reviews.some((r) => r.user_id === userId);
+		if (checkedOut && !alreadyReviewed) setReviewOpen(true);
+	}
 
 	return (
 		<ScrollView key={id} style={styles.screen} contentContainerStyle={styles.content}>
@@ -178,7 +186,7 @@ export default function PlaceScreen() {
 				{DbPlace && (
 					<TouchableOpacity
 						style={styles.checkInButton}
-						onPress={myCheckIn ? checkOut : handleCheckIn}
+						onPress={myCheckIn ? handleCheckOut : handleCheckIn}
 						disabled={saving}
 						activeOpacity={0.8}
 					>
@@ -283,6 +291,12 @@ export default function PlaceScreen() {
 					))
 				)}
 			</View>
+		<ReviewModal
+		visible={reviewOpen}
+		onSubmit={submitReview}
+		submitting={submitting}
+		onClose={() => setReviewOpen(false)}
+		/>
 		</ScrollView>
 	);
 }

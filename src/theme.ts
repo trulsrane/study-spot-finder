@@ -39,7 +39,7 @@ export const colors = {
   coverBackground: '#CBD8BC',
   cardBackground: '#fff',
   imageBackground: 'lightgray',
-  
+  overlay: 'rgba(0, 0, 0, 0.25)',
 };
 
 export const icons = {
