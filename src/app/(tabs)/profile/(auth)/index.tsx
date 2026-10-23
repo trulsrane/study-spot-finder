@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useProfile } from '@/src/hooks/useProfile';
 import { useRouter, Link, useFocusEffect } from 'expo-router'
@@ -14,10 +14,18 @@ import { useCallback, useRef } from 'react';
 export default function ProfilePage() {
 	const router = useRouter();
 	const { profile, loading: profileLoading, error: profileError, refetch } = useProfile();
-	const { places, loading: placesLoading, error: placesError } = usePlaces();
-	const { favorites, loading: favoritesLoading, error: favoritesError, toggleFavorite, isFavorite } = useFavorites();
+	const { places, loading: placesLoading, error: placesError, refetch: refetchPlaces } = usePlaces();
+	const { favorites, loading: favoritesLoading, error: favoritesError, toggleFavorite, isFavorite, refetch: refetchFavorites } = useFavorites();
 	const favoritePlaces = places.filter((p) => favorites.includes(p.id))
-	const { reviews, loading: reviewsLoading, error: reviewsError } = useMyReviews();
+	const { reviews, loading: reviewsLoading, error: reviewsError, refetch: refetchReviews } = useMyReviews();
+
+	// Hämtar om allt på sidan när man drar nedåt
+	const refetchAll = useCallback(() => {
+		refetch();
+		refetchPlaces();
+		refetchFavorites();
+		refetchReviews();
+	}, [refetch, refetchPlaces, refetchFavorites, refetchReviews]);
 
 	const loading = profileLoading || placesLoading || favoritesLoading;
 	const error = profileError ?? placesError ?? favoritesError;
@@ -45,6 +53,8 @@ export default function ProfilePage() {
 			style={styles.container}
 			contentContainerStyle={styles.content}
 			contentInsetAdjustmentBehavior="automatic"
+			keyboardShouldPersistTaps="handled" // Gör så du kan trycka på knappar även om tangentbordet är uppe (t.ex. "send").
+			refreshControl={<RefreshControl refreshing={false} onRefresh={refetchAll} />} // Dra nedåt för att hämta om sidan
 		>
 
 			<View style={styles.header}>
