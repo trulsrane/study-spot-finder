@@ -96,15 +96,15 @@ export default function PlaceScreen() {
 				))}
 			</View>
 
-
+			<View style={styles.container}>
+				{/* Texten som angavs när platsen lades till */}
+				<Text style={styles.rowTitle}>Info about the place:</Text>
+				<Text style={styles.row}>{place.description ?? 'No info about this place yet.'}</Text>
+			</View>
 			<Text style={styles.row}>Opening hours: {place.opening_hours ?? '—'}</Text>
 
 			<Text style={styles.row}>Updated: {place.busyness_updated_at ?? '—'}</Text>
 
-
-			{/* Texten som angavs när platsen lades till */}
-			<Text style={styles.rowTitle}>Info about the place:</Text>
-			<Text style={styles.row}>{place.description ?? 'No info about this place yet.'}</Text>
 
 			{/* Fyll denna med info om populära tider */}
 			<Text style={styles.rowTitle}>Popular times:</Text>
@@ -156,8 +156,8 @@ const styles = StyleSheet.create({
 
 	},
 	textContent: {
-	paddingHorizontal: spacing.md,
-},
+		paddingHorizontal: spacing.md,
+	},
 	missing: {
 		...type.body,
 		color: colors.textMuted,
@@ -322,5 +322,20 @@ const styles = StyleSheet.create({
 		fontSize: type.tag.fontSize,
 		fontWeight: type.tag.fontWeight,
 		color: colors.text,
+	},
+	container: {
+		paddingTop: spacing.xs,
+		paddingBottom: spacing.md,
+		backgroundColor: colors.buttonBackground,
+		borderRadius: radius.md,
+		padding: spacing.md,
+		marginBottom: spacing.sm,
+		shadowColor: colors.amenityCircle,
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.06,
+		shadowRadius: 4,
+		elevation: 2,
+		borderWidth: 1,
+		borderColor: colors.borderColor,
 	},
 });

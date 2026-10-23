@@ -101,10 +101,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 11,
     fontWeight: '600',
-    color: colors.background,
-    // Ljus kant runt texten så att den syns mot kartan
-    textShadowRadius: 3,
-    textShadowOffset: { width: 0, height: 1 },
+    color: colors.text,
+    // Vit skugga runt texten så att den syns mot kartan
+    textShadowColor: colors.lightText,
+    textShadowRadius: 1,
+    textShadowOffset: { width: 0, height: 0 },
     zIndex: 1, // så att texten hamnar ovanför glasmarkören
   },
   fallback: {
