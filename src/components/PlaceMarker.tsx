@@ -80,10 +80,10 @@ export function PlaceMarker({ place, selected, onPress, showLabel, friendHere }:
           )}
 
           {dotColor && <View style={[styles.dot, { backgroundColor: dotColor }]} />}
-          {friendHere && (
-            <FriendAvatar profile={friendHere.profiles} size={Math.round(size * 0.5)} style={styles.friend} />
-          )}
         </View>
+        {friendHere && (
+            <FriendAvatar profile={friendHere.profiles} size={Math.round(size * 0.7)} style={styles.friend} />
+          )}
       </View>
     </Marker>
   );
@@ -106,6 +106,7 @@ const styles = StyleSheet.create({
     textShadowColor: colors.lightText,
     textShadowRadius: 1,
     textShadowOffset: { width: 0, height: 0 },
+    zIndex: 1, // så att texten hamnar ovanför glasmarkören
   },
   fallback: {
     borderRadius: 999,
@@ -126,7 +127,7 @@ const styles = StyleSheet.create({
   },
   friend: {
     position: 'absolute',
-    right: 0,
-    bottom: 0,
+    left: 0,
+    top: 15,
   },
 });

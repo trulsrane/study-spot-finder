@@ -1,4 +1,4 @@
-export const spacing = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 };
+export const spacing = { xs: 4, s: 6, sm: 8, md: 16, lg: 24, xl: 32 };
 export const radius  = { sm: 8, md: 12, lg: 20, pill: 999 };
 export const type = {
   title:   { fontSize: 22, fontWeight: '600' },
@@ -26,6 +26,7 @@ export const colors = {
   busynessMedium: '#EDDAC2',
   busynessHigh: '#E8CDD5',
   busynessUnknown: '#D9D9D9',
+  borderColor: '#b8cb9e87',
   // Starkare varianter för små prickar på kartan, där pastellfärgerna ovan blir för bleka
   busynessDotLow: '#6FA04A',
   busynessDotMedium: '#E0A040',
