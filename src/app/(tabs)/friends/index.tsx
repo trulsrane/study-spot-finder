@@ -1,15 +1,25 @@
 import { useState } from 'react';
-import { Alert, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Image, TouchableHighlight} from 'react-native';
 import { useFriends, FriendshipWithProfile } from '@/src/hooks/useFriends';
 import { colors, radius, spacing, type } from '@/src/theme';
+import { useProfile } from '@/src/hooks/useProfile';
+import { opacity } from '@expo/ui/swift-ui/modifiers';
+import { useRouter } from 'expo-router';
+
 
 // Visningsnamn om det finns, annars användarnamn (samma som för recensioner)
 function nameOf(f: FriendshipWithProfile) {
 	return f.other?.display_name ?? f.other?.username ?? 'Unknown user';
 }
 
+function picOf(f: FriendshipWithProfile) {
+	return f.other?.avatar_url ?? "No image";
+}
+
 export default function FriendsScreen() {
+	const router = useRouter();
 	const { friends, incoming, outgoing, loading, error, refetch, sendRequest, acceptRequest, removeFriendship } = useFriends();
+	const { profile } = useProfile();
 	const [username, setUsername] = useState('');
 	const [sending, setSending] = useState(false);
 	const [busy, setBusy] = useState(false);
@@ -52,9 +62,14 @@ export default function FriendsScreen() {
 		]);
 	}
 
+	function seeFriendProfile(f: FriendshipWithProfile){
+		if(!f.other?.id) return;
+		router.push({pathname: '/friends/[id]', params: {id: f.other.id}})
+	}
+
 	if (loading) return <Text style={styles.message}>Loading...</Text>;
 	if (error) return <Text style={styles.message}>{error}</Text>; // Om det blev ett fel vid hämtning, visa det. (Det går att dra nedåt för att hämta om listan, se nedan.)
-
+	if (!profile) return <Text style={styles.message}>No profile found</Text>;
 	// Dra nedåt för att hämta om listan, t.ex. när någon just skickat en förfrågan till dig
 	return (
 		<ScrollView
@@ -124,13 +139,29 @@ export default function FriendsScreen() {
 				<Text style={styles.message}>No friends yet.</Text>
 			) : (
 				friends.map((f) => (
-					<View key={f.id} style={styles.row}>
-						<Text style={styles.name}>{nameOf(f)}</Text>
-						{/* Tar bort vänrelationen, visar en bekräftelsedialog först */}
-						<TouchableOpacity style={styles.plainButton} onPress={() => confirmRemove(f)} disabled={busy}>
-							<Text style={styles.mutedText}>Remove</Text>
-						</TouchableOpacity>
-					</View>
+					<TouchableHighlight
+						key={f.id}
+						underlayColor={colors.buttonpress}
+						activeOpacity={0.8}
+						onPress={() => seeFriendProfile(f)}
+					>
+						<View style={styles.row}>
+							{profile.avatar_url ? (
+												<Image source={{ uri: picOf(f) }} style={styles.profilePicture} />
+											) : (
+												<View style={[styles.profilePicture, styles.profilePictureFallback]}>
+													<Text style={styles.profilePictureInitial}>
+														{profile.username?.charAt(0).toUpperCase() ?? 'U'}
+													</Text>
+												</View>
+											)}
+							<Text style={styles.name}>{nameOf(f)}</Text>
+							{/* Tar bort vänrelationen, visar en bekräftelsedialog först */}
+							<TouchableOpacity style={styles.plainButton} onPress={() => confirmRemove(f)} disabled={busy}>
+								<Text style={styles.mutedText}>Remove</Text>
+							</TouchableOpacity>
+						</View>
+					</TouchableHighlight>
 				))
 			)}
 		</ScrollView>
@@ -173,5 +204,22 @@ const styles = StyleSheet.create({
 	mutedText: { color: colors.textMuted, fontSize: type.buttonText.fontSize },
 	error: { ...type.caption, color: colors.favorite, marginTop: spacing.xs },
 	info: { ...type.caption, color: colors.textMuted, marginTop: spacing.xs },
+	profilePicture: {
+		width: 50,
+		height: 50,
+		borderRadius: radius.pill,
+		borderWidth: 4,
+		borderColor: colors.cardBackground,
+	},
+	profilePictureFallback: {
+		backgroundColor: colors.amenityCircle,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	profilePictureInitial: {
+		fontSize: 44,
+		fontWeight: '600',
+		color: colors.text,
+	},
 
 });

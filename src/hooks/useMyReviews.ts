@@ -11,8 +11,9 @@ export type ReviewWithPlace = Review & {
 
 // Alla recensioner som den inloggade användaren har skrivit, nyast först.
 // Utan inloggning är listan tom.
-export function useMyReviews() {
-  const userId = useSession()?.user.id;
+export function useMyReviews(otherUserId: string) {
+  const sessionUserId = useSession()?.user.id;
+  const userId = otherUserId ?? sessionUserId;
   const [reviews, setReviews] = useState<ReviewWithPlace[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

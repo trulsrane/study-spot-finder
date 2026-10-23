@@ -9,6 +9,7 @@ import { colors, radius, spacing, type } from '@/src/theme';
 import { Card } from '@/src/components/CardContainer';
 import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards';
 import { useCallback, useRef } from 'react';
+import { id } from '@expo/ui/swift-ui/modifiers';
 
 
 export default function ProfilePage() {
@@ -17,7 +18,7 @@ export default function ProfilePage() {
 	const { places, loading: placesLoading, error: placesError, refetch: refetchPlaces } = usePlaces();
 	const { favorites, loading: favoritesLoading, error: favoritesError, toggleFavorite, isFavorite, refetch: refetchFavorites } = useFavorites();
 	const favoritePlaces = places.filter((p) => favorites.includes(p.id))
-	const { reviews, loading: reviewsLoading, error: reviewsError, refetch: refetchReviews } = useMyReviews();
+	const { reviews, loading: reviewsLoading, error: reviewsError, refetch: refetchReviews } = useMyReviews(profile?.id ?? '');
 
 	// Hämtar om allt på sidan när man drar nedåt
 	const refetchAll = useCallback(() => {

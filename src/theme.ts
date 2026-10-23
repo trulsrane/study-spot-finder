@@ -37,7 +37,8 @@ export const colors = {
   coverBackground: '#CBD8BC',
   cardBackground: '#fff',
   imageBackground: 'lightgray',
-  
+  //För knapptryck med TouchableOpacityHighlight
+  buttonpress: '#EEF3E8'
 };
 
 export const icons = {
