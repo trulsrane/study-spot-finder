@@ -10,6 +10,8 @@ export function useFavorites() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const refetch = useCallback(() => setReloadKey((k) => k + 1), []);
 
   // Hämtas varje gång skärmen visas, så att en favorit som markerats på en annan skärm
   // (t.ex. platspanelen på kartan) också syns i listvyn och på profilen.
@@ -35,7 +37,7 @@ export function useFavorites() {
     })();
 
     return () => { cancelled = true; };
-  }, [userId]));
+  }, [userId, reloadKey]));
 
   function isFavorite(placeId: string) {
     return favorites.includes(placeId); // returnerar om platsen finns i listan med favoriter
@@ -62,5 +64,5 @@ export function useFavorites() {
     }
   }
 
-  return { favorites, loading, error, isFavorite, toggleFavorite };
+  return { favorites, loading, error, isFavorite, toggleFavorite, refetch };
 }

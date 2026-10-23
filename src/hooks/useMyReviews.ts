@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/src/utils/supabase';
 import { Review, Place } from '@/src/types/db';
 import { useSession } from '@/src/hooks/useSession';
@@ -16,6 +16,8 @@ export function useMyReviews() {
   const [reviews, setReviews] = useState<ReviewWithPlace[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const refetch = useCallback(() => setReloadKey((k) => k + 1), []);
 
   useEffect(() => {
     // Inte inloggad: inga recensioner att hämta
@@ -40,7 +42,7 @@ export function useMyReviews() {
     })();
 
     return () => { cancelled = true; };
-  }, [userId]);
+  }, [userId, reloadKey]);
 
-  return { reviews, loading, error }; // returnerar användarens recensioner, laddningsstatus och eventuellt felmeddelande
+  return { reviews, loading, error, refetch }; // returnerar användarens recensioner, laddningsstatus och eventuellt felmeddelande
 }

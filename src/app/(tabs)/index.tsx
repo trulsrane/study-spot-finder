@@ -18,6 +18,7 @@ import { MAP_BUTTON_SIZE, MapAddButton } from '@/src/components/MapAddButton';
 import { DraftPlaceBar } from '@/src/components/DraftPlaceBar';
 import { BusynessLegend } from '@/src/components/BusynessLegend';
 import { findBuilding } from '@/src/utils/campusBuildings';
+import { AMENITY_FILTER_HEIGHT, AmenityFilter } from '@/src/components/AmenityFilter';
 import { pickVisibleLabels } from '@/src/utils/pickVisibleLabels';
 
 // Ungefärlig höjd på kartans logga och "Legal"-länk längst ner
@@ -59,6 +60,24 @@ export default function Map() {
   // Senaste området kartan stannade på, så att namnen kan räknas om när platserna eller valet ändras
   const lastRegion = useRef<Region | null>(null);
 
+  // Bekvämligheterna man filtrerar på. Tom lista betyder att alla platser visas.
+  const [amenityFilter, setAmenityFilter] = useState<string[]>([]);
+  const toggleAmenity = (key: string) =>
+    setAmenityFilter((current) =>
+      current.includes(key) ? current.filter((k) => k !== key) : [...current, key]
+    );
+  // Platserna som har alla valda bekvämligheter. Den valda platsen visas alltid,
+  // så att den inte försvinner om man sökt fram den eller kommit dit från en annan sida.
+  const visiblePlaces = useMemo(
+    () =>
+      amenityFilter.length === 0
+        ? places
+        : places.filter(
+            (p) => p.id === focusedId || amenityFilter.every((a) => p.amenities.includes(a))
+          ),
+    [places, amenityFilter, focusedId]
+  );
+
   // Hämtar kartans kamera (mitt, vridning osv.), eller null om kartan inte är redo
   const getCameraSafely = async () => {
     if (!mapReady.current || !mapRef.current) return null;
@@ -74,13 +93,13 @@ export default function Map() {
     // Vanligt objekt, eftersom komponenten heter Map och skuggar JavaScripts Map
     const counts: Record<string, number> = {};
     const outside: typeof places = [];
-    places.forEach((place) => {
+    visiblePlaces.forEach((place) => {
       const building = findBuilding(buildings, place.latitude, place.longitude);
       if (building) counts[building.id] = (counts[building.id] ?? 0) + 1;
       else outside.push(place);
     });
     return { placesOutside: outside, countByBuilding: counts };
-  }, [places, buildings]);
+  }, [visiblePlaces, buildings]);
 
   // Räknar ut vilka namn som får plats. Frågar kartan var varje markör hamnar på skärmen,
   // så att det blir rätt även när kartan är vriden.
@@ -294,11 +313,22 @@ export default function Map() {
         />
       )}
 
-      {/* Förklaring till färgen på prickarna, uppe till vänster under sökfältet. Ligger före sökfältet
-          så att träfflistan hamnar ovanpå. Döljs när man lägger till en plats. */}
+      {/* Filterknapparna och förklaringen till färgen på prickarna ligger under sökfältet. De ligger före
+          sökfältet så att träfflistan hamnar ovanpå. Döljs när man lägger till en plats. */}
+      {!draft && (
+        <AmenityFilter
+          selected={amenityFilter}
+          onToggle={toggleAmenity}
+          style={[styles.amenityFilter, { top: insets.top + spacing.sm + SEARCH_BAR_HEIGHT + spacing.xs }]}
+        />
+      )}
+
       {!draft && (
         <BusynessLegend
-          style={[styles.legend, { top: insets.top + spacing.sm + SEARCH_BAR_HEIGHT + spacing.sm }]}
+          style={[
+            styles.legend,
+            { top: insets.top + spacing.sm + SEARCH_BAR_HEIGHT + spacing.xs + AMENITY_FILTER_HEIGHT + spacing.xs },
+          ]}
         />
       )}
 
@@ -361,6 +391,12 @@ const styles = StyleSheet.create({
   compass: {
     position: 'absolute',
     left: spacing.md,
+  },
+  // Lika bred som sökfältet
+  amenityFilter: {
+    position: 'absolute',
+    left: spacing.md,
+    right: spacing.md,
   },
   legend: {
     position: 'absolute',

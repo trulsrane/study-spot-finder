@@ -35,6 +35,8 @@ export function translatePlaceToInfoCards(place: Place & { distance_meters?: num
 		status: place.opening_hours ?? 'Open',
 		level: place.current_busyness ?? 'unknown',
 		distance: place.distance_meters != null ? formatDistance(place.distance_meters) : undefined,
+		// Första bilden visas i kortet, saknas den visas den grå platshållaren
+		image: place.image_urls[0],
 
 		amenities: place.amenities.map((key) => ({
 			key,
