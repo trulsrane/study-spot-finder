@@ -536,7 +536,7 @@ const styles = StyleSheet.create({
 		marginBottom: spacing.sm,
 	},
 	titleSide: {
-		width: 100,          // lika bred på båda sidor, så att titeln hamnar mitt på sidan
+		width: 110,          // lika bred på båda sidor, så att titeln hamnar mitt på sidan
 	},
 	titleSideRight: {
 		alignItems: 'flex-end',
