@@ -1,4 +1,4 @@
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { NativeTabs } from 'expo-router/native-tabs';
 import { useSession } from  '@/src/hooks/useSession';
 
 // Renderars på iOS och Android istället för standard js/ts-versionen.
