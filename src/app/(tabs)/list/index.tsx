@@ -10,10 +10,6 @@ import { Card } from '@/src/components/CardContainer';
 import { translatePlaceToInfoCards } from '@/src/utils/translatePlaceToInfoCards';
 import { createPlaceSearcher, searchPlaces } from '@/src/scripts/searchPlaces';
 
-// För att testa databasen
-import { useEffect } from 'react';
-import { supabase } from '@/src/utils/supabase';
-
 // Listan visar alla platser, så radien är stor nog för att alla i Umeå ska få ett avstånd
 const DISTANCE_RADIUS_METERS = 50_000;
 
