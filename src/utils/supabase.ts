@@ -18,5 +18,3 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: false,
   },
 });
-
-const _check = supabase.from('nonexistent_table');

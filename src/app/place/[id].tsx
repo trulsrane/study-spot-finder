@@ -38,7 +38,6 @@ export default function PlaceScreen() {
 	const { reviews, averageRating, count, loading: reviewsLoading, error: reviewsError, submitReview, submitting } = useReviews(id);
 	const { checkIn, checkOut, myCheckIn, saving, loading: checkInsLoading, error: checkInsError } = useCheckIns(DbPlace?.id);
 	const { isFavorite, toggleFavorite } = useFavorites();
-	const [titleWrapped, setTitleWrapped] = useState(false);
 	const [reviewOpen, setReviewOpen] = useState(false);
 	// Räknar upp "x mins ago" varje minut och växlar till Unknown när rapporten blir en timme gammal
 	const now = useNow();
@@ -102,18 +101,9 @@ export default function PlaceScreen() {
 					</View>
 				</View>
 			
-				{/* Mitten: en rad, kapas med "…". Mätkopian upptäcker om namnet inte fick plats */}
+				{/* Mitten: en rad, kapas med "…". Hela namnet står alltid under bilden. */}
 				<View style={styles.titleCenter}>
 					<Text style={styles.title} numberOfLines={1}>{place.name}</Text>
-					<Text
-						style={[styles.title, styles.titleMeasure]}
-						onTextLayout={(e) => setTitleWrapped(e.nativeEvent.lines.length > 1)}
-						pointerEvents="none"
-						accessibilityElementsHidden
-						importantForAccessibility="no-hide-descendants"
-					>
-						{place.name}
-					</Text>
 				</View>
 
 				{/* Höger: favorit. Kolumnen finns kvar även utan hjärta, så titeln ligger kvar mitt på sidan */}
@@ -133,7 +123,7 @@ export default function PlaceScreen() {
 					)}
 				</View>
 			</View>
-			<Text style={styles.row}>Last updated: {info.lastUpdated}</Text>
+			<Text style={styles.status}>Last updated:{'\n'}{info.lastUpdated}</Text>
 			{/* ----------- */}
 			{/* Rad 1: trängsel till vänster, favorit till höger */}
 			{/* <View style={styles.topRow}>
@@ -200,7 +190,8 @@ export default function PlaceScreen() {
 					</TouchableOpacity>
 				)}
 			</View>
-			{titleWrapped && <Text style={styles.fullTitle}>{place.name}</Text>}
+			{/* Hela namnet under bilden, alltid. Uppe i raden kapas det med "…" om det är för långt. */}
+			<Text style={styles.fullTitle}>{place.name}</Text>
 			{/* Tog bort rubrikerna, jag tänker att adressen säger sig själv */}
 			<View style={styles.addressRow}>
 				<View style={styles.addressText}>
@@ -253,11 +244,21 @@ export default function PlaceScreen() {
 				<Text style={styles.row}>{place.description ?? 'No info about this place yet.'}</Text>
 			</View>
 
-			<Text style={styles.row}>Opening hours: {place.opening_hours ?? '—'}</Text>
+			{/* Samma vita ruta som infotexten ovanför, så att de hänger ihop */}
+			<View style={styles.container}>
+				<Text style={styles.rowTitle}>Opening hours:</Text>
+				<Text style={styles.row}>{place.opening_hours ?? 'No opening hours added yet.'}</Text>
+			</View>
 
 			
 			{/* Fyll denna med info om populära tider */}
 			<Text style={styles.rowTitle}>Popular times:</Text>
+			{/* Platshållarbild tills vi har riktig data om populära tider */}
+			<Image
+				source={require('@/assets/images/popular_times_placeholder.png')}
+				style={styles.popularTimes}
+				resizeMode="contain"
+			/>
 
 			<View style={styles.reviewContainer}>
 				<Text style={styles.rowTitle}>Reviews ({count}):</Text>
@@ -321,6 +322,12 @@ const styles = StyleSheet.create({
 		color: colors.text,
 		marginTop: spacing.sm,
 	},
+	status: {
+		...type.amenityLabel,
+		color: colors.textMuted,
+		textAlign: 'left',
+		marginLeft: spacing.sm,
+	},
 	rowTitle: {
 		...type.heading,
 		color: colors.text,
@@ -357,8 +364,9 @@ const styles = StyleSheet.create({
 	amenitiesRow: {
 		flexDirection: 'row',
 		flexWrap: 'wrap',
-		gap: 5,
-		marginTop: 8,
+		gap: spacing.xs,
+		marginTop: spacing.sm,
+		marginBottom: spacing.md,
 	},
 	amenityPill: {
 		flexDirection: 'row',
@@ -432,6 +440,12 @@ const styles = StyleSheet.create({
 		fontWeight: type.buttonText.fontWeight,
 	},
 
+	// Samma proportioner som bilden (358 × 185), så att den inte sträcks ut
+	popularTimes: {
+		width: '100%',
+		aspectRatio: 358 / 185,
+		borderRadius: radius.md,
+	},
 	reviewItem: {
 		marginTop: spacing.sm,
 		padding: spacing.sm,
@@ -492,9 +506,10 @@ const styles = StyleSheet.create({
 		flexShrink: 1,
 		paddingRight: spacing.sm,
 	},
+	// Toppjusterad, så att adressen hamnar direkt under namnet och inte centreras mot den högre knappen
 	addressRow: {
 		flexDirection: 'row',
-		alignItems: 'center',
+		alignItems: 'flex-start',
 		justifyContent: 'space-between',
 		gap: spacing.sm,
 	},
@@ -510,7 +525,6 @@ const styles = StyleSheet.create({
 		borderRadius: radius.pill,
 		paddingHorizontal: spacing.md,
 		paddingVertical: spacing.sm,
-		marginTop: spacing.sm,
 	},
 	directionsText: {
 		color: colors.text,
@@ -525,7 +539,7 @@ const styles = StyleSheet.create({
 	// 	opacity: 0,
 	// },
 	fullTitle: {
-		...type.heading,       // lite mindre än type.title
+		...type.title,         // samma storlek som titeln på listans detaljsida
 		color: colors.text,
 		marginBottom: spacing.xs,
 	},
@@ -533,7 +547,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		gap: spacing.sm,
-		marginBottom: spacing.sm,
+		marginBottom: 0,
 	},
 	titleSide: {
 		width: 110,          // lika bred på båda sidor, så att titeln hamnar mitt på sidan
@@ -550,13 +564,6 @@ const styles = StyleSheet.create({
 		color: colors.text,
 		textAlign: 'center',
 	},
-	titleMeasure: {
-		position: 'absolute',
-		top: 0,
-		left: 0,
-		right: 0,
-		opacity: 0,
-	},
 	busynessContainer: {
 		paddingTop: spacing.sm,
 		paddingBottom: spacing.md,
@@ -564,7 +571,7 @@ const styles = StyleSheet.create({
 		backgroundColor: colors.buttonBackground,
 		borderRadius: radius.md,
 		padding: spacing.md,
-		marginBottom: spacing.sm,
+		marginBottom: spacing.md,
 		shadowColor: colors.amenityCircle,
 		shadowOffset: { width: 0, height: 1 },
 		shadowOpacity: 0.06,

@@ -71,7 +71,7 @@ export function PlaceMarker({ place, selected, onPress, showLabel, friendHere }:
                 color={colors.text}
                 modifiers={[
                   frame({ width: size, height: size }),
-                  glassEffect({ glass: { variant: 'regular' }, shape: 'circle' }),
+                  glassEffect({ glass: { variant: 'clear', tint: colors.glassTint }, shape: 'circle' }),
                 ]}
               />
             </Host>

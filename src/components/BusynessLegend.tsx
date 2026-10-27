@@ -39,7 +39,7 @@ export function BusynessLegend({ style }: Props) {
             color="#00000000"
             modifiers={[
               frame({ width: size.width, height: size.height }),
-              glassEffect({ glass: { variant: 'regular' }, shape: 'roundedRectangle', cornerRadius: radius.md }),
+              glassEffect({ glass: { variant: 'clear', tint: colors.glassTint }, shape: 'roundedRectangle', cornerRadius: radius.md }),
             ]}
           />
         </Host>

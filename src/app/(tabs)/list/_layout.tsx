@@ -5,7 +5,7 @@ export default function ListLayout() {
   return (
     <Stack>
       <Stack.Screen name="index" options={{ title: 'Study places', headerLargeTitle: true }} />
-      <Stack.Screen name="[id]" options={{ title: 'Place' }} />
+      <Stack.Screen name="[id]" options={{ title: '', }} />
     </Stack>
   );
 }

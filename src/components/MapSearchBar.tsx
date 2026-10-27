@@ -61,7 +61,7 @@ export function MapSearchBar({ onSelect }: Props) {
             spacing={spacing.sm}
             modifiers={[
               padding({ horizontal: spacing.md, vertical: spacing.sm + spacing.xs }),
-              glassEffect({ glass: { variant: 'regular', interactive: true }, shape: 'capsule' }),
+              glassEffect({ glass: { variant: 'clear', interactive: true, tint: colors.glassTint }, shape: 'capsule' }),
             ]}>
             <Image systemName="magnifyingglass" color={colors.textMuted} />
             <TextField
