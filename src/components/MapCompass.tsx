@@ -47,7 +47,7 @@ export function MapCompass({ heading, size, onPress, style }: Props) {
         <ZStack
           modifiers={[
             frame({ width: size, height: size }),
-            glassEffect({ glass: { variant: 'clear', interactive: true }, shape: 'circle' }),
+            glassEffect({ glass: { variant: 'clear', interactive: true, tint: colors.glassTint }, shape: 'circle' }),
             accessibilityLabel('Compass, tap to point north up'),
             onTapGesture(onPress),
           ]}

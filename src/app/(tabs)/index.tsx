@@ -309,7 +309,7 @@ export default function Map() {
               color={colors.text}
               modifiers={[
                 frame({ width: MAP_BUTTON_SIZE, height: MAP_BUTTON_SIZE }),
-                glassEffect({ glass: { variant: 'clear', interactive: true }, shape: 'circle' }),
+                glassEffect({ glass: { variant: 'clear', interactive: true, tint: colors.glassTint }, shape: 'circle' }),
                 accessibilityLabel('Add place'),
                 onTapGesture(startDraftAtCenter),
               ]}

@@ -34,7 +34,7 @@ export function ReviewModal({ visible, onSubmit, submitting, onClose }: Props) {
 								color="#00000000"
 								modifiers={[
 									frame({ width: size.width, height: size.height }),
-									glassEffect({ glass: { variant: 'clear' }, shape: 'roundedRectangle', cornerRadius: radius.lg }),
+									glassEffect({ glass: { variant: 'clear', tint: colors.glassTint }, shape: 'roundedRectangle', cornerRadius: radius.lg }),
 								]}
 							/>
 						</Host>
