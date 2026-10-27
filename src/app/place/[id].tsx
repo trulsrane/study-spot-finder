@@ -38,7 +38,6 @@ export default function PlaceScreen() {
 	const { reviews, averageRating, count, loading: reviewsLoading, error: reviewsError, submitReview, submitting } = useReviews(id);
 	const { checkIn, checkOut, myCheckIn, saving, loading: checkInsLoading, error: checkInsError } = useCheckIns(DbPlace?.id);
 	const { isFavorite, toggleFavorite } = useFavorites();
-	const [titleWrapped, setTitleWrapped] = useState(false);
 	const [reviewOpen, setReviewOpen] = useState(false);
 	// Räknar upp "x mins ago" varje minut och växlar till Unknown när rapporten blir en timme gammal
 	const now = useNow();
@@ -102,18 +101,9 @@ export default function PlaceScreen() {
 					</View>
 				</View>
 			
-				{/* Mitten: en rad, kapas med "…". Mätkopian upptäcker om namnet inte fick plats */}
+				{/* Mitten: en rad, kapas med "…". Hela namnet står alltid under bilden. */}
 				<View style={styles.titleCenter}>
 					<Text style={styles.title} numberOfLines={1}>{place.name}</Text>
-					<Text
-						style={[styles.title, styles.titleMeasure]}
-						onTextLayout={(e) => setTitleWrapped(e.nativeEvent.lines.length > 1)}
-						pointerEvents="none"
-						accessibilityElementsHidden
-						importantForAccessibility="no-hide-descendants"
-					>
-						{place.name}
-					</Text>
 				</View>
 
 				{/* Höger: favorit. Kolumnen finns kvar även utan hjärta, så titeln ligger kvar mitt på sidan */}
@@ -200,7 +190,8 @@ export default function PlaceScreen() {
 					</TouchableOpacity>
 				)}
 			</View>
-			{titleWrapped && <Text style={styles.fullTitle}>{place.name}</Text>}
+			{/* Hela namnet under bilden, alltid. Uppe i raden kapas det med "…" om det är för långt. */}
+			<Text style={styles.fullTitle}>{place.name}</Text>
 			{/* Tog bort rubrikerna, jag tänker att adressen säger sig själv */}
 			<View style={styles.addressRow}>
 				<View style={styles.addressText}>
@@ -515,9 +506,10 @@ const styles = StyleSheet.create({
 		flexShrink: 1,
 		paddingRight: spacing.sm,
 	},
+	// Toppjusterad, så att adressen hamnar direkt under namnet och inte centreras mot den högre knappen
 	addressRow: {
 		flexDirection: 'row',
-		alignItems: 'center',
+		alignItems: 'flex-start',
 		justifyContent: 'space-between',
 		gap: spacing.sm,
 	},
@@ -533,7 +525,6 @@ const styles = StyleSheet.create({
 		borderRadius: radius.pill,
 		paddingHorizontal: spacing.md,
 		paddingVertical: spacing.sm,
-		marginTop: spacing.sm,
 	},
 	directionsText: {
 		color: colors.text,
@@ -548,7 +539,7 @@ const styles = StyleSheet.create({
 	// 	opacity: 0,
 	// },
 	fullTitle: {
-		...type.heading,       // lite mindre än type.title
+		...type.title,         // samma storlek som titeln på listans detaljsida
 		color: colors.text,
 		marginBottom: spacing.xs,
 	},
@@ -572,13 +563,6 @@ const styles = StyleSheet.create({
 		...type.title,
 		color: colors.text,
 		textAlign: 'center',
-	},
-	titleMeasure: {
-		position: 'absolute',
-		top: 0,
-		left: 0,
-		right: 0,
-		opacity: 0,
 	},
 	busynessContainer: {
 		paddingTop: spacing.sm,
