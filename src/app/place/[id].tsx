@@ -258,6 +258,12 @@ export default function PlaceScreen() {
 			
 			{/* Fyll denna med info om populära tider */}
 			<Text style={styles.rowTitle}>Popular times:</Text>
+			{/* Platshållarbild tills vi har riktig data om populära tider */}
+			<Image
+				source={require('@/assets/images/popular_times_placeholder.png')}
+				style={styles.popularTimes}
+				resizeMode="contain"
+			/>
 
 			<View style={styles.reviewContainer}>
 				<Text style={styles.rowTitle}>Reviews ({count}):</Text>
@@ -432,6 +438,12 @@ const styles = StyleSheet.create({
 		fontWeight: type.buttonText.fontWeight,
 	},
 
+	// Samma proportioner som bilden (358 × 185), så att den inte sträcks ut
+	popularTimes: {
+		width: '100%',
+		aspectRatio: 358 / 185,
+		borderRadius: radius.md,
+	},
 	reviewItem: {
 		marginTop: spacing.sm,
 		padding: spacing.sm,
