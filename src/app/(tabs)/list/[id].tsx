@@ -142,14 +142,28 @@ export default function PlaceScreen() {
 					</Text>
 				</View>
 			</View>
-			<Text style={styles.row}>Last updated: {info.lastUpdated}</Text>
-
+			{/* Adressen till vänster, och när trängseln senast uppdaterades till höger under trängseln */}
 			<View style={styles.addressRow}>
 				<View style={styles.addressText}>
 					<Text style={styles.rowSmall}>
 						{[place.address, place.building].filter(Boolean).join(' ')}
 						{place.floor != null && place.floor !== '' ? ` Floor: ${place.floor}` : ''}
 					</Text>
+				</View>
+				<Text style={styles.status}>Last updated:{'\n'}{info.lastUpdated}</Text>
+			</View>
+
+			{/* Bekvämligheterna till vänster (får radbrytas) och vägbeskrivningen till höger */}
+			<View style={styles.amenitiesAndDirections}>
+				<View style={styles.amenitiesRow}>
+					{amenities.map((a) => (
+						<View key={a.key} style={styles.amenityPill}>
+							<View style={styles.amenityCircle}>
+								<Ionicons name={a.icon} size={13} color={colors.icon} />
+							</View>
+							<Text style={styles.amenityLabel}>{a.label}</Text>
+						</View>
+					))}
 				</View>
 
 				{/* Vägbeskrivning visas bara för platser från databasen */}
@@ -162,18 +176,6 @@ export default function PlaceScreen() {
 						<Text style={styles.directionsText}>Directions</Text>
 					</TouchableOpacity>
 				)}
-			</View>
-
-			{/* Ikonerna för bekvämligheterna som finns på studieplatsen */}
-			<View style={styles.amenitiesRow}>
-				{amenities.map((a) => (
-					<View key={a.key} style={styles.amenityPill}>
-						<View style={styles.amenityCircle}>
-							<Ionicons name={a.icon} size={13} color={colors.icon} />
-						</View>
-						<Text style={styles.amenityLabel}>{a.label}</Text>
-					</View>
-				))}
 			</View>
 
 			{/* Rapportera in trängseln */}
@@ -189,7 +191,11 @@ export default function PlaceScreen() {
 				<Text style={styles.row}>{place.description ?? 'No info about this place yet.'}</Text>
 			</View>
 
-			<Text style={styles.row}>Opening hours: {place.opening_hours ?? '—'}</Text>
+			{/* Samma vita ruta som infotexten ovanför, så att de hänger ihop */}
+			<View style={styles.container}>
+				<Text style={styles.rowTitle}>Opening hours:</Text>
+				<Text style={styles.row}>{place.opening_hours ?? 'No opening hours added yet.'}</Text>
+			</View>
 
 			{/* Fyll denna med info om populära tider */}
 			<Text style={styles.rowTitle}>Popular times:</Text>
@@ -256,6 +262,12 @@ const styles = StyleSheet.create({
 		...type.body,
 		color: colors.text,
 		marginTop: spacing.sm,
+	},
+	status: {
+		...type.amenityLabel,
+		color: colors.textMuted,
+		textAlign: 'right',
+		marginRight: spacing.sm,
 	},
 	rowTitle: {
 		...type.heading,
@@ -353,23 +365,29 @@ const styles = StyleSheet.create({
 
 	addressRow: {
 		flexDirection: 'row',
-		alignItems: 'center',
+		alignItems: 'flex-start',
 		justifyContent: 'space-between',
 		gap: spacing.sm,
 	},
 	addressText: {
 		flex: 1,
 	},
+	// Bekvämligheterna och vägbeskrivningen på samma rad
+	amenitiesAndDirections: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: spacing.sm,
+		marginTop: spacing.sm,
+		marginBottom: spacing.md,
+	},
 	directionsButton: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		alignSelf: 'flex-start',
 		gap: 6,
 		backgroundColor: colors.greenButtonBackground,
 		borderRadius: radius.pill,
 		paddingHorizontal: spacing.md,
 		paddingVertical: spacing.sm,
-		marginTop: spacing.sm,
 	},
 	directionsText: {
 		color: colors.text,
@@ -377,11 +395,12 @@ const styles = StyleSheet.create({
 		fontWeight: type.buttonText.fontWeight,
 	},
 
+	// Tar platsen som blir kvar bredvid vägbeskrivningen
 	amenitiesRow: {
+		flex: 1,
 		flexDirection: 'row',
 		flexWrap: 'wrap',
 		gap: 5,
-		marginTop: 8,
 	},
 	amenityPill: {
 		flexDirection: 'row',
@@ -411,7 +430,7 @@ const styles = StyleSheet.create({
 		backgroundColor: colors.buttonBackground,
 		borderRadius: radius.md,
 		padding: spacing.md,
-		marginBottom: spacing.sm,
+		marginBottom: spacing.md,
 		shadowColor: colors.amenityCircle,
 		shadowOffset: { width: 0, height: 1 },
 		shadowOpacity: 0.06,

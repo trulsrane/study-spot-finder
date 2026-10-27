@@ -133,7 +133,7 @@ export default function PlaceScreen() {
 					)}
 				</View>
 			</View>
-			<Text style={styles.row}>Last updated: {info.lastUpdated}</Text>
+			<Text style={styles.status}>Last updated:{'\n'}{info.lastUpdated}</Text>
 			{/* ----------- */}
 			{/* Rad 1: trängsel till vänster, favorit till höger */}
 			{/* <View style={styles.topRow}>
@@ -253,7 +253,11 @@ export default function PlaceScreen() {
 				<Text style={styles.row}>{place.description ?? 'No info about this place yet.'}</Text>
 			</View>
 
-			<Text style={styles.row}>Opening hours: {place.opening_hours ?? '—'}</Text>
+			{/* Samma vita ruta som infotexten ovanför, så att de hänger ihop */}
+			<View style={styles.container}>
+				<Text style={styles.rowTitle}>Opening hours:</Text>
+				<Text style={styles.row}>{place.opening_hours ?? 'No opening hours added yet.'}</Text>
+			</View>
 
 			
 			{/* Fyll denna med info om populära tider */}
@@ -327,6 +331,12 @@ const styles = StyleSheet.create({
 		color: colors.text,
 		marginTop: spacing.sm,
 	},
+	status: {
+		...type.amenityLabel,
+		color: colors.textMuted,
+		textAlign: 'left',
+		marginLeft: spacing.sm,
+	},
 	rowTitle: {
 		...type.heading,
 		color: colors.text,
@@ -363,8 +373,9 @@ const styles = StyleSheet.create({
 	amenitiesRow: {
 		flexDirection: 'row',
 		flexWrap: 'wrap',
-		gap: 5,
-		marginTop: 8,
+		gap: spacing.xs,
+		marginTop: spacing.sm,
+		marginBottom: spacing.md,
 	},
 	amenityPill: {
 		flexDirection: 'row',
@@ -545,7 +556,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		gap: spacing.sm,
-		marginBottom: spacing.sm,
+		marginBottom: 0,
 	},
 	titleSide: {
 		width: 110,          // lika bred på båda sidor, så att titeln hamnar mitt på sidan
@@ -576,7 +587,7 @@ const styles = StyleSheet.create({
 		backgroundColor: colors.buttonBackground,
 		borderRadius: radius.md,
 		padding: spacing.md,
-		marginBottom: spacing.sm,
+		marginBottom: spacing.md,
 		shadowColor: colors.amenityCircle,
 		shadowOffset: { width: 0, height: 1 },
 		shadowOpacity: 0.06,
