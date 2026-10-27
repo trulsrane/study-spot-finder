@@ -40,6 +40,9 @@ export const colors = {
   cardBackground: '#fff',
   imageBackground: 'lightgray',
   overlay: 'rgba(0, 0, 0, 0.25)',
+  // Ljus ton på glaset så att mörk text syns mot kartan, utan det gråa i "regular"-glaset.
+  // Samma färg som background (#EEF3E8) med 70 % täckning.
+  glassTint: 'rgba(238, 243, 232, 0.7)',
   //För knapptryck med TouchableOpacityHighlight
   buttonpress: '#EEF3E8'
 };

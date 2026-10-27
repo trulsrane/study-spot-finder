@@ -51,7 +51,8 @@ type ChipProps = {
 };
 
 // Byggd på samma sätt som BusynessLegend: glaset sitter på en osynlig Image bakom, och ikonen och texten
-// ligger ovanpå som vanliga vyer. Ligger de inuti glaset tappar de sin färg. Vald knapp får grönt glas.
+// ligger ovanpå som vanliga vyer. Ligger de inuti glaset tappar de sin färg.
+// Vald knapp är helt grön i stället för glas, eftersom grönt glas blir gråaktigt i ljust läge.
 function FilterChip({ icon, label, active, onPress }: ChipProps) {
   // Knappens storlek, så att glaset bakom blir exakt lika stort
   const [width, setWidth] = useState<number | null>(null);
@@ -63,7 +64,7 @@ function FilterChip({ icon, label, active, onPress }: ChipProps) {
       accessibilityState={{ selected: active }}
       style={({ pressed }) => pressed && styles.pressed}
     >
-      {width !== null && (
+      {width !== null && !active && (
         <View style={styles.glass} pointerEvents="none">
           <Host matchContents>
             <Image
@@ -72,18 +73,18 @@ function FilterChip({ icon, label, active, onPress }: ChipProps) {
               color="#00000000"
               modifiers={[
                 frame({ width, height: CHIP_HEIGHT }),
-                glassEffect({
-                  glass: { variant: 'regular', tint: active ? colors.primary : undefined },
-                  shape: 'capsule',
-                }),
+                glassEffect({ glass: { variant: 'clear', tint: colors.glassTint }, shape: 'capsule' }),
               ]}
             />
           </Host>
         </View>
       )}
 
-      <View style={styles.content} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
-        <Ionicons name={icon} size={14} color={colors.text} />
+      <View
+        style={[styles.content, active && styles.contentSelected]}
+        onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+      >
+        <Ionicons name={icon} size={14} color={active ? colors.lightText : colors.text} />
         <Text style={[styles.label, active && styles.labelSelected]}>{label}</Text>
       </View>
     </Pressable>
@@ -111,6 +112,10 @@ const styles = StyleSheet.create({
     gap: spacing.xs + 2,
     paddingHorizontal: spacing.sm + 4,
     borderRadius: radius.pill,
+  },
+  // Samma gröna som primärknapparna, med vit ikon och text
+  contentSelected: {
+    backgroundColor: colors.busynessDotLow,
   },
   label: {
     ...type.caption,
