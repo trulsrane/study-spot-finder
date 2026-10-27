@@ -18,31 +18,29 @@ import { supabase } from '@/src/utils/supabase';
 const DISTANCE_RADIUS_METERS = 50_000;
 
 export default function List() {
-
-  // För att testa connection med databasen
-  useEffect(() => {
-  supabase
-    .from('places')
-    .select('*')
-    .then(({ data, error }) => {
-      console.log('ERROR:', error);
-      console.log('ROWS:', data?.length);
-      console.log('FIRST:', data?.[0]);
-    });
-  }, []);
   // Avstånden dyker upp när positionen är hämtad. Utan position visas listan utan avstånd.
   const { coords } = useUserLocation();
   const { places, loading: placesLoading, error: placesError } = usePlaces(coords, DISTANCE_RADIUS_METERS);
   const { favorites, loading: favoritesLoading, error: favoritesError, isFavorite, toggleFavorite } = useFavorites();
   const [query, setQuery] = useState('');
 
+  // Närmast först. Platser utan avstånd (t.ex. när positionen saknas) hamnar sist.
+  const placesByDistance = useMemo(
+    () => [...places].sort((a, b) => (a.distance_meters ?? Infinity) - (b.distance_meters ?? Infinity)),
+    [places],
+  );
+
   const fuse = useMemo(() => createPlaceSearcher(places), [places]);
   // Under två tecken söks det inte, då visas hela listan som vanligt.
+  // Sökträffarna behåller sökningens ordning, så att bästa träffen hamnar först.
   const isSearching = query.trim().length >= 2;
   const visiblePlaces = useMemo(
-    () => (isSearching ? searchPlaces(fuse, query, places.length) : places),
-    [isSearching, fuse, query, places],
+    () => (isSearching ? searchPlaces(fuse, query, places.length) : placesByDistance),
+    [isSearching, fuse, query, places.length, placesByDistance],
   );
+
+  // Utan position går listan inte att sortera på avstånd, då står det bara "All places"
+  const subtitle = isSearching ? 'Search results:' : coords ? 'Places near you:' : 'All places:';
 
   const loading = placesLoading || favoritesLoading;
   const error = placesError ?? favoritesError;
@@ -74,6 +72,7 @@ export default function List() {
 	  contentContainerStyle={styles.listContent}
       keyboardDismissMode="on-drag"
       keyboardShouldPersistTaps="handled"
+      ListHeaderComponent={<Text style={styles.subtitle}>{subtitle}</Text>}
       ListEmptyComponent={<Text style={styles.message}>{isSearching ? 'No results' : 'No places yet'}</Text>}
       renderItem={({ item }) => (
         // asChild gör att Pressable blir den klickbara ytan, istället för Links egen Text.
@@ -106,6 +105,12 @@ const styles = StyleSheet.create({
     ...type.body,
     color: colors.textMuted,
     padding: spacing.lg,
+  },
+  // Rubriken ovanför listan, t.ex. "Places near you:"
+  subtitle: {
+    ...type.heading,
+    color: colors.text,
+    marginBottom: spacing.sm,
   },
   meta: {
     ...type.caption,
