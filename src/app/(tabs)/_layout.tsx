@@ -1,11 +1,12 @@
 import { NativeTabs } from 'expo-router/native-tabs';
 import { useSession } from  '@/src/hooks/useSession';
+import { colors } from '@/src/theme';
 
 // Renderars på iOS och Android istället för standard js/ts-versionen.
 export default function TabLayout() {
 	const session = useSession();
   return (
-    <NativeTabs minimizeBehavior="never">
+    <NativeTabs minimizeBehavior="never" tintColor={colors.busynessDotLow}>
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Icon sf={{ default: 'map', selected: 'map.fill' }} />
         <NativeTabs.Trigger.Label>Map</NativeTabs.Trigger.Label>
