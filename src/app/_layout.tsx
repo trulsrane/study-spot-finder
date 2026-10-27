@@ -15,7 +15,7 @@ export default function RootLayout() {
         <Stack.Screen
           name="place/[id]"
           options={{
-            // En native modal som dyker upp ovanpå tabbarna. Man kan dra 30%, 60% eller hela vägen upp. Kartan är fortfarande synlig bakom modalen.
+            // En native modal som dyker upp ovanpå tabbarna. Man kan dra 45%, 60% eller hela vägen upp. Kartan är fortfarande synlig bakom modalen.
             presentation: 'formSheet',
             sheetAllowedDetents: [0.45, 0.6, 1],
             sheetLargestUndimmedDetentIndex: 1,
