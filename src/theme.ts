@@ -36,13 +36,13 @@ export const colors = {
   // Mörkare salviagrön för primärknappar och ikoner, samt färgen på profilens omslag
   primary: '#76885F',
   logout: '#C74068',
-  coverBackground: '#CBD8BC',
+  coverBackground: '#cbd8bc',
   cardBackground: '#fff',
   imageBackground: 'lightgray',
   overlay: 'rgba(0, 0, 0, 0.25)',
   // Ljus ton på glaset så att mörk text syns mot kartan, utan det gråa i "regular"-glaset.
   // Samma färg som background (#EEF3E8) med 70 % täckning.
-  glassTint: 'rgba(238, 243, 232, 0.7)',
+  glassTint: '#EEF3E8ff',
   //För knapptryck med TouchableOpacityHighlight
   buttonpress: '#EEF3E8'
 };
